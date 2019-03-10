@@ -23,8 +23,12 @@
         <activity
             android:name=".ui.activity.RegisterActivity"
             android:label="新用户注册" />
-        <activity android:name=".ui.activity.LoginActivity"
+        <activity
+            android:name=".ui.activity.LoginActivity"
             android:label="用户登录" />
+        <activity
+            android:name=".ui.activity.TeacherMainActivity"
+            android:label="@string/title_activity_teacher_main"></activity>
     </application>
 
 </manifest>
