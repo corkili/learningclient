@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="user_type">
+        <item>老师</item>
+        <item>学生</item>
+    </array>
+</resources>
