@@ -28,7 +28,7 @@
             android:label="用户登录" />
         <activity
             android:name=".ui.activity.TeacherMainActivity"
-            android:label="@string/title_activity_teacher_main"></activity>
+            android:theme="@style/AppTheme.NoTitle" />
     </application>
 
 </manifest>

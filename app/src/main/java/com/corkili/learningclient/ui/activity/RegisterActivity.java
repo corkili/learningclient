@@ -35,6 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UserService.REGISTER_MSG:
                     handleRegisterMsg(msg);
+                    break;
             }
         }
     };

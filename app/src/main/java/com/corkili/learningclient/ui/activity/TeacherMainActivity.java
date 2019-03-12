@@ -1,10 +1,9 @@
 package com.corkili.learningclient.ui.activity;
 
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +13,9 @@ import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.ui.fragment.UserFragment;
 
 public class TeacherMainActivity extends AppCompatActivity
-        implements UserFragment.OnFragmentInteractionListener {
+        implements UserFragment.OnUserInfoChangeListener {
+
+    private UserInfo userInfo;
 
     private UserFragment userFragment;
 
@@ -23,10 +24,10 @@ public class TeacherMainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_main);
 
+        Intent intent = getIntent();
+        userInfo = (UserInfo) intent.getSerializableExtra("userInfo");
+
         BottomNavigationView navigation = findViewById(R.id.navigation);
-        Resources resource = getBaseContext().getResources();
-        ColorStateList csl = resource.getColorStateList(R.color.navigation_menu_item_color);
-        navigation.setItemTextColor(csl);
         navigation.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_course_manager:
@@ -47,6 +48,13 @@ public class TeacherMainActivity extends AppCompatActivity
         navigation.setSelectedItemId(R.id.navigation_user_info);
     }
 
+    private void showFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+    }
+
     private void loadCourseFragment() {
 
     }
@@ -60,20 +68,14 @@ public class TeacherMainActivity extends AppCompatActivity
     }
 
     private void loadUserFragment() {
-        UserFragment fragment;
         if (userFragment == null) {
-            fragment = UserFragment.newInstance(UserInfo.getDefaultInstance());
-        } else {
-            fragment = userFragment;
+            userFragment = UserFragment.newInstance(userInfo);
         }
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.commit();
+        showFragment(userFragment);
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void changeUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
     }
 }

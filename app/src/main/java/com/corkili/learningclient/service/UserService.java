@@ -7,9 +7,13 @@ import android.util.Log;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Request.UserLoginRequest;
+import com.corkili.learningclient.generate.protobuf.Request.UserLogoutRequest;
 import com.corkili.learningclient.generate.protobuf.Request.UserRegisterRequest;
+import com.corkili.learningclient.generate.protobuf.Request.UserUpdateInfoRequest;
 import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
+import com.corkili.learningclient.generate.protobuf.Response.UserLogoutResponse;
 import com.corkili.learningclient.generate.protobuf.Response.UserRegisterResponse;
+import com.corkili.learningclient.generate.protobuf.Response.UserUpdateInfoResponse;
 import com.corkili.learningclient.network.HttpUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +22,9 @@ public class UserService {
 
     public static final int REGISTER_MSG = 0;
     public static final int LOGIN_MSG = 1;
+    public static final int MODIFY_USERNAME_MSG = 2;
+    public static final int MODIFY_PASSWORD_MSG = 3;
+    public static final int LOGOUT_MSG = 4;
 
     private static final String TAG = "UserService";
     private static UserService instance;
@@ -119,6 +126,108 @@ public class UserService {
                 } else {
                     msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
                             UserLoginResponse.class, response);
+                }
+            }
+            handler.sendMessage(msg);
+        });
+    }
+
+    public void modifyUsername(final Handler handler, String phone, UserType userType, String newUsername) {
+        final Message msg = new Message();
+        msg.what = MODIFY_USERNAME_MSG;
+        ServiceResult result = null;
+        if (StringUtils.isBlank(phone) || userType == null) {
+            result = ServiceResult.failResultWithMessage("系统错误");
+        } else if (StringUtils.isBlank(newUsername)) {
+            result = ServiceResult.failResultWithMessage("新用户名不能为空");
+        }
+        if (result != null) {
+            msg.obj = result;
+            handler.sendMessage(msg);
+            return;
+        }
+        final UserUpdateInfoRequest request = UserUpdateInfoRequest.newBuilder()
+                .setPhone(phone)
+                .setUserType(userType)
+                .setUpdateUsername(true)
+                .setNewUsername(newUsername)
+                .build();
+        AsyncTaskExecutor.execute(() -> {
+            UserUpdateInfoResponse response = HttpUtils.request(request,
+                    UserUpdateInfoRequest.class, UserUpdateInfoResponse.class, "/user/updateInfo");
+            Log.i(TAG, "modifyUsername: " + response);
+            if (response == null) {
+                msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
+            } else {
+                if (response.getResponse().getResult()) {
+                    msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
+                            UserUpdateInfoResponse.class, response);
+                } else {
+                    msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
+                            UserUpdateInfoResponse.class, response);
+                }
+            }
+            handler.sendMessage(msg);
+        });
+    }
+
+    public void modifyPassword(final Handler handler, String phone, UserType userType, String newPassword) {
+        final Message msg = new Message();
+        msg.what = MODIFY_PASSWORD_MSG;
+        ServiceResult result = null;
+        if (StringUtils.isBlank(phone) || userType == null) {
+            result = ServiceResult.failResultWithMessage("系统错误");
+        } else if (StringUtils.isBlank(newPassword)) {
+            result = ServiceResult.failResultWithMessage("新密码不能为空");
+        } else if (newPassword.length() < 6) {
+            result = ServiceResult.failResultWithMessage("新密码长度应大于6");
+        }
+        if (result != null) {
+            msg.obj = result;
+            handler.sendMessage(msg);
+            return;
+        }
+        final UserUpdateInfoRequest request = UserUpdateInfoRequest.newBuilder()
+                .setPhone(phone)
+                .setUserType(userType)
+                .setUpdatePassword(true)
+                .setNewPassword(newPassword)
+                .build();
+        AsyncTaskExecutor.execute(() -> {
+            UserUpdateInfoResponse response = HttpUtils.request(request,
+                    UserUpdateInfoRequest.class, UserUpdateInfoResponse.class, "/user/updateInfo");
+            Log.i(TAG, "modifyPassword: " + response);
+            if (response == null) {
+                msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
+            } else {
+                if (response.getResponse().getResult()) {
+                    msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
+                            UserUpdateInfoResponse.class, response);
+                } else {
+                    msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
+                            UserUpdateInfoResponse.class, response);
+                }
+            }
+            handler.sendMessage(msg);
+        });
+    }
+
+    public void logout(final Handler handler) {
+        final Message msg = new Message();
+        msg.what = LOGOUT_MSG;
+        AsyncTaskExecutor.execute(() -> {
+            UserLogoutResponse response = HttpUtils.request(UserLogoutRequest.newBuilder().build(),
+                    UserLogoutRequest.class, UserLogoutResponse.class, "/user/logout");
+            Log.i(TAG, "logout: " + response);
+            if (response == null) {
+                msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
+            } else {
+                if (response.getResponse().getResult()) {
+                    msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
+                            UserLogoutResponse.class, response);
+                } else {
+                    msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
+                            UserLogoutResponse.class, response);
                 }
             }
             handler.sendMessage(msg);

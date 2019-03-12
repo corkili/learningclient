@@ -9,4 +9,9 @@
         <!--<item name="windowNoTitle">true</item>-->
     </style>
 
+    <style name="AppTheme.NoTitle" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="windowNoTitle">true</item>
+    </style>
+
 </resources>

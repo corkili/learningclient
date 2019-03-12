@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
+import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.UserService;
 
@@ -32,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UserService.LOGIN_MSG:
                     handleLoginMsg(msg);
+                    break;
             }
         }
     };
@@ -87,11 +89,19 @@ public class LoginActivity extends AppCompatActivity {
     private void handleLoginMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
         Toast.makeText(LoginActivity.this, serviceResult.msg(), Toast.LENGTH_LONG).show();
-        // TODO 跳主界面，根据userType
-//        Intent intent = new Intent();
-//        intent.putExtra("userInfo", serviceResult.extra(UserLoginResponse.class).getUserInfo());
-//        startActivity(intent);
-//        LoginActivity.this.finish();
+        if (serviceResult.isSuccess()) {
+            UserInfo userInfo = serviceResult.extra(UserLoginResponse.class).getUserInfo();
+            // TODO 跳主界面，根据userType
+            Intent intent = new Intent();
+            if (userInfo.getUserType() == UserType.Teacher) {
+                intent.setClass(LoginActivity.this, TeacherMainActivity.class);
+            } else {
+                return;
+            }
+            intent.putExtra("userInfo", userInfo);
+            startActivity(intent);
+            LoginActivity.this.finish();
+        }
     }
 
 }
