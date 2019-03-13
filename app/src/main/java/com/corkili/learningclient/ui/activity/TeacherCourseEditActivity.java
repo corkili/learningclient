@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
+import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseCreateResponse;
 import com.corkili.learningclient.generate.protobuf.Response.CourseUpdateResponse;
@@ -23,9 +24,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class TeacherCourseEditActivity extends AppCompatActivity {
-
-    public static final String INTENT_PARAM_IS_CREATE = "isCreate";
-    public static final String INTENT_PARAM_COURSE_INFO = "courseInfo";
 
     private EditText courseNameEditText;
     private EditText tagsEditText;
@@ -38,7 +36,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_course_edit);
-        isCreate = getIntent().getBooleanExtra(INTENT_PARAM_IS_CREATE, true);
+        isCreate = getIntent().getBooleanExtra(IntentParam.IS_CREATE, true);
         if (isCreate) {
             setTitle("创建课程");
         } else {
@@ -48,7 +46,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
         tagsEditText = findViewById(R.id.course_edit_text_edit_tags);
         openRadioGroup = findViewById(R.id.course_edit_radio_group_open);
         descriptionEditText = findViewById(R.id.course_edit_text_edit_description);
-        CourseInfo courseInfo = (CourseInfo) getIntent().getSerializableExtra(INTENT_PARAM_COURSE_INFO);
+        CourseInfo courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
         if (!isCreate) {
             if (courseInfo == null) {
                 throw new RuntimeException("expected courseInfo");
@@ -114,7 +112,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
         Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
-            intent.putExtra(INTENT_PARAM_COURSE_INFO, serviceResult.extra(CourseCreateResponse.class).getCourseInfo());
+            intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseCreateResponse.class).getCourseInfo());
             setResult(RESULT_OK, intent);
             this.finish();
         }
@@ -125,7 +123,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
         Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
-            intent.putExtra(INTENT_PARAM_COURSE_INFO, serviceResult.extra(CourseUpdateResponse.class).getCourseInfo());
+            intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseUpdateResponse.class).getCourseInfo());
             setResult(RESULT_OK, intent);
             this.finish();
         }

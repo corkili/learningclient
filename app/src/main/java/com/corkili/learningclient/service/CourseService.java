@@ -145,18 +145,18 @@ public class CourseService {
         final CourseUpdateRequest request = CourseUpdateRequest.newBuilder()
                 .setCourseId(courseId)
                 .setUpdateCourseName(courseName != null)
-                .setCourseName(courseName)
+                .setCourseName(courseName == null ? "" : courseName)
                 .setUpdateDescription(description != null)
-                .setDescription(description)
+                .setDescription(description == null ? "" : description)
                 .setUpdateImage(false)
                 .setUpdateTags(tags != null)
-                .addAllTag(tags)
+                .addAllTag(tags == null ? Collections.emptyList() : tags)
                 .setUpdateOpen(open != null)
                 .setOpen(open != null ? open : true)
                 .build();
         AsyncTaskExecutor.execute(() -> {
             CourseUpdateResponse response = HttpUtils.request(request,
-                    CourseUpdateRequest.class, CourseUpdateResponse.class, "/course/create");
+                    CourseUpdateRequest.class, CourseUpdateResponse.class, "/course/update");
             Log.i(TAG, "updateCourse: " + response);
             if (response == null) {
                 msg.obj = ServiceResult.failResultWithMessage("网络请求错误");

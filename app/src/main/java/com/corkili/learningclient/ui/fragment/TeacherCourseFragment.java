@@ -16,15 +16,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
-import com.corkili.learningclient.common.IUtils;
+import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseFindAllResponse;
 import com.corkili.learningclient.service.CourseService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.TeacherCourseEditActivity;
+import com.corkili.learningclient.ui.activity.TeacherCourseManageActivity;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
@@ -44,11 +44,10 @@ public class TeacherCourseFragment extends Fragment {
     private List<CourseInfo> courseInfos;
 
     private OnRecycleItemClickListener onRecycleItemClickListener = courseInfo -> {
-        Intent intent = new Intent();
-        intent.putExtra("courseInfo", courseInfo);
-        // TODO 跳课程管理界面
-        Toast.makeText(getActivity(), IUtils.format("点击课程 - {}", courseInfo.getCourseName()), Toast.LENGTH_LONG).show();
-//        startActivityForResult(intent, REQUEST_CODE_MANAGE_COURSE);
+        Intent intent = new Intent(getActivity(), TeacherCourseManageActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+//        Toast.makeText(getActivity(), IUtils.format("点击课程 - {}", courseInfo.getCourseName()), Toast.LENGTH_LONG).show();
+        startActivityForResult(intent, REQUEST_CODE_MANAGE_COURSE);
     };
 
     public TeacherCourseFragment() {
@@ -92,7 +91,7 @@ public class TeacherCourseFragment extends Fragment {
 
         createCourseFab.setOnClickListener(view -> {
             Intent intent = new Intent(getActivity(), TeacherCourseEditActivity.class);
-            intent.putExtra(TeacherCourseEditActivity.INTENT_PARAM_IS_CREATE, true);
+            intent.putExtra(IntentParam.IS_CREATE, true);
             startActivityForResult(intent, REQUEST_CODE_CREATE_COURSE);
         });
 
@@ -129,7 +128,7 @@ public class TeacherCourseFragment extends Fragment {
         if (resultCode != TeacherCourseEditActivity.RESULT_OK) {
             return;
         }
-        CourseInfo courseInfo = (CourseInfo) data.getSerializableExtra(TeacherCourseEditActivity.INTENT_PARAM_COURSE_INFO);
+        CourseInfo courseInfo = (CourseInfo) data.getSerializableExtra(IntentParam.COURSE_INFO);
         if (requestCode == REQUEST_CODE_CREATE_COURSE && courseInfo != null) {
             courseInfos.add(courseInfo);
             recyclerViewAdapter.notifyDataSetChanged();
