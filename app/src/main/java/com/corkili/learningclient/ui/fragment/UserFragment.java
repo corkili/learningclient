@@ -36,26 +36,23 @@ public class UserFragment extends Fragment {
 
     private TextView usernameTextView;
     private EditText usernameEditText;
+    private EditText phoneEditText;
+    private EditText userTypeEditText;
     private Button modifyPasswordButton;
     private Button logoutButton;
 
     private UserInfo userInfo;
 
     @SuppressLint("HandlerLeak")
-    private Handler handler =
-            new Handler() {
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case UserService.MODIFY_USERNAME_MSG:
-                    handleModifyUsernameMsg(msg);
-                    break;
-                case UserService.MODIFY_PASSWORD_MSG:
-                    handleModifyPasswordMsg(msg);
-                    break;
-                case UserService.LOGOUT_MSG:
-                    handleLogoutMsg(msg);
-                    break;
+            if (msg.what == UserService.MODIFY_USERNAME_MSG) {
+                handleModifyUsernameMsg(msg);
+            } else if (msg.what == UserService.MODIFY_PASSWORD_MSG) {
+                handleModifyPasswordMsg(msg);
+            } else if (msg.what == UserService.LOGOUT_MSG) {
+                handleLogoutMsg(msg);
             }
         }
     };
@@ -84,21 +81,23 @@ public class UserFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user, container, false);
+        View view = inflater.inflate(R.layout.fragment_user, container, false);
+        usernameTextView = view.findViewById(R.id.user_fragment_text_view_username);
+        usernameEditText = view.findViewById(R.id.user_fragment_text_edit_username);
+        phoneEditText = view.findViewById(R.id.user_fragment_text_edit_phone);
+        userTypeEditText = view.findViewById(R.id.user_fragment_text_edit_user_type);
+        modifyPasswordButton = view.findViewById(R.id.user_fragment_button_modify_password);
+        logoutButton = view.findViewById(R.id.user_fragment_button_logout);
+        return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        usernameTextView = getActivity().findViewById(R.id.user_fragment_text_view_username);
-        usernameEditText = getActivity().findViewById(R.id.user_fragment_text_edit_username);
-        EditText phoneEditText = getActivity().findViewById(R.id.user_fragment_text_edit_phone);
-        EditText userTypeEditText = getActivity().findViewById(R.id.user_fragment_text_edit_user_type);
-        modifyPasswordButton = getActivity().findViewById(R.id.user_fragment_button_modify_password);
-        logoutButton = getActivity().findViewById(R.id.user_fragment_button_logout);
 
         usernameEditText.setText(userInfo.getUsername());
         phoneEditText.setText(userInfo.getPhone());
+
         if (userInfo.getUserType() != UserType.Teacher) {
             userTypeEditText.setText("老师");
         } else {

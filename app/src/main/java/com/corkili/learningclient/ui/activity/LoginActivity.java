@@ -30,10 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case UserService.LOGIN_MSG:
-                    handleLoginMsg(msg);
-                    break;
+            if (msg.what == UserService.LOGIN_MSG) {
+                handleLoginMsg(msg);
             }
         }
     };

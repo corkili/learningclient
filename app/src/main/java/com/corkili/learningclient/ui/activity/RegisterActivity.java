@@ -32,10 +32,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case UserService.REGISTER_MSG:
-                    handleRegisterMsg(msg);
-                    break;
+            if (msg.what == UserService.REGISTER_MSG) {
+                handleRegisterMsg(msg);
             }
         }
     };

@@ -20,11 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public class UserService {
 
-    public static final int REGISTER_MSG = 0;
-    public static final int LOGIN_MSG = 1;
-    public static final int MODIFY_USERNAME_MSG = 2;
-    public static final int MODIFY_PASSWORD_MSG = 3;
-    public static final int LOGOUT_MSG = 4;
+    public static final int REGISTER_MSG = 0x10;
+    public static final int LOGIN_MSG = 0x11;
+    public static final int MODIFY_USERNAME_MSG = 0x12;
+    public static final int MODIFY_PASSWORD_MSG = 0x13;
+    public static final int LOGOUT_MSG = 0x14;
 
     private static final String TAG = "UserService";
     private static UserService instance;

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.ui.fragment.TeacherCourseFragment;
 import com.corkili.learningclient.ui.fragment.UserFragment;
 
 public class TeacherMainActivity extends AppCompatActivity
@@ -18,6 +19,7 @@ public class TeacherMainActivity extends AppCompatActivity
     private UserInfo userInfo;
 
     private UserFragment userFragment;
+    private TeacherCourseFragment teacherCourseFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,10 @@ public class TeacherMainActivity extends AppCompatActivity
     }
 
     private void loadCourseFragment() {
-
+        if (teacherCourseFragment == null) {
+            teacherCourseFragment = TeacherCourseFragment.newInstance();
+        }
+        showFragment(teacherCourseFragment);
     }
 
     private void loadQuestionFragment() {
