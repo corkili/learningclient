@@ -47,7 +47,7 @@ public class TeacherMainActivity extends AppCompatActivity
             }
             return false;
         });
-        navigation.setSelectedItemId(R.id.navigation_user_info);
+        navigation.setSelectedItemId(R.id.navigation_course_manager);
     }
 
     private void showFragment(Fragment fragment) {

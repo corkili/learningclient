@@ -1,6 +1,7 @@
 package com.corkili.learningclient.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -8,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,15 +19,21 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseFindAllResponse;
 import com.corkili.learningclient.service.CourseService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.corkili.learningclient.ui.activity.TeacherCourseEditActivity;
+import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TeacherCourseFragment extends Fragment {
+
+    public static final int REQUEST_CODE_CREATE_COURSE = 0xF1;
+    public static final int REQUEST_CODE_MANAGE_COURSE = 0xF2;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -34,6 +42,14 @@ public class TeacherCourseFragment extends Fragment {
     private TeacherCourseRecyclerViewAdapter recyclerViewAdapter;
 
     private List<CourseInfo> courseInfos;
+
+    private OnRecycleItemClickListener onRecycleItemClickListener = courseInfo -> {
+        Intent intent = new Intent();
+        intent.putExtra("courseInfo", courseInfo);
+        // TODO 跳课程管理界面
+        Toast.makeText(getActivity(), IUtils.format("点击课程 - {}", courseInfo.getCourseName()), Toast.LENGTH_LONG).show();
+//        startActivityForResult(intent, REQUEST_CODE_MANAGE_COURSE);
+    };
 
     public TeacherCourseFragment() {
     }
@@ -59,11 +75,13 @@ public class TeacherCourseFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.fragment_teacher_course_swipe_refresh_layout);
         createCourseFab = view.findViewById(R.id.fab_create_course);
         courseInfos = new ArrayList<>();
-        recyclerViewAdapter = new TeacherCourseRecyclerViewAdapter(getActivity(), courseInfos);
+        recyclerViewAdapter = new TeacherCourseRecyclerViewAdapter(getActivity(), courseInfos, onRecycleItemClickListener);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
+                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
         return view;
     }
 
@@ -73,7 +91,9 @@ public class TeacherCourseFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(this::refreshCourseInfos);
 
         createCourseFab.setOnClickListener(view -> {
-            // TODO 跳转 课程信息编辑Activity
+            Intent intent = new Intent(getActivity(), TeacherCourseEditActivity.class);
+            intent.putExtra(TeacherCourseEditActivity.INTENT_PARAM_IS_CREATE, true);
+            startActivityForResult(intent, REQUEST_CODE_CREATE_COURSE);
         });
 
         refreshCourseInfos();
@@ -97,11 +117,39 @@ public class TeacherCourseFragment extends Fragment {
 
     private void handleFindAllCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         courseInfos.clear();
         courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
         swipeRefreshLayout.setRefreshing(false);
         recyclerViewAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != TeacherCourseEditActivity.RESULT_OK) {
+            return;
+        }
+        CourseInfo courseInfo = (CourseInfo) data.getSerializableExtra(TeacherCourseEditActivity.INTENT_PARAM_COURSE_INFO);
+        if (requestCode == REQUEST_CODE_CREATE_COURSE && courseInfo != null) {
+            courseInfos.add(courseInfo);
+            recyclerViewAdapter.notifyDataSetChanged();
+        } else if (requestCode == REQUEST_CODE_MANAGE_COURSE && courseInfo != null) {
+            int needReplaceIndex = -1;
+            for (int i = 0; i < courseInfos.size(); i++) {
+                CourseInfo info = courseInfos.get(i);
+                if (info.getCourseId() == courseInfo.getCourseId()) {
+                    needReplaceIndex = i;
+                    break;
+                }
+            }
+            if (needReplaceIndex > 0) {
+                courseInfos.set(needReplaceIndex, courseInfo);
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    public interface OnRecycleItemClickListener {
+        void onRecycleItemClick(CourseInfo courseInfo);
+    }
 }

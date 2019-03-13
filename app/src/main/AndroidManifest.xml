@@ -29,6 +29,9 @@
         <activity
             android:name=".ui.activity.TeacherMainActivity"
             android:theme="@style/AppTheme.NoTitle" />
+        <activity
+            android:name=".ui.activity.TeacherCourseEditActivity"
+            android:label="课程信息编辑" />
     </application>
 
 </manifest>

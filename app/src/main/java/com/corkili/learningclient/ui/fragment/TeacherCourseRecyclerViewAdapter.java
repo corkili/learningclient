@@ -6,22 +6,29 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
+import com.corkili.learningclient.ui.fragment.TeacherCourseFragment.OnRecycleItemClickListener;
 
+import java.util.Date;
 import java.util.List;
 
 
 public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<TeacherCourseRecyclerViewAdapter.ViewHolder> {
 
-    private final Context context;
+    private Context context;
     private final List<CourseInfo> courseInfos;
+    private OnRecycleItemClickListener onRecycleItemClickListener;
 
-    public TeacherCourseRecyclerViewAdapter(Context context, List<CourseInfo> courseInfos) {
+    public TeacherCourseRecyclerViewAdapter(Context context, List<CourseInfo> courseInfos,
+                                            OnRecycleItemClickListener onRecycleItemClickListener) {
         this.context = context;
         this.courseInfos = courseInfos;
+        this.onRecycleItemClickListener = onRecycleItemClickListener;
     }
 
     @NonNull
@@ -35,11 +42,22 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = courseInfos.get(position);
-        holder.mIdView.setText(position);
-        holder.mContentView.setText(courseInfos.get(position).getCourseName());
-
+        holder.indexView.setText(String.valueOf(position + 1));
+        if (holder.mItem.getOpen()) {
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_yes_bk_green));
+        } else {
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_no_bk_red));
+        }
+        holder.courseNameView.setText(holder.mItem.getCourseName());
+        holder.descriptionView.setText(holder.mItem.getDescription());
+        holder.createTimeView.setText(IUtils.format("创建时间：{}",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
+        holder.updateTimeView.setText(IUtils.format("更新时间：{}",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getUpdateTime()))));
         holder.mView.setOnClickListener(v -> {
-            // TODO 跳转至课程管理界面 Intent(context, Activity.class)
+            if (this.onRecycleItemClickListener != null) {
+                this.onRecycleItemClickListener.onRecycleItemClick(holder.mItem);
+            }
         });
     }
 
@@ -48,22 +66,25 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
         return courseInfos.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public CourseInfo mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final TextView indexView;
+        final ImageView openView;
+        final TextView courseNameView;
+        final TextView descriptionView;
+        final TextView createTimeView;
+        final TextView updateTimeView;
+        CourseInfo mItem;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = view.findViewById(R.id.item_number);
-            mContentView = view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            indexView = view.findViewById(R.id.item_index);
+            openView = view.findViewById(R.id.item_open);
+            courseNameView = view.findViewById(R.id.item_course_name);
+            descriptionView = view.findViewById(R.id.item_description);
+            createTimeView = view.findViewById(R.id.item_create_time);
+            updateTimeView = view.findViewById(R.id.item_update_time);
         }
     }
 }
