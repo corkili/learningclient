@@ -12,6 +12,7 @@ import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 
 public class TeacherCourseManageActivity extends AppCompatActivity {
 
@@ -58,12 +59,10 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_course_edit:
-                Intent intent = new Intent(TeacherCourseManageActivity.this, TeacherCourseEditActivity.class);
-                intent.putExtra(IntentParam.IS_CREATE, false);
-                intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-                startActivityForResult(intent, REQUEST_CODE_EDIT_COURSE);
+                selectCourseEditItem();
                 break;
             case R.id.menu_item_course_comment:
+                selectCourseCommentItem();
                 break;
             case R.id.menu_item_course_forum:
                 break;
@@ -73,6 +72,20 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+    private void selectCourseEditItem() {
+        Intent intent = new Intent(TeacherCourseManageActivity.this, TeacherCourseEditActivity.class);
+        intent.putExtra(IntentParam.IS_CREATE, false);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        startActivityForResult(intent, REQUEST_CODE_EDIT_COURSE);
+    }
+
+    private void selectCourseCommentItem() {
+        Intent intent = new Intent(TeacherCourseManageActivity.this, CourseCommentActivity.class);
+        intent.putExtra(IntentParam.USER_TYPE, UserType.Teacher);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        startActivity(intent);
     }
 
     @Override

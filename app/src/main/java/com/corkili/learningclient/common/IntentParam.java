@@ -4,5 +4,6 @@ public class IntentParam {
 
     public static final String COURSE_INFO = "courseInfo";
     public static final String IS_CREATE = "isCreate";
+    public static final String USER_TYPE = "userType";
 
 }

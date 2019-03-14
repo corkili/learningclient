@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
@@ -116,11 +117,13 @@ public class TeacherCourseFragment extends Fragment {
 
     private void handleFindAllCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-//        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
-        courseInfos.clear();
-        courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
-        swipeRefreshLayout.setRefreshing(false);
-        recyclerViewAdapter.notifyDataSetChanged();
+        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        if (serviceResult.isSuccess()) {
+            courseInfos.clear();
+            courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
+            swipeRefreshLayout.setRefreshing(false);
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
