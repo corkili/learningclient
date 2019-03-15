@@ -57,8 +57,8 @@ public class CourseCommentActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.activity_course_comment_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_comment_swipe_refresh_layout);
         addCommentFab = findViewById(R.id.fab_add_course_comment);
-        if (userType != UserType.Student) {
-            addCommentFab.setVisibility(View.GONE);
+        if (userType != UserType.Student || !getIntent().getBooleanExtra(IntentParam.ALREADY_SUBSCRIBE, false)) {
+            addCommentFab.setVisibility(View.GONE); // RestrictedApi
             addCommentFab.setSystemUiVisibility(View.GONE);
             addCommentFab.setEnabled(false);
         } else {

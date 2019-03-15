@@ -70,6 +70,9 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 break;
             case R.id.menu_item_course_exam:
                 break;
+            case R.id.menu_item_course_subscription:
+                selectCourseSubscriptionItem();
+                break;
         }
         return true;
     }
@@ -86,6 +89,10 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
         intent.putExtra(IntentParam.USER_TYPE, UserType.Teacher);
         intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
         startActivity(intent);
+    }
+
+    private void selectCourseSubscriptionItem() {
+
     }
 
     @Override
