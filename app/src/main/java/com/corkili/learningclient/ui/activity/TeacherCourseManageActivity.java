@@ -92,7 +92,9 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     }
 
     private void selectCourseSubscriptionItem() {
-
+        Intent intent = new Intent(TeacherCourseManageActivity.this, TeacherCourseSubscriptionActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        startActivity(intent);
     }
 
     @Override
