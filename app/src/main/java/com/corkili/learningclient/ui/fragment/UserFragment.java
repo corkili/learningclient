@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserUpdateInfoResponse;
@@ -29,7 +30,6 @@ import com.corkili.learningclient.ui.activity.LoginActivity;
 
 public class UserFragment extends Fragment {
 
-    private static final String ARG_PARAM_USER_INFO = "userInfo";
     private static final String TAG = "UserFragment";
 
     private OnUserInfoChangeListener onUserInfoChangeListener;
@@ -65,7 +65,7 @@ public class UserFragment extends Fragment {
     public static UserFragment newInstance(UserInfo userInfo) {
         UserFragment fragment = new UserFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_PARAM_USER_INFO, userInfo);
+        args.putSerializable(IntentParam.USER_INFO, userInfo);
         fragment.setArguments(args);
         return fragment;
     }
@@ -74,7 +74,7 @@ public class UserFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            userInfo = (UserInfo) getArguments().getSerializable(ARG_PARAM_USER_INFO);
+            userInfo = (UserInfo) getArguments().getSerializable(IntentParam.USER_INFO);
         }
     }
 
@@ -192,7 +192,7 @@ public class UserFragment extends Fragment {
 
     private void refreshUserInfo(UserInfo newUserInfo) {
         if (onUserInfoChangeListener != null) {
-            onUserInfoChangeListener.changeUserInfo(newUserInfo);
+            onUserInfoChangeListener.onUserInfoChange(newUserInfo);
         }
         this.userInfo = newUserInfo;
     }
@@ -214,6 +214,6 @@ public class UserFragment extends Fragment {
     }
 
     public interface OnUserInfoChangeListener {
-        void changeUserInfo(UserInfo userInfo);
+        void onUserInfoChange(UserInfo userInfo);
     }
 }

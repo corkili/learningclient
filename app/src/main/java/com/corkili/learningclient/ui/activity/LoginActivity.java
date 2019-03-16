@@ -12,6 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
@@ -47,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         toRegisterButton = findViewById(R.id.button_to_register);
         Intent intent = getIntent();
         if (intent != null) {
-            UserInfo userInfo = (UserInfo) intent.getSerializableExtra("userInfo");
+            UserInfo userInfo = (UserInfo) intent.getSerializableExtra(IntentParam.USER_INFO);
             if (userInfo != null) {
                 phoneEditText.setText(userInfo.getPhone());
                 if (userInfo.getUserType() == UserType.Teacher) {

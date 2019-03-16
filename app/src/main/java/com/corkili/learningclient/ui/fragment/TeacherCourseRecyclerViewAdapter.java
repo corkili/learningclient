@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
-import com.corkili.learningclient.ui.fragment.TeacherCourseFragment.OnRecycleItemClickListener;
 
 import java.util.Date;
 import java.util.List;
@@ -22,13 +21,13 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
 
     private Context context;
     private final List<CourseInfo> courseInfos;
-    private OnRecycleItemClickListener onRecycleItemClickListener;
+    private OnItemInteractionListener mListener;
 
     public TeacherCourseRecyclerViewAdapter(Context context, List<CourseInfo> courseInfos,
-                                            OnRecycleItemClickListener onRecycleItemClickListener) {
+                                            OnItemInteractionListener mListener) {
         this.context = context;
         this.courseInfos = courseInfos;
-        this.onRecycleItemClickListener = onRecycleItemClickListener;
+        this.mListener = mListener;
     }
 
     @NonNull
@@ -55,8 +54,8 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
         holder.updateTimeView.setText(IUtils.format("更新时间：{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getUpdateTime()))));
         holder.mView.setOnClickListener(v -> {
-            if (this.onRecycleItemClickListener != null) {
-                this.onRecycleItemClickListener.onRecycleItemClick(holder.mItem);
+            if (this.mListener != null) {
+                this.mListener.onItemClick(holder);
             }
         });
     }
@@ -67,14 +66,14 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        final View mView;
-        final TextView indexView;
-        final ImageView openView;
-        final TextView courseNameView;
-        final TextView descriptionView;
-        final TextView createTimeView;
-        final TextView updateTimeView;
-        CourseInfo mItem;
+        private final View mView;
+        private final TextView indexView;
+        private final ImageView openView;
+        private final TextView courseNameView;
+        private final TextView descriptionView;
+        private final TextView createTimeView;
+        private final TextView updateTimeView;
+        private CourseInfo mItem;
 
         ViewHolder(View view) {
             super(view);
@@ -86,5 +85,15 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
             createTimeView = view.findViewById(R.id.item_create_time);
             updateTimeView = view.findViewById(R.id.item_update_time);
         }
+
+        public CourseInfo getCourseInfo() {
+            return mItem;
+        }
+    }
+
+    public interface OnItemInteractionListener {
+
+        void onItemClick(ViewHolder viewHolder);
+
     }
 }

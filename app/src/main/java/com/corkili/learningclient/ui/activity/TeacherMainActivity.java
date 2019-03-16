@@ -9,12 +9,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.ui.fragment.TeacherCourseFragment;
 import com.corkili.learningclient.ui.fragment.UserFragment;
 
 public class TeacherMainActivity extends AppCompatActivity
-        implements UserFragment.OnUserInfoChangeListener {
+        implements UserFragment.OnUserInfoChangeListener, TeacherCourseFragment.DataBus {
 
     private UserInfo userInfo;
 
@@ -27,7 +28,7 @@ public class TeacherMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_teacher_main);
 
         Intent intent = getIntent();
-        userInfo = (UserInfo) intent.getSerializableExtra("userInfo");
+        userInfo = (UserInfo) intent.getSerializableExtra(IntentParam.USER_INFO);
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(item -> {
@@ -80,7 +81,13 @@ public class TeacherMainActivity extends AppCompatActivity
     }
 
     @Override
-    public void changeUserInfo(UserInfo userInfo) {
+    public void onUserInfoChange(UserInfo userInfo) {
         this.userInfo = userInfo;
     }
+
+    @Override
+    public UserInfo getUserInfoFromActivity() {
+        return userInfo;
+    }
+
 }

@@ -12,12 +12,14 @@ import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 
 public class TeacherCourseManageActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE_EDIT_COURSE = 0xF1;
 
+    private UserInfo userInfo;
     private CourseInfo courseInfo;
 
     private TextView courseNameView;
@@ -29,6 +31,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_course_manage);
+        userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
         courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
         courseNameView = findViewById(R.id.course_manage_text_edit_course_name);
         tagsView = findViewById(R.id.course_manage_text_edit_tags);
@@ -65,6 +68,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 selectCourseCommentItem();
                 break;
             case R.id.menu_item_course_forum:
+                selectCourseForumItem();
                 break;
             case R.id.menu_item_course_work:
                 break;
@@ -87,6 +91,13 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     private void selectCourseCommentItem() {
         Intent intent = new Intent(TeacherCourseManageActivity.this, CourseCommentActivity.class);
         intent.putExtra(IntentParam.USER_TYPE, UserType.Teacher);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        startActivity(intent);
+    }
+
+    private void selectCourseForumItem() {
+        Intent intent = new Intent(TeacherCourseManageActivity.this, ForumTopicActivity.class);
+        intent.putExtra(IntentParam.USER_INFO, userInfo);
         intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
         startActivity(intent);
     }

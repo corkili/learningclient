@@ -1,6 +1,7 @@
 package com.corkili.learningclient.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,17 +22,19 @@ import android.widget.Toast;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseFindAllResponse;
 import com.corkili.learningclient.service.CourseService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.TeacherCourseEditActivity;
 import com.corkili.learningclient.ui.activity.TeacherCourseManageActivity;
+import com.corkili.learningclient.ui.fragment.TeacherCourseRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeacherCourseFragment extends Fragment {
+public class TeacherCourseFragment extends Fragment implements TeacherCourseRecyclerViewAdapter.OnItemInteractionListener {
 
     public static final int REQUEST_CODE_CREATE_COURSE = 0xF1;
     public static final int REQUEST_CODE_MANAGE_COURSE = 0xF2;
@@ -44,12 +47,7 @@ public class TeacherCourseFragment extends Fragment {
 
     private List<CourseInfo> courseInfos;
 
-    private OnRecycleItemClickListener onRecycleItemClickListener = courseInfo -> {
-        Intent intent = new Intent(getActivity(), TeacherCourseManageActivity.class);
-        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-//        Toast.makeText(getActivity(), IUtils.format("点击课程 - {}", courseInfo.getCourseName()), Toast.LENGTH_LONG).show();
-        startActivityForResult(intent, REQUEST_CODE_MANAGE_COURSE);
-    };
+    private DataBus dataBus;
 
     public TeacherCourseFragment() {
     }
@@ -75,7 +73,7 @@ public class TeacherCourseFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.fragment_teacher_course_swipe_refresh_layout);
         createCourseFab = view.findViewById(R.id.fab_create_course);
         courseInfos = new ArrayList<>();
-        recyclerViewAdapter = new TeacherCourseRecyclerViewAdapter(getActivity(), courseInfos, onRecycleItemClickListener);
+        recyclerViewAdapter = new TeacherCourseRecyclerViewAdapter(getActivity(), courseInfos, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -151,7 +149,34 @@ public class TeacherCourseFragment extends Fragment {
         }
     }
 
-    public interface OnRecycleItemClickListener {
-        void onRecycleItemClick(CourseInfo courseInfo);
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DataBus) {
+            this.dataBus = (DataBus) context;
+        } else {
+            throw new RuntimeException("Activities must implement TeacherCourseFragment.DataBus");
+        }
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.dataBus = null;
+    }
+
+    @Override
+    public void onItemClick(ViewHolder viewHolder) {
+        Intent intent = new Intent(getActivity(), TeacherCourseManageActivity.class);
+        intent.putExtra(IntentParam.USER_INFO, dataBus.getUserInfoFromActivity());
+        intent.putExtra(IntentParam.COURSE_INFO, viewHolder.getCourseInfo());
+        startActivityForResult(intent, REQUEST_CODE_MANAGE_COURSE);
+    }
+
+    public interface DataBus {
+
+        UserInfo getUserInfoFromActivity();
+
+    }
+
 }
