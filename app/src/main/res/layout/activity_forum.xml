@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.ForumTopicActivity">
+    tools:context=".ui.activity.ForumActivity">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             tools:context=".ui.activity.CourseCommentActivity"
-            tools:listitem="@layout/activity_forum_topic_list_item" />
+            tools:listitem="@layout/activity_forum_list_item" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

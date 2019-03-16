@@ -16,13 +16,13 @@ import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import java.util.Date;
 import java.util.List;
 
-public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTopicRecyclerViewAdapter.ViewHolder> {
+public class ForumRecyclerViewAdapter extends RecyclerView.Adapter<ForumRecyclerViewAdapter.ViewHolder> {
 
     private final Context context;
     private final List<ForumTopicInfo> forumTopicInfos;
     private final OnItemInteractionListener mListener;
 
-    public ForumTopicRecyclerViewAdapter(Context context, List<ForumTopicInfo> forumTopicInfos, OnItemInteractionListener mListener) {
+    public ForumRecyclerViewAdapter(Context context, List<ForumTopicInfo> forumTopicInfos, OnItemInteractionListener mListener) {
         this.context = context;
         this.forumTopicInfos = forumTopicInfos;
         this.mListener = mListener;
@@ -32,7 +32,7 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_forum_topic_list_item, parent, false);
+                .inflate(R.layout.activity_forum_list_item, parent, false);
         return new ViewHolder(view);
     }
 

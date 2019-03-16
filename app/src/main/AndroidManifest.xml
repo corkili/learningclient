@@ -42,7 +42,7 @@
             android:name=".ui.activity.TeacherCourseSubscriptionActivity"
             android:label="课程订阅列表" />
         <activity
-            android:name=".ui.activity.ForumTopicActivity"
+            android:name=".ui.activity.ForumActivity"
             android:label="课程讨论区" />
 
     </application>

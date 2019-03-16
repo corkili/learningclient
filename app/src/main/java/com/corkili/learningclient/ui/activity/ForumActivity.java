@@ -28,13 +28,13 @@ import com.corkili.learningclient.generate.protobuf.Response.ForumTopicFindAllRe
 import com.corkili.learningclient.generate.protobuf.Response.ForumTopicUpdateResponse;
 import com.corkili.learningclient.service.ForumService;
 import com.corkili.learningclient.service.ServiceResult;
-import com.corkili.learningclient.ui.activity.ForumTopicRecyclerViewAdapter.ViewHolder;
+import com.corkili.learningclient.ui.activity.ForumRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForumTopicActivity extends AppCompatActivity implements ForumTopicRecyclerViewAdapter.OnItemInteractionListener {
+public class ForumActivity extends AppCompatActivity implements ForumRecyclerViewAdapter.OnItemInteractionListener {
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -45,13 +45,13 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
 
     private List<ForumTopicInfo> forumTopicInfos;
 
-    private ForumTopicRecyclerViewAdapter recyclerViewAdapter;
+    private ForumRecyclerViewAdapter recyclerViewAdapter;
 
     @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_forum_topic);
+        setContentView(R.layout.activity_forum);
         courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
         userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
         if (userInfo == null || courseInfo == null) {
@@ -62,7 +62,7 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
         addTopicFab = findViewById(R.id.fab_add_topic);
         addTopicFab.setOnClickListener(v -> showAddTopicDialog());
         forumTopicInfos = new ArrayList<>();
-        recyclerViewAdapter = new ForumTopicRecyclerViewAdapter(this, forumTopicInfos, this);
+        recyclerViewAdapter = new ForumRecyclerViewAdapter(this, forumTopicInfos, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -79,8 +79,8 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
 
     private void showAddTopicDialog() {
         AlertDialog.Builder addTopicDialog =
-                new AlertDialog.Builder(ForumTopicActivity.this);
-        final View dialogView = LayoutInflater.from(ForumTopicActivity.this)
+                new AlertDialog.Builder(ForumActivity.this);
+        final View dialogView = LayoutInflater.from(ForumActivity.this)
                 .inflate(R.layout.dialog_add_topic,null);
         addTopicDialog.setTitle("发表帖子");
         addTopicDialog.setView(dialogView);
@@ -191,14 +191,14 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
             return false;
         }
         final AlertDialog.Builder dialog =
-                new AlertDialog.Builder(ForumTopicActivity.this);
+                new AlertDialog.Builder(ForumActivity.this);
         dialog.setTitle("请选择操作");
 
         dialog.setPositiveButton("编辑", (d, w) -> {
             d.dismiss();
             AlertDialog.Builder editTopicDialog =
-                    new AlertDialog.Builder(ForumTopicActivity.this);
-            final View dialogView = LayoutInflater.from(ForumTopicActivity.this)
+                    new AlertDialog.Builder(ForumActivity.this);
+            final View dialogView = LayoutInflater.from(ForumActivity.this)
                     .inflate(R.layout.dialog_add_topic,null);
             dialogView.<EditText>findViewById(R.id.text_edit_title).setText(forumTopicInfo.getTitle());
             dialogView.findViewById(R.id.text_edit_title).setEnabled(false);
@@ -222,7 +222,7 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
         dialog.setNegativeButton("删除", (d, w) -> {
             d.dismiss();
             AlertDialog.Builder confirmDeleteDialog =
-                    new AlertDialog.Builder(ForumTopicActivity.this);
+                    new AlertDialog.Builder(ForumActivity.this);
             confirmDeleteDialog.setTitle("删除帖子");
             confirmDeleteDialog.setMessage("确定删除该帖子？");
             confirmDeleteDialog.setPositiveButton("确定", (ed, which) -> {

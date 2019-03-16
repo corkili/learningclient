@@ -96,7 +96,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     }
 
     private void selectCourseForumItem() {
-        Intent intent = new Intent(TeacherCourseManageActivity.this, ForumTopicActivity.class);
+        Intent intent = new Intent(TeacherCourseManageActivity.this, ForumActivity.class);
         intent.putExtra(IntentParam.USER_INFO, userInfo);
         intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
         startActivity(intent);
