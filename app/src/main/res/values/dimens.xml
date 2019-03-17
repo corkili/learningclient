@@ -4,4 +4,5 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="login_activity_button_margin">20dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="topic_reply_left_margin">50dp</dimen>
 </resources>

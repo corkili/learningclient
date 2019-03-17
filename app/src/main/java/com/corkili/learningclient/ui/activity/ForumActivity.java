@@ -179,9 +179,11 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
     @Override
     public void onItemClick(ViewHolder viewHolder) {
         final ForumTopicInfo forumTopicInfo = viewHolder.getForumTopicInfo();
-        // TODO 跳转activity
-        Intent intent = new Intent();
-//        startActivity(intent);
+        Intent intent = new Intent(ForumActivity.this, ForumTopicActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        intent.putExtra(IntentParam.USER_INFO, userInfo);
+        intent.putExtra(IntentParam.FORUM_TOPIC_INFO, forumTopicInfo);
+        startActivity(intent);
     }
 
     @Override
