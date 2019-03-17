@@ -20,6 +20,7 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseSubscriptionInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseSubscriptionFindAllResponse;
 import com.corkili.learningclient.service.CourseSubscriptionService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.corkili.learningclient.ui.adapter.TeacherCourseSubscriptionRecyclerViewAdapter;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;

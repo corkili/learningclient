@@ -28,7 +28,8 @@ import com.corkili.learningclient.service.CourseService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.TeacherCourseEditActivity;
 import com.corkili.learningclient.ui.activity.TeacherCourseManageActivity;
-import com.corkili.learningclient.ui.fragment.TeacherCourseRecyclerViewAdapter.ViewHolder;
+import com.corkili.learningclient.ui.adapter.TeacherCourseRecyclerViewAdapter;
+import com.corkili.learningclient.ui.adapter.TeacherCourseRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;

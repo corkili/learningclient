@@ -1,4 +1,4 @@
-package com.corkili.learningclient.ui.activity;
+package com.corkili.learningclient.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

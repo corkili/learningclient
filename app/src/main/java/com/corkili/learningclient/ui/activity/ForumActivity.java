@@ -28,7 +28,8 @@ import com.corkili.learningclient.generate.protobuf.Response.ForumTopicFindAllRe
 import com.corkili.learningclient.generate.protobuf.Response.ForumTopicUpdateResponse;
 import com.corkili.learningclient.service.ForumService;
 import com.corkili.learningclient.service.ServiceResult;
-import com.corkili.learningclient.ui.activity.ForumRecyclerViewAdapter.ViewHolder;
+import com.corkili.learningclient.ui.adapter.ForumRecyclerViewAdapter;
+import com.corkili.learningclient.ui.adapter.ForumRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;

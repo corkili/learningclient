@@ -31,7 +31,8 @@ import com.corkili.learningclient.generate.protobuf.Response.TopicCommentDeleteR
 import com.corkili.learningclient.generate.protobuf.Response.TopicCommentFindAllResponse;
 import com.corkili.learningclient.service.ForumService;
 import com.corkili.learningclient.service.ServiceResult;
-import com.corkili.learningclient.ui.activity.ForumTopicRecyclerViewAdapter.ViewHolder;
+import com.corkili.learningclient.ui.adapter.ForumTopicRecyclerViewAdapter;
+import com.corkili.learningclient.ui.adapter.ForumTopicRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;

@@ -27,6 +27,7 @@ import com.corkili.learningclient.generate.protobuf.Response.CourseCommentCreate
 import com.corkili.learningclient.generate.protobuf.Response.CourseCommentFindAllResponse;
 import com.corkili.learningclient.service.CourseCommentService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.corkili.learningclient.ui.adapter.CourseCommentRecyclerViewAdapter;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
