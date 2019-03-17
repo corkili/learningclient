@@ -62,7 +62,7 @@ public class ForumTopicReplyRecyclerViewAdapter extends RecyclerView.Adapter<For
         return topicReplyInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView indexView;
         private final TextView usernameView;

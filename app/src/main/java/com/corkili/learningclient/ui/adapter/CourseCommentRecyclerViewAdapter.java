@@ -49,7 +49,7 @@ public class CourseCommentRecyclerViewAdapter extends RecyclerView.Adapter<Cours
         return courseCommentInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView usernameView;
         final RatingBar ratingView;

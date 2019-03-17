@@ -47,7 +47,7 @@ public class TeacherCourseSubscriptionRecyclerViewAdapter extends RecyclerView.A
         return courseSubscriptionInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView indexView;
         final TextView usernameView;

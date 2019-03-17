@@ -65,7 +65,7 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
         return courseInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView indexView;
         private final ImageView openView;

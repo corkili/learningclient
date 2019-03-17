@@ -68,7 +68,7 @@ public class ForumRecyclerViewAdapter extends RecyclerView.Adapter<ForumRecycler
         return forumTopicInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView titleView;
         private final TextView usernameView;

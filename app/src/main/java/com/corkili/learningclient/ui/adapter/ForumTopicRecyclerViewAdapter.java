@@ -95,7 +95,7 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
         return topicCommentInfos.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements ForumTopicReplyRecyclerViewAdapter.OnItemInteractionListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements ForumTopicReplyRecyclerViewAdapter.OnItemInteractionListener {
         private final View mView;
         private final TextView indexView;
         private final TextView usernameView;
