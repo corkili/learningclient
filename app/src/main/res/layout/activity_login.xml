@@ -35,6 +35,7 @@
         <EditText
             android:id="@+id/text_edit_phone"
             android:hint="请输入手机号"
+            android:text="18681255793"
             android:ems="10"
             android:inputType="phone"
             android:layout_width="match_parent"
@@ -69,6 +70,7 @@
         <EditText
             android:id="@+id/text_edit_password"
             android:hint="请输入密码"
+            android:text="123456"
             android:ems="10"
             android:inputType="textPassword"
             android:layout_width="match_parent"

@@ -143,7 +143,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
                     break;
                 }
             }
-            if (needReplaceIndex > 0) {
+            if (needReplaceIndex >= 0) {
                 courseInfos.set(needReplaceIndex, courseInfo);
                 recyclerViewAdapter.notifyDataSetChanged();
             }

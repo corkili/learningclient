@@ -46,8 +46,10 @@
             android:label="课程讨论区" />
         <activity
             android:name=".ui.activity.ForumTopicActivity"
-            android:label="帖子详情"/>
-
+            android:label="帖子详情" />
+        <activity
+            android:name=".ui.activity.QuestionEditActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
     </application>
 
 </manifest>

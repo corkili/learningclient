@@ -9,5 +9,7 @@
     <string name="navigation_question">试题</string>
     <string name="navigation_message">消息</string>
     <string name="navigation_user_info">我的</string>
+    <string name="single_choice_info">请设置两个及以上的可选选项，并勾选一个作为正确答案：</string>
+    <string name="multiple_choice_info">请设置两个及以上的可选选项，并勾选任意多个作为正确答案：</string>
 
 </resources>
