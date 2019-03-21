@@ -21,11 +21,8 @@ import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
-import com.corkili.learningclient.common.ProtoUtils;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
-import com.corkili.learningclient.generate.protobuf.Info.QuestionSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Response.QuestionFindAllResponse;
-import com.corkili.learningclient.generate.protobuf.Response.QuestionGetResponse;
 import com.corkili.learningclient.service.QuestionService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.QuestionEditActivity;
@@ -34,18 +31,12 @@ import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter.ViewHol
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class QuestionFragment extends Fragment implements QuestionRecyclerViewAdapter.OnItemInteractionListener {
 
     public static final int REQUEST_CODE_CREATE_QUESTION = 0xF1;
-    public static final int REQUEST_CODE_MANAGE_QUESTION = 0xF2;
+    public static final int REQUEST_CODE_UPDATE_OR_DELETE_QUESTION = 0xF2;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -53,10 +44,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
 
     private QuestionRecyclerViewAdapter recyclerViewAdapter;
 
-    private List<QuestionSimpleInfo> questionSimpleInfos;
-    private Map<Long, QuestionInfo> questionInfoCache;
-
-    private boolean hasStartActivityRequest;
+    private List<QuestionInfo> questionInfos;
 
     public QuestionFragment() {
     }
@@ -78,13 +66,11 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_question, container, false);
-        hasStartActivityRequest = false;
         recyclerView = view.findViewById(R.id.fragment_question_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_question_swipe_refresh_layout);
         addQuestionFab = view.findViewById(R.id.fab_add_question);
-        questionSimpleInfos = new ArrayList<>();
-        questionInfoCache = new HashMap<>();
-        recyclerViewAdapter = new QuestionRecyclerViewAdapter(getActivity(), questionSimpleInfos, this);
+        questionInfos = new ArrayList<>();
+        recyclerViewAdapter = new QuestionRecyclerViewAdapter(getActivity(), questionInfos, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -97,7 +83,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout.setOnRefreshListener(this::refreshQuestionSimpleInfos);
+        swipeRefreshLayout.setOnRefreshListener(this::refreshQuestionInfos);
 
         addQuestionFab.setOnClickListener(view -> {
             Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
@@ -105,15 +91,11 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             startActivityForResult(intent, REQUEST_CODE_CREATE_QUESTION);
         });
 
-        refreshQuestionSimpleInfos();
+        refreshQuestionInfos();
     }
 
-    private void refreshQuestionSimpleInfos() {
+    private void refreshQuestionInfos() {
         QuestionService.getInstance().findAllQuestion(handler, true, null, null);
-    }
-
-    private void getQuestionInfo(Collection<Long> questionIdList) {
-        QuestionService.getInstance().getQuestion(handler, questionIdList, true);
     }
 
     @SuppressLint("HandlerLeak")
@@ -122,8 +104,6 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         public void handleMessage(Message msg) {
             if (msg.what == QuestionService.FIND_ALL_QUESTION_MSG) {
                 handleFindAllQuestionMsg(msg);
-            } else if (msg.what == QuestionService.GET_QUESTION_MSG) {
-                handleGetQuestionMsg(msg);
             }
         }
     };
@@ -132,56 +112,11 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         ServiceResult serviceResult = (ServiceResult) msg.obj;
         Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
-            Set<Long> cachedQuestionIdList = new HashSet<>(questionInfoCache.keySet());
-            questionSimpleInfos.clear();
-            questionInfoCache.clear();
-            questionSimpleInfos.addAll(serviceResult.extra(QuestionFindAllResponse.class).getQuestionSimpleInfoList());
+            questionInfos.clear();
+            questionInfos.addAll(serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList());
             swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
-            List<Long> needRecoverQuestionId = new ArrayList<>();
-            for (QuestionSimpleInfo questionSimpleInfo : questionSimpleInfos) {
-                if (cachedQuestionIdList.contains(questionSimpleInfo.getQuestionId())) {
-                    needRecoverQuestionId.add(questionSimpleInfo.getQuestionId());
-                }
-            }
-            getQuestionInfo(needRecoverQuestionId);
         }
-    }
-
-    private void handleGetQuestionMsg(Message msg) {
-        ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
-        if (serviceResult.isSuccess()) {
-            List<QuestionInfo> questionInfoList = serviceResult.extra(QuestionGetResponse.class).getQuestionInfoList();
-            for (QuestionInfo questionInfo : questionInfoList) {
-                questionInfoCache.put(questionInfo.getQuestionId(), questionInfo);
-                int needReplaceIndex = -1;
-                for (int i = 0; i < questionSimpleInfos.size(); i++) {
-                    if (questionSimpleInfos.get(i).getQuestionId() == questionInfo.getQuestionId()) {
-                        needReplaceIndex = i;
-                        break;
-                    }
-                }
-                if (needReplaceIndex >= 0) {
-                    questionSimpleInfos.set(needReplaceIndex, ProtoUtils.simplifyQuestionInfo(questionInfo));
-                }
-            }
-            if (!questionInfoList.isEmpty()) {
-                recyclerViewAdapter.notifyDataSetChanged();
-            }
-            if (questionInfoList.size() == 1 && hasStartActivityRequest) {
-                hasStartActivityRequest = false;
-                startQuestionManageActivity(questionInfoList.get(0));
-            }
-        }
-    }
-
-    // TODO 跳转
-    private void startQuestionManageActivity(QuestionInfo questionInfo) {
-        Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
-        intent.putExtra(IntentParam.IS_CREATE, false);
-        intent.putExtra(IntentParam.QUESTION_INFO, questionInfo);
-        startActivityForResult(intent, REQUEST_CODE_MANAGE_QUESTION);
     }
 
     @Override
@@ -190,41 +125,36 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             return;
         }
         QuestionInfo questionInfo = (QuestionInfo) data.getSerializableExtra(IntentParam.QUESTION_INFO);
-        if (requestCode == REQUEST_CODE_MANAGE_QUESTION && questionInfo != null) {
+        if (requestCode == REQUEST_CODE_UPDATE_OR_DELETE_QUESTION && questionInfo != null) {
             boolean deleteQuestion = data.getBooleanExtra(IntentParam.DELETE_QUESTION, false);
             int needModifyIndex = -1;
-            for (int i = 0; i < questionSimpleInfos.size(); i++) {
-                if (questionSimpleInfos.get(i).getQuestionId() == questionInfo.getQuestionId()) {
+            for (int i = 0; i < questionInfos.size(); i++) {
+                if (questionInfos.get(i).getQuestionId() == questionInfo.getQuestionId()) {
                     needModifyIndex = i;
                     break;
                 }
             }
             if (needModifyIndex >= 0) {
                 if (deleteQuestion) {
-                    questionSimpleInfos.remove(needModifyIndex);
-                    questionInfoCache.remove(questionInfo.getQuestionId());
+                    questionInfos.remove(needModifyIndex);
                 } else {
-                    questionSimpleInfos.set(needModifyIndex, ProtoUtils.simplifyQuestionInfo(questionInfo));
-                    questionInfoCache.put(questionInfo.getQuestionId(), questionInfo);
+                    questionInfos.set(needModifyIndex, questionInfo);
                 }
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         } else if (requestCode == REQUEST_CODE_CREATE_QUESTION && questionInfo != null){
-            questionSimpleInfos.add(ProtoUtils.simplifyQuestionInfo(questionInfo));
-            questionInfoCache.put(questionInfo.getQuestionId(), questionInfo);
+            questionInfos.add(questionInfo);
             recyclerViewAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
-    public void onItemClick(ViewHolder viewHolder) {
-        QuestionInfo questionInfo = questionInfoCache.get(viewHolder.getQuestionSimpleInfo().getQuestionId());
-        if (questionInfo != null) {
-            startQuestionManageActivity(questionInfo);
-        } else {
-            hasStartActivityRequest = true;
-            getQuestionInfo(Collections.singletonList(viewHolder.getQuestionSimpleInfo().getQuestionId()));
-        }
+    public boolean onItemLongClick(ViewHolder viewHolder) {
+        Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
+        intent.putExtra(IntentParam.IS_CREATE, false);
+        intent.putExtra(IntentParam.QUESTION_INFO, viewHolder.getQuestionInfo());
+        startActivityForResult(intent, REQUEST_CODE_UPDATE_OR_DELETE_QUESTION);
+        return true;
     }
 
 }

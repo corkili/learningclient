@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/question_index"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
@@ -17,19 +17,9 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/question_auto_check_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        app:srcCompat="@drawable/ic_no_bk_red"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/question_index" />
-
     <TextView
         android:id="@+id/question_type"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
@@ -39,22 +29,117 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/question_auto_check_image" />
+        app:layout_constraintRight_toLeftOf="@id/question_auto_check_image" />
 
-    <TextView
-        android:id="@+id/question_description"
+    <ImageView
+        android:id="@+id/question_auto_check_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:text="question_description"
+        app:srcCompat="@drawable/ic_no_bk_red"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/question_simple_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="question_simple_description"
         android:textSize="20sp"
         android:textStyle="bold"
         android:ellipsize="end"
         android:singleLine="false"
         android:maxLines="2"
         app:layout_constraintTop_toBottomOf="@id/question_type"
-        app:layout_constraintLeft_toRightOf="@id/question_index" />
+        app:layout_constraintLeft_toRightOf="@id/question_index"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/answer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/question_simple_description"
+        android:visibility="visible">
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/colorBlack"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"/>
+
+        <TextView
+            android:id="@+id/question_description_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:text="问题："
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+        <TextView
+            android:id="@+id/question_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:text="question_description"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="false"
+            app:layout_constraintLeft_toRightOf="@id/question_description_text"
+            app:layout_constraintTop_toBottomOf="@id/question_description_text"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <TextView
+            android:id="@+id/answer_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:text="答案："
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="false"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/question_description" />
+
+        <TextView
+            android:id="@+id/question_answer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:text="正确选项为(少选或错选不得分)：1,3,4"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="false"
+            app:layout_constraintLeft_toRightOf="@id/answer_text"
+            app:layout_constraintTop_toBottomOf="@id/answer_text"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/colorBlack"
+            app:layout_constraintTop_toBottomOf="@id/question_answer"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
 

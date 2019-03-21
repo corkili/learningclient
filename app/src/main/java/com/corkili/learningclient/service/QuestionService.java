@@ -157,7 +157,7 @@ public class QuestionService {
     }
 
     public void updateQuestion(final Handler handler, Long questionId, QuestionType questionType, String question,
-                               Boolean autoCheck, Map<Integer, String> choices, Answer answer) {
+                               Boolean autoCheck, boolean updateChoices, Map<Integer, String> choices, Answer answer) {
         Message msg = new Message();
         msg.what = UPDATE_QUESTION_MSG;
         ServiceResult result = null;
@@ -166,10 +166,10 @@ public class QuestionService {
         } else if (question != null && StringUtils.isBlank(question)) {
             result = ServiceResult.failResultWithMessage("问题描述不能为空");
         } else if ((questionType == QuestionType.SingleChoice || questionType == QuestionType.MultipleChoice)
-                && (choices != null && choices.isEmpty())) { 
+                && (choices == null || choices.isEmpty())) {
             result = ServiceResult.failResultWithMessage("选择题必须提供选项");
         } else if ((questionType == QuestionType.SingleChoice || questionType == QuestionType.MultipleChoice)
-                && (choices != null && !ProtoUtils.checkChoices(choices))) {
+                && (!ProtoUtils.checkChoices(choices))) {
             result = ServiceResult.failResultWithMessage("选项内容不能为空");
         } else if (answer != null && !ProtoUtils.checkAnswer(answer, questionType, choices)) {
             result = ServiceResult.failResultWithMessage("必须提供符合题型的答案");
@@ -187,8 +187,8 @@ public class QuestionService {
                 .setQuestionType(questionType)
                 .setUpdateAutoCheck(autoCheck != null)
                 .setAutoCheck(autoCheck != null ? autoCheck : false)
-                .setUpdateChoices((questionType == QuestionType.SingleChoice || questionType == QuestionType.MultipleChoice) && choices != null)
-                .putAllChoices(choices != null ? choices : Collections.emptyMap())
+                .setUpdateChoices(updateChoices)
+                .putAllChoices(updateChoices ? choices : Collections.emptyMap())
                 .setUpdateAnswer(answer != null)
                 .setAnswer(answer != null ? answer : Answer.getDefaultInstance())
                 .build();

@@ -190,14 +190,15 @@ public class QuestionEditActivity extends AppCompatActivity {
                     if (autoCheck == questionInfo.getAutoCheck()) {
                         autoCheck = null;
                     }
+                    boolean updateChoices = true;
                     if (choices != null && choices.equals(questionInfo.getChoicesMap())) {
-                        choices = null;
+                        updateChoices = false;
                     }
                     if (answer.equals(questionInfo.getAnswer())) {
                         answer = null;
                     }
                     QuestionService.getInstance().updateQuestion(handler, questionInfo.getQuestionId(),
-                            questionType, question, autoCheck, choices, answer);
+                            questionType, question, autoCheck, updateChoices, choices, answer);
                 }
             } else {
                 if (!isCreate && !editMode) {
@@ -613,6 +614,11 @@ public class QuestionEditActivity extends AppCompatActivity {
             autoCheckSelector.check(R.id.auto_check_yes);
         } else {
             autoCheckSelector.check(R.id.auto_check_no);
+        }
+        if (questionInfo.getQuestionType() == QuestionType.SingleChoice
+                || questionInfo.getQuestionType() == QuestionType.MultipleChoice
+                || questionInfo.getQuestionType() == QuestionType.Essay) {
+            UIHelper.disableRadioGroup(autoCheckSelector);
         }
         if (questionInfo.getQuestionType() == QuestionType.MultipleChoice) {
             MultipleChoiceAnswer multipleChoiceAnswer = questionInfo.getAnswer().getMultipleChoiceAnswer();
