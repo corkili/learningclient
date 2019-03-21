@@ -50,6 +50,15 @@
         <activity
             android:name=".ui.activity.QuestionEditActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".ui.activity.CourseWorkActivity"
+            android:label="作业列表" />
+        <activity
+            android:name=".ui.activity.CourseWorkEditActivity"
+            android:label="创建作业" />
+        <activity
+            android:name=".ui.activity.QuestionSelectActivity"
+            android:label="选择试题"/>
     </application>
 
 </manifest>

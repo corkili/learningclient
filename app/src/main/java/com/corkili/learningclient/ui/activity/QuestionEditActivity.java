@@ -190,9 +190,9 @@ public class QuestionEditActivity extends AppCompatActivity {
                     if (autoCheck == questionInfo.getAutoCheck()) {
                         autoCheck = null;
                     }
-                    boolean updateChoices = true;
-                    if (choices != null && choices.equals(questionInfo.getChoicesMap())) {
-                        updateChoices = false;
+                    boolean updateChoices = false;
+                    if (choices != null && !choices.equals(questionInfo.getChoicesMap())) {
+                        updateChoices = true;
                     }
                     if (answer.equals(questionInfo.getAnswer())) {
                         answer = null;

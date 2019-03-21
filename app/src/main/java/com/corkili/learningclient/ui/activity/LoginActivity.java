@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleLoginMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(LoginActivity.this, serviceResult.msg(), Toast.LENGTH_LONG).show();
+        Toast.makeText(LoginActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             UserInfo userInfo = serviceResult.extra(UserLoginResponse.class).getUserInfo();
             // TODO 跳主界面，根据userType

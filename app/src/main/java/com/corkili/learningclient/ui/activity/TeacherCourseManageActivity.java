@@ -71,6 +71,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 selectCourseForumItem();
                 break;
             case R.id.menu_item_course_work:
+                selectCourseWorkItem();
                 break;
             case R.id.menu_item_course_exam:
                 break;
@@ -99,6 +100,13 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
         Intent intent = new Intent(TeacherCourseManageActivity.this, ForumActivity.class);
         intent.putExtra(IntentParam.USER_INFO, userInfo);
         intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        startActivity(intent);
+    }
+
+    private void selectCourseWorkItem() {
+        Intent intent = new Intent(TeacherCourseManageActivity.this, CourseWorkActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        intent.putExtra(IntentParam.USER_INFO, userInfo);
         startActivity(intent);
     }
 

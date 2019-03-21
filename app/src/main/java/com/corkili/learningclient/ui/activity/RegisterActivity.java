@@ -79,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void handleRegisterMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(RegisterActivity.this, serviceResult.msg(), Toast.LENGTH_LONG).show();
+        Toast.makeText(RegisterActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             intent.putExtra("userInfo", serviceResult.extra(UserRegisterResponse.class).getUserInfo());

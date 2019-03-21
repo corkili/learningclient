@@ -26,6 +26,8 @@ import com.corkili.learningclient.generate.protobuf.Response.QuestionFindAllResp
 import com.corkili.learningclient.service.QuestionService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.QuestionEditActivity;
+import com.corkili.learningclient.ui.activity.QuestionSelectActivity;
+import com.corkili.learningclient.ui.activity.TeacherMainActivity;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
@@ -80,6 +82,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         return view;
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -90,6 +93,11 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             intent.putExtra(IntentParam.IS_CREATE, true);
             startActivityForResult(intent, REQUEST_CODE_CREATE_QUESTION);
         });
+
+        if (getActivity() instanceof QuestionSelectActivity) {
+            addQuestionFab.setEnabled(false);
+            addQuestionFab.setVisibility(View.GONE);
+        }
 
         refreshQuestionInfos();
     }
@@ -150,10 +158,17 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
 
     @Override
     public boolean onItemLongClick(ViewHolder viewHolder) {
-        Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
-        intent.putExtra(IntentParam.IS_CREATE, false);
-        intent.putExtra(IntentParam.QUESTION_INFO, viewHolder.getQuestionInfo());
-        startActivityForResult(intent, REQUEST_CODE_UPDATE_OR_DELETE_QUESTION);
+        if (getActivity() instanceof TeacherMainActivity) {
+            Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
+            intent.putExtra(IntentParam.IS_CREATE, false);
+            intent.putExtra(IntentParam.QUESTION_INFO, viewHolder.getQuestionInfo());
+            startActivityForResult(intent, REQUEST_CODE_UPDATE_OR_DELETE_QUESTION);
+        } else if (getActivity() instanceof QuestionSelectActivity){
+            Intent intent = new Intent();
+            intent.putExtra(IntentParam.QUESTION_INFO, viewHolder.getQuestionInfo());
+            getActivity().setResult(Activity.RESULT_OK, intent);
+            getActivity().finish();
+        }
         return true;
     }
 

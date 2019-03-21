@@ -1,6 +1,8 @@
 package com.corkili.learningclient.common;
 
 import com.corkili.learningclient.generate.protobuf.Info.Answer;
+import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
+import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionType;
@@ -39,6 +41,20 @@ public class ProtoUtils {
                 .setQuestionType(questionInfo.getQuestionType())
                 .setAutoCheck(questionInfo.getAutoCheck())
                 .setAuthorId(questionInfo.getAuthorId())
+                .build();
+    }
+
+    public static CourseWorkSimpleInfo simplifyCourseWorkInfo(CourseWorkInfo courseWorkInfo) {
+        if (courseWorkInfo == null) {
+            return null;
+        }
+        return CourseWorkSimpleInfo.newBuilder()
+                .setCourseWorkId(courseWorkInfo.getCourseWorkId())
+                .setOpen(courseWorkInfo.getOpen())
+                .setCourseWorkName(courseWorkInfo.getCourseWorkName())
+                .setBelongCourseId(courseWorkInfo.getBelongCourseId())
+                .setHasDeadline(courseWorkInfo.getHasDeadline())
+                .setDeadline(courseWorkInfo.getDeadline())
                 .build();
     }
 
