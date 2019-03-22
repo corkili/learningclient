@@ -18,6 +18,9 @@ public class IUtils {
     public static final SimpleDateFormat DATE_TIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @SuppressLint("SimpleDateFormat")
+    public static final SimpleDateFormat DATE_TIME_NO_SEC_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+    @SuppressLint("SimpleDateFormat")
     public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
     public static List<String> string2List(String content, Pattern delimiterRegex) {

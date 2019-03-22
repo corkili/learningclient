@@ -10,20 +10,20 @@ import android.widget.TextView;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
-import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.ExamSimpleInfo;
 
 import java.util.Date;
 import java.util.List;
 
-public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWorkRecyclerViewAdapter.ViewHolder> {
+public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<ExamRecyclerViewAdapter.ViewHolder> {
 
     private final Context context;
-    private final List<CourseWorkSimpleInfo> courseWorkSimpleInfos;
+    private final List<ExamSimpleInfo> examSimpleInfos;
     private final OnItemInteractionListener mListener;
 
-    public CourseWorkRecyclerViewAdapter(Context context, List<CourseWorkSimpleInfo> courseWorkSimpleInfos, OnItemInteractionListener mListener) {
+    public ExamRecyclerViewAdapter(Context context, List<ExamSimpleInfo> examSimpleInfos, OnItemInteractionListener mListener) {
         this.context = context;
-        this.courseWorkSimpleInfos = courseWorkSimpleInfos;
+        this.examSimpleInfos = examSimpleInfos;
         this.mListener = mListener;
     }
 
@@ -31,16 +31,16 @@ public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_course_work_list_item, parent, false);
+                .inflate(R.layout.activity_exam_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        holder.mItem = courseWorkSimpleInfos.get(position);
+        holder.mItem = examSimpleInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
-        if (holder.mItem.getOpen()) {
-            if (holder.mItem.getHasDeadline() && holder.mItem.getDeadline() <= System.currentTimeMillis()) {
+        if (holder.mItem.getStartTime() <= System.currentTimeMillis()) {
+            if (holder.mItem.getEndTime() <= System.currentTimeMillis()) {
                 holder.submitView.setText("已关闭提交(点击查看)");
             } else {
                 holder.submitView.setText("已开放提交(点击查看)");
@@ -48,9 +48,12 @@ public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWo
         } else {
             holder.submitView.setText("未开放提交");
         }
-        holder.courseWorkNameView.setText(holder.mItem.getCourseWorkName());
-        holder.deadlineView.setText(holder.mItem.getHasDeadline() ? IUtils.format("截止日期：{}",
-                IUtils.DATE_FORMATTER.format(new Date(holder.mItem.getDeadline()))) : "截止日期：无限期");
+
+        holder.examNameView.setText(holder.mItem.getExamName());
+        holder.startTimeView.setText(IUtils.format("开始时间：{}", IUtils.DATE_TIME_FORMATTER
+                .format(new Date(holder.mItem.getStartTime()))));
+        holder.endTimeView.setText(IUtils.format("结束时间：{}", IUtils.DATE_TIME_FORMATTER
+                .format(new Date(holder.mItem.getEndTime()))));
 
         holder.mView.setOnClickListener(v -> {
             if (mListener != null) {
@@ -68,27 +71,29 @@ public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWo
 
     @Override
     public int getItemCount() {
-        return courseWorkSimpleInfos.size();
+        return examSimpleInfos.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView indexView;
         private final TextView submitView;
-        private final TextView courseWorkNameView;
-        private final TextView deadlineView;
-        private CourseWorkSimpleInfo mItem;
+        private final TextView examNameView;
+        private final TextView startTimeView;
+        private final TextView endTimeView;
+        private ExamSimpleInfo mItem;
 
         ViewHolder(View view) {
             super(view);
             mView = view;
             indexView = view.findViewById(R.id.item_index);
             submitView = view.findViewById(R.id.item_submit);
-            courseWorkNameView = view.findViewById(R.id.item_course_work_name);
-            deadlineView = view.findViewById(R.id.item_deadline);
+            examNameView = view.findViewById(R.id.item_exam_name);
+            startTimeView = view.findViewById(R.id.item_start_time);
+            endTimeView = view.findViewById(R.id.item_end_time);
         }
 
-        public CourseWorkSimpleInfo getCourseWorkSimpleInfo() {
+        public ExamSimpleInfo getExamSimpleInfo() {
             return mItem;
         }
     }

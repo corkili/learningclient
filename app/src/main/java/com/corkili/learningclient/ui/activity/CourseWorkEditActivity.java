@@ -12,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -228,6 +227,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
             openSelector.check(R.id.open_no);
             UIHelper.disableRadioGroup(openSelector);
             openLayout.setVisibility(View.GONE);
+            setTitle("创建作业");
         } else {
             courseWorkNameEditor.setText(courseWorkInfo.getCourseWorkName());
             openSelector.check(courseWorkInfo.getOpen() ? R.id.open_yes : R.id.open_no);
@@ -246,6 +246,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
                 addWorkQuestionButton.setEnabled(false);
                 addWorkQuestionButton.setVisibility(View.GONE);
             }
+            setTitle("编辑作业");
         }
 
     }
@@ -327,20 +328,17 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        Log.d("CourseWorkEdit", "onActivityResult3: " + resultCode);
         if (resultCode != RESULT_OK) {
             return;
         }
         if (requestCode == REQUEST_CODE_SELECT_QUESTION && data != null) {
             QuestionInfo questionInfo = (QuestionInfo) data.getSerializableExtra(IntentParam.QUESTION_INFO);
-            Log.d("CourseWorkEdit", "onActivityResult1: " + questionInfo);
             for (QuestionInfo info : questionInfos) {
                 if (info.getQuestionId() == questionInfo.getQuestionId()) {
                     Toast.makeText(this, "不能选择相同的试题", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
-            Log.d("CourseWorkEdit", "onActivityResult2: " + questionInfo);
             questionInfos.add(questionInfo);
             allQuestionInfo.put(questionInfo.getQuestionId(), questionInfo);
             recyclerViewAdapter.notifyDataSetChanged();

@@ -1,5 +1,6 @@
 package com.corkili.learningclient.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.corkili.learningclient.generate.protobuf.Info.MultipleChoiceAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionType;
+import com.corkili.learningclient.generate.protobuf.Info.Score;
 import com.corkili.learningclient.generate.protobuf.Info.SingleFillingAnswer;
 
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
     private Context context;
     private final List<QuestionInfo> questionInfos;
     private OnItemInteractionListener mListener;
+    private ScoreDataBus scoreDataBus;
     private int opened;
 
     public QuestionRecyclerViewAdapter(Context context, List<QuestionInfo> questionInfos,
@@ -160,11 +163,19 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
             holder.answerView.setText("未设置标准答案");
         }
 
+        updateScoreView(holder);
+
         holder.mView.setOnLongClickListener(v -> {
             if (this.mListener != null) {
                 return this.mListener.onItemLongClick(holder);
             }
             return false;
+        });
+
+        holder.scoreView.setOnClickListener(v -> {
+            if (mListener != null) {
+                mListener.onScoreViewClick(holder);
+            }
         });
 
         if (position == opened) {
@@ -182,6 +193,54 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
         return questionInfos.size();
     }
 
+    public void setScoreDataBus(ScoreDataBus scoreDataBus) {
+        this.scoreDataBus = scoreDataBus;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public void updateScoreView(ViewHolder holder) {
+        if (scoreDataBus != null) {
+            StringBuilder sb = new StringBuilder("分数： ");
+            Score score = scoreDataBus.requireScoreFor(holder.mItem.getQuestionId());
+            if (score != null) {
+                if (holder.mItem.getQuestionType() == QuestionType.MultipleFilling) {
+                    List<Integer> indexList = new ArrayList<>(holder.mItem.getAnswer()
+                            .getMultipleFillingAnswer().getAnswerMap().keySet());
+                    Collections.sort(indexList, ((o1, o2) -> o1 - o2));
+                    Map<Integer, Double> scoreMap;
+                    if (score.hasMultipleScore()) {
+                        scoreMap = score.getMultipleScore().getScoreMap();
+                    } else {
+                        scoreMap = Collections.emptyMap();
+                    }
+                    for (int i = 0; i < indexList.size(); i++) {
+                        Integer index = indexList.get(i);
+                        if (scoreMap.containsKey(index)) {
+                            sb.append(String.format("%.2f", scoreMap.get(index)));
+                        } else {
+                            sb.append("0.00");
+                        }
+                        if (i != indexList.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                } else {
+                    if (!score.hasMultipleScore()) {
+                        sb.append(String.format("%.2f", score.getSingleScore()));
+                    } else {
+                        sb.append("0.00");
+                    }
+                }
+            } else {
+                sb.append("0.00");
+            }
+            holder.scoreView.setVisibility(View.VISIBLE);
+            holder.scoreView.setText(sb.toString());
+        } else {
+            holder.scoreView.setVisibility(View.GONE);
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView indexView;
@@ -190,6 +249,7 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
         private final TextView simpleDescriptionView;
         private final TextView descriptionView;
         private final TextView answerView;
+        private final TextView scoreView;
         private final View answerLayout;
         private QuestionInfo mItem;
 
@@ -202,6 +262,7 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
             simpleDescriptionView = view.findViewById(R.id.question_simple_description);
             descriptionView = view.findViewById(R.id.question_description);
             answerView = view.findViewById(R.id.question_answer);
+            scoreView = view.findViewById(R.id.question_score);
             answerLayout = view.findViewById(R.id.answer_layout);
 
             mView.setOnClickListener(v -> {
@@ -228,5 +289,14 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
 
         boolean onItemLongClick(ViewHolder viewHolder);
 
+        default void onScoreViewClick(ViewHolder viewHolder) {}
+
     }
+
+    public interface ScoreDataBus {
+
+        Score requireScoreFor(long questionId);
+
+    }
+
 }

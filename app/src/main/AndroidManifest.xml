@@ -59,6 +59,14 @@
         <activity
             android:name=".ui.activity.QuestionSelectActivity"
             android:label="选择试题"/>
+        <activity
+            android:name=".ui.activity.ExamActivity"
+            android:label="考试列表"
+            />
+        <activity
+            android:name=".ui.activity.ExamEditActivity"
+            android:label="创建考试"
+            />
     </application>
 
 </manifest>
