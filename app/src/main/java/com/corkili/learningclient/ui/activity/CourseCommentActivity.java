@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.ProtoUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentType;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
@@ -93,7 +94,8 @@ public class CourseCommentActivity extends AppCompatActivity {
                     // 获取EditView中的输入内容
                     RatingBar ratingBar = dialogView.findViewById(R.id.rating_bar_comment);
                     EditText commentEditView = dialogView.findViewById(R.id.text_edit_comment);
-                    CourseCommentType commentType = CourseCommentType.forNumber((int) ratingBar.getRating() - 1);
+                    CourseCommentType commentType = ProtoUtils.generateCommentTypeFromRating(
+                            (int) ratingBar.getRating());
                     CourseCommentService.getInstance().createCourseComment(handler,
                             commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
                 })

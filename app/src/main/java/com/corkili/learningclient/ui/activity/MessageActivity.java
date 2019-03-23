@@ -10,6 +10,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -70,7 +71,7 @@ public class MessageActivity extends AppCompatActivity {
 
         sendContentButton.setOnClickListener(v -> MessageService.getInstance().createMessage(
                 handler, contentEditor.getText().toString().trim(),
-                selfUserInfo.getUserId(), userInfo.getUserId()));
+                userInfo.getUserId(), selfUserInfo.getUserId()));
 
         recyclerView = findViewById(R.id.activity_message_list);
         swipeRefreshLayout = findViewById(R.id.activity_message_swipe_refresh_layout);
@@ -85,10 +86,22 @@ public class MessageActivity extends AppCompatActivity {
 
         setTitle(userInfo.getUsername());
 
+        if (messageInfos.size() == 0) {
+            refreshMessageInfos();
+        }
+
+        scrollToBottom();
     }
 
     private void refreshMessageInfos() {
         MessageService.getInstance().findAllMessage(handler, selfUserInfo.getUserId(), null, true);
+    }
+
+    private void scrollToBottom(){
+        LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager != null && layoutManager.getItemCount() > 0) {
+            recyclerView.scrollToPosition(layoutManager.getItemCount() - 1);
+        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -118,6 +131,7 @@ public class MessageActivity extends AppCompatActivity {
             });
             swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+            scrollToBottom();
         }
     }
 
@@ -137,6 +151,7 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 });
                 recyclerViewAdapter.notifyDataSetChanged();
+                scrollToBottom();
             }
         }
     }

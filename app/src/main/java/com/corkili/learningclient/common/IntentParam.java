@@ -10,6 +10,7 @@ public class IntentParam {
     public static final String EXAM_INFO = "examInfo";
     public static final String MESSAGE_INFO = "messageInfo";
     public static final String SELF_USER_INFO = "selfUserInfo";
+    public static final String COURSE_SUBSCRIPTION_INFO = "courseSubscriptionInfo";
     public static final String COUNT = "count";
     public static final String IS_CREATE = "isCreate";
     public static final String USER_TYPE = "userType";
@@ -17,5 +18,4 @@ public class IntentParam {
     public static final String DELETE_QUESTION = "deleteQuestion";
     public static final String DELETE_EXAM = "deleteExam";
     public static final String DELETE_COURSE_WORK = "deleteCourseWork";
-    public static final String REFRESHED_QUESTION_INFO = "refreshedQuestionInfo";
 }

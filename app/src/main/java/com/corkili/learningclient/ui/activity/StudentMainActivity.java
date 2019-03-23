@@ -12,16 +12,18 @@ import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.ui.fragment.MessageFragment;
-import com.corkili.learningclient.ui.fragment.TeacherCourseFragment;
+import com.corkili.learningclient.ui.fragment.StudentCourseFragment;
 import com.corkili.learningclient.ui.fragment.UserFragment;
 
 public class StudentMainActivity extends AppCompatActivity
-        implements UserFragment.OnUserInfoChangeListener, TeacherCourseFragment.DataBus, MessageFragment.DataBus {
+        implements UserFragment.OnUserInfoChangeListener, MessageFragment.DataBus, StudentCourseFragment.DataBus {
 
     private UserInfo userInfo;
 
     private UserFragment userFragment;
     private MessageFragment messageFragment;
+    private StudentCourseFragment courseFragment;
+    private StudentCourseFragment subscriptionFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,7 @@ public class StudentMainActivity extends AppCompatActivity
             }
             return false;
         });
-        navigation.setSelectedItemId(R.id.navigation_course_manager);
+        navigation.setSelectedItemId(R.id.navigation_subscription);
     }
 
     private void showFragment(Fragment fragment) {
@@ -60,11 +62,17 @@ public class StudentMainActivity extends AppCompatActivity
     }
 
     private synchronized void loadCourseFragment() {
-
+        if (courseFragment == null) {
+            courseFragment = StudentCourseFragment.newInstance(false);
+        }
+        showFragment(courseFragment);
     }
 
     private synchronized void loadSubscriptionFragment() {
-
+        if (courseFragment == null) {
+            subscriptionFragment = StudentCourseFragment.newInstance(true);
+        }
+        showFragment(subscriptionFragment);
     }
 
     private synchronized void loadMessageFragment() {

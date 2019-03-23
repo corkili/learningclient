@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/item_index"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="item_index"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/item_course_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="item_course_name"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/item_index" />
+
+    <ImageView
+        android:id="@+id/item_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        app:srcCompat="@drawable/ic_no_bk_red"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/item_tags"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="item_tags"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        app:layout_constraintTop_toBottomOf="@id/item_course_name"
+        app:layout_constraintLeft_toRightOf="@id/item_index" />
+
+
+    <TextView
+        android:id="@+id/item_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="item_description"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:ellipsize="end"
+        android:singleLine="false"
+        android:maxLines="2"
+        app:layout_constraintTop_toBottomOf="@id/item_tags"
+        app:layout_constraintLeft_toRightOf="@id/item_index" />
+    <TextView
+        android:id="@+id/item_teacher"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="item_teacher"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        app:layout_constraintTop_toBottomOf="@id/item_description"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>
+
+

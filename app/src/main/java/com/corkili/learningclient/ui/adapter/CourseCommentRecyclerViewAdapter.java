@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
+import com.corkili.learningclient.common.ProtoUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentInfo;
 
 import java.util.Date;
@@ -38,7 +39,7 @@ public class CourseCommentRecyclerViewAdapter extends RecyclerView.Adapter<Cours
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = courseCommentInfos.get(position);
         holder.usernameView.setText(holder.mItem.getCommentAuthorInfo().getUsername());
-        holder.ratingView.setRating(holder.mItem.getCommentType().getNumber() + 1);
+        holder.ratingView.setRating(ProtoUtils.getCommentTypeRating(holder.mItem.getCommentType()));
         holder.contentView.setText(holder.mItem.getContent());
         holder.commentTimeView.setText(IUtils.format("评论时间：{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));

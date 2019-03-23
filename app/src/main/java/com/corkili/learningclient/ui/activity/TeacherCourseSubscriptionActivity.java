@@ -95,7 +95,7 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity
     @Override
     public void onItemClick(ViewHolder viewHolder) {
         Intent intent = new Intent(TeacherCourseSubscriptionActivity.this, MessageActivity.class);
-        intent.putExtra(IntentParam.USER_INFO, viewHolder.getCourseSubscriptionInfo());
+        intent.putExtra(IntentParam.USER_INFO, viewHolder.getCourseSubscriptionInfo().getSubscriberInfo());
         intent.putExtra(IntentParam.SELF_USER_INFO, courseInfo.getTeacherInfo());
         intent.putExtra(IntentParam.COUNT, 0);
         startActivity(intent);

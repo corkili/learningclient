@@ -72,6 +72,9 @@
         <activity
             android:name=".ui.activity.StudentMainActivity"
             android:theme="@style/AppTheme.NoTitle" />
+        <activity
+            android:name=".ui.activity.StudentCourseDetailActivity"
+            android:label="课程详情" />
     </application>
 
 </manifest>

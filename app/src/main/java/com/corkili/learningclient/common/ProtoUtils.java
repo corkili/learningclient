@@ -1,6 +1,7 @@
 package com.corkili.learningclient.common;
 
 import com.corkili.learningclient.generate.protobuf.Info.Answer;
+import com.corkili.learningclient.generate.protobuf.Info.CourseCommentType;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
@@ -21,6 +22,31 @@ import java.util.List;
 import java.util.Map;
 
 public class ProtoUtils {
+
+    public static int getCommentTypeRating(CourseCommentType courseCommentType) {
+        if (courseCommentType == null) {
+            return 0;
+        }
+        switch (courseCommentType) {
+            case BAD: return 1;
+            case JUST_MID: return 2;
+            case MID: return 3;
+            case GOOD: return 4;
+            case VERY_GOOD: return 5;
+        }
+        return 0;
+    }
+
+    public static CourseCommentType generateCommentTypeFromRating(int rating) {
+        switch (rating) {
+            case 1: return CourseCommentType.BAD;
+            case 2: return CourseCommentType.JUST_MID;
+            case 3: return CourseCommentType.MID;
+            case 4: return CourseCommentType.GOOD;
+            case 5: return CourseCommentType.VERY_GOOD;
+        }
+        return CourseCommentType.MID;
+    }
 
     public static String getQuestionTypeUIName(QuestionType questionType) {
         switch (questionType) {
