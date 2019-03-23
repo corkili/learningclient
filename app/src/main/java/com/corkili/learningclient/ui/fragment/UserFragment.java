@@ -98,7 +98,7 @@ public class UserFragment extends Fragment {
         usernameEditText.setText(userInfo.getUsername());
         phoneEditText.setText(userInfo.getPhone());
 
-        if (userInfo.getUserType() != UserType.Teacher) {
+        if (userInfo.getUserType() == UserType.Teacher) {
             userTypeEditText.setText("老师");
         } else {
             userTypeEditText.setText("学生");

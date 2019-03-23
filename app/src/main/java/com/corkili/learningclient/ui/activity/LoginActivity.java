@@ -90,14 +90,13 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(LoginActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             UserInfo userInfo = serviceResult.extra(UserLoginResponse.class).getUserInfo();
-            // TODO 跳主界面，根据userType
             Intent intent = new Intent();
             if (userInfo.getUserType() == UserType.Teacher) {
                 intent.setClass(LoginActivity.this, TeacherMainActivity.class);
             } else {
-                return;
+                intent.setClass(LoginActivity.this, StudentMainActivity.class);
             }
-            intent.putExtra("userInfo", userInfo);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
             startActivity(intent);
             LoginActivity.this.finish();
         }
