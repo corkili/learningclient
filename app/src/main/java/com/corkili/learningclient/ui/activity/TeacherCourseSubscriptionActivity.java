@@ -1,6 +1,7 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,12 +22,14 @@ import com.corkili.learningclient.generate.protobuf.Response.CourseSubscriptionF
 import com.corkili.learningclient.service.CourseSubscriptionService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.adapter.TeacherCourseSubscriptionRecyclerViewAdapter;
+import com.corkili.learningclient.ui.adapter.TeacherCourseSubscriptionRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
+public class TeacherCourseSubscriptionActivity extends AppCompatActivity
+        implements TeacherCourseSubscriptionRecyclerViewAdapter.OnItemInteractionListener {
 
     private static final String SUBSCRIPTION_NUMBER_TEXT_FORMAT = "当前共有{}位订阅者";
 
@@ -52,7 +55,7 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
         subscriptionNumberTextView = findViewById(R.id.text_view_current_subscription_number);
         courseSubscriptionInfos = new ArrayList<>();
         subscriptionNumberTextView.setText(IUtils.format(SUBSCRIPTION_NUMBER_TEXT_FORMAT, courseSubscriptionInfos.size()));
-        recyclerViewAdapter = new TeacherCourseSubscriptionRecyclerViewAdapter(this, courseSubscriptionInfos);
+        recyclerViewAdapter = new TeacherCourseSubscriptionRecyclerViewAdapter(this, courseSubscriptionInfos, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -87,6 +90,15 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
             subscriptionNumberTextView.setText(IUtils.format(SUBSCRIPTION_NUMBER_TEXT_FORMAT, courseSubscriptionInfos.size()));
             recyclerViewAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onItemClick(ViewHolder viewHolder) {
+        Intent intent = new Intent(TeacherCourseSubscriptionActivity.this, MessageActivity.class);
+        intent.putExtra(IntentParam.USER_INFO, viewHolder.getCourseSubscriptionInfo());
+        intent.putExtra(IntentParam.SELF_USER_INFO, courseInfo.getTeacherInfo());
+        intent.putExtra(IntentParam.COUNT, 0);
+        startActivity(intent);
     }
 }
 

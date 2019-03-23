@@ -8,6 +8,9 @@ public class IntentParam {
     public static final String QUESTION_INFO = "questionInfo";
     public static final String COURSE_WORK_INFO = "courseWorkInfo";
     public static final String EXAM_INFO = "examInfo";
+    public static final String MESSAGE_INFO = "messageInfo";
+    public static final String SELF_USER_INFO = "selfUserInfo";
+    public static final String COUNT = "count";
     public static final String IS_CREATE = "isCreate";
     public static final String USER_TYPE = "userType";
     public static final String ALREADY_SUBSCRIBE = "alreadySubscribe";

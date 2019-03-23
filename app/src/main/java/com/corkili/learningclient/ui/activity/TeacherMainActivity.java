@@ -11,18 +11,20 @@ import android.support.v7.app.AppCompatActivity;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.ui.fragment.MessageFragment;
 import com.corkili.learningclient.ui.fragment.QuestionFragment;
 import com.corkili.learningclient.ui.fragment.TeacherCourseFragment;
 import com.corkili.learningclient.ui.fragment.UserFragment;
 
 public class TeacherMainActivity extends AppCompatActivity
-        implements UserFragment.OnUserInfoChangeListener, TeacherCourseFragment.DataBus {
+        implements UserFragment.OnUserInfoChangeListener, TeacherCourseFragment.DataBus, MessageFragment.DataBus {
 
     private UserInfo userInfo;
 
     private UserFragment userFragment;
     private TeacherCourseFragment teacherCourseFragment;
     private QuestionFragment questionFragment;
+    private MessageFragment messageFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,25 +62,28 @@ public class TeacherMainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void loadCourseFragment() {
+    private synchronized void loadCourseFragment() {
         if (teacherCourseFragment == null) {
             teacherCourseFragment = TeacherCourseFragment.newInstance();
         }
         showFragment(teacherCourseFragment);
     }
 
-    private void loadQuestionFragment() {
+    private synchronized void loadQuestionFragment() {
         if (questionFragment == null) {
             questionFragment = QuestionFragment.newInstance();
         }
         showFragment(questionFragment);
     }
 
-    private void loadMessageFragment() {
-
+    private synchronized void loadMessageFragment() {
+        if (messageFragment == null) {
+            messageFragment = MessageFragment.newInstance();
+        }
+        showFragment(messageFragment);
     }
 
-    private void loadUserFragment() {
+    private synchronized void loadUserFragment() {
         if (userFragment == null) {
             userFragment = UserFragment.newInstance(userInfo);
         }

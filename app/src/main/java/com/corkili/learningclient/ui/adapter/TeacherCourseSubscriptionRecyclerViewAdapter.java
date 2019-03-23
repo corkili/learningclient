@@ -19,10 +19,14 @@ public class TeacherCourseSubscriptionRecyclerViewAdapter extends RecyclerView.A
 
     private final Context context;
     private final List<CourseSubscriptionInfo> courseSubscriptionInfos;
+    private final OnItemInteractionListener mListener;
 
-    public TeacherCourseSubscriptionRecyclerViewAdapter(Context context, List<CourseSubscriptionInfo> courseSubscriptionInfos) {
+    public TeacherCourseSubscriptionRecyclerViewAdapter(Context context,
+                                                        List<CourseSubscriptionInfo> courseSubscriptionInfos,
+                                                        OnItemInteractionListener mListener) {
         this.context = context;
         this.courseSubscriptionInfos = courseSubscriptionInfos;
+        this.mListener = mListener;
     }
 
     @NonNull
@@ -37,9 +41,17 @@ public class TeacherCourseSubscriptionRecyclerViewAdapter extends RecyclerView.A
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = courseSubscriptionInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
-        holder.usernameView.setText(holder.mItem.getSubscriberInfo().getUsername());
+        holder.usernameView.setText(IUtils.format("{}(点击联系)",
+                holder.mItem.getSubscriberInfo().getUsername()));
         holder.subscribeTimeView.setText(IUtils.format("订阅时间：{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
+
+        holder.mView.setOnClickListener(v -> {
+            if (mListener != null) {
+                mListener.onItemClick(holder);
+            }
+        });
+
     }
 
     @Override
@@ -61,6 +73,16 @@ public class TeacherCourseSubscriptionRecyclerViewAdapter extends RecyclerView.A
             usernameView = view.findViewById(R.id.item_user_name);
             subscribeTimeView = view.findViewById(R.id.item_subscribe_time);
         }
+
+        public CourseSubscriptionInfo getCourseSubscriptionInfo() {
+            return mItem;
+        }
+
+    }
+
+    public interface OnItemInteractionListener {
+
+        void onItemClick(ViewHolder viewHolder);
 
     }
 }
