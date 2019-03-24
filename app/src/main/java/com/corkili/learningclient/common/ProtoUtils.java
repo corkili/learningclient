@@ -3,15 +3,27 @@ package com.corkili.learningclient.common;
 import com.corkili.learningclient.generate.protobuf.Info.Answer;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentType;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
+import com.corkili.learningclient.generate.protobuf.Info.CourseWorkQuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.EssaySubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
+import com.corkili.learningclient.generate.protobuf.Info.ExamQuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.ExamSubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.MultipleChoiceSubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingSubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingSubmittedAnswer.Pair;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionType;
 import com.corkili.learningclient.generate.protobuf.Info.Score;
 import com.corkili.learningclient.generate.protobuf.Info.Score.MultipleScore;
+import com.corkili.learningclient.generate.protobuf.Info.SingleChoiceSubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.SingleFillingAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.SingleFillingSubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.SubmittedAnswer;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,8 +32,112 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ProtoUtils {
+
+    public static Map<Integer, ExamSubmittedAnswer> generateSubmittedExamAnswerMap(
+            ExamInfo examInfo, List<QuestionInfo> questionInfoList,
+            Map<Integer, ExamSubmittedAnswer> submittedAnswerMap) {
+        Map<Integer, ExamSubmittedAnswer> map = new HashMap<>();
+        if (examInfo == null || questionInfoList == null) {
+            return map;
+        }
+        Map<Long, QuestionInfo> questionInfoMap = new HashMap<>();
+        for (QuestionInfo questionInfo : questionInfoList) {
+            questionInfoMap.put(questionInfo.getQuestionId(), questionInfo);
+        }
+        if (submittedAnswerMap == null) {
+            submittedAnswerMap = new HashMap<>();
+        }
+        for (ExamQuestionInfo examQuestionInfo : examInfo.getExamQuestionInfoList()) {
+            QuestionInfo questionInfo = questionInfoMap.get(examQuestionInfo.getQuestionId());
+            if (questionInfo != null) {
+                ExamSubmittedAnswer rawExamSubmittedAnswer = submittedAnswerMap.get(examQuestionInfo.getIndex());
+                ExamSubmittedAnswer examSubmittedAnswer = ExamSubmittedAnswer.newBuilder()
+                        .setQuestionIndex(examQuestionInfo.getIndex())
+                        .setScore(rawExamSubmittedAnswer != null ? rawExamSubmittedAnswer.getScore() : -1)
+                        .setSubmittedAnswer((rawExamSubmittedAnswer == null
+                                || rawExamSubmittedAnswer.getSubmittedAnswer() == null)
+                                ? generateDefaultSubmittedAnswer(questionInfo)
+                                : rawExamSubmittedAnswer.getSubmittedAnswer())
+                        .build();
+                map.put(examQuestionInfo.getIndex(), examSubmittedAnswer);
+            }
+        }
+        return map;
+    }
+    
+    public static Map<Integer, CourseWorkSubmittedAnswer> generateSubmittedCourseWorkAnswerMap(
+            CourseWorkInfo courseWorkInfo, List<QuestionInfo> questionInfoList, 
+            Map<Integer, CourseWorkSubmittedAnswer> submittedAnswerMap) {
+        Map<Integer, CourseWorkSubmittedAnswer> map = new HashMap<>();
+        if (courseWorkInfo == null || questionInfoList == null) {
+            return map;
+        }
+        Map<Long, QuestionInfo> questionInfoMap = new HashMap<>();
+        for (QuestionInfo questionInfo : questionInfoList) {
+            questionInfoMap.put(questionInfo.getQuestionId(), questionInfo);
+        }
+        if (submittedAnswerMap == null) {
+            submittedAnswerMap = new HashMap<>();
+        }
+        for (CourseWorkQuestionInfo courseWorkQuestionInfo : courseWorkInfo.getCourseWorkQuestionInfoList()) {
+            QuestionInfo questionInfo = questionInfoMap.get(courseWorkQuestionInfo.getQuestionId());
+            if (questionInfo != null) {
+                CourseWorkSubmittedAnswer rawCourseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
+                CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = CourseWorkSubmittedAnswer.newBuilder()
+                        .setQuestionIndex(courseWorkQuestionInfo.getIndex())
+                        .setCheckStatus(rawCourseWorkSubmittedAnswer != null ? rawCourseWorkSubmittedAnswer.getCheckStatus() : -1)
+                        .setSubmittedAnswer((rawCourseWorkSubmittedAnswer == null 
+                                || rawCourseWorkSubmittedAnswer.getSubmittedAnswer() == null) 
+                                ? generateDefaultSubmittedAnswer(questionInfo)
+                                : rawCourseWorkSubmittedAnswer.getSubmittedAnswer())
+                        .build();
+                map.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+            }
+        }
+        return map;
+    }
+    
+    private static SubmittedAnswer generateDefaultSubmittedAnswer(QuestionInfo questionInfo) {
+        QuestionType questionType = questionInfo.getQuestionType();
+        if (questionType == QuestionType.SingleFilling) {
+            return SubmittedAnswer.newBuilder()
+                    .setSingleFillingSubmittedAnswer(SingleFillingSubmittedAnswer.getDefaultInstance())
+                    .build();
+        } else if (questionType == QuestionType.MultipleFilling) {
+            Map<Integer, Pair> ans = new HashMap<>();
+            if (questionInfo.getAnswer().hasMultipleFillingAnswer()) {
+                MultipleFillingAnswer multipleFillingAnswer = questionInfo.getAnswer().getMultipleFillingAnswer();
+                for (Entry<Integer, SingleFillingAnswer> entry : multipleFillingAnswer.getAnswerMap().entrySet()) {
+                    Pair pair = Pair.newBuilder()
+                            .setIndex(entry.getKey())
+                            .setAnswer("")
+                            .setScoreOrCheckStatus(-1)
+                            .build();
+                    ans.put(pair.getIndex(), pair);
+                }
+            }
+            return SubmittedAnswer.newBuilder()
+                    .setMultipleFillingSubmittedAnswer(MultipleFillingSubmittedAnswer.newBuilder().putAllAnswer(ans))
+                    .build();
+        } else if (questionType == QuestionType.SingleChoice) {
+            return SubmittedAnswer.newBuilder()
+                    .setSingleChoiceSubmittedAnswer(SingleChoiceSubmittedAnswer.getDefaultInstance())
+                    .build();
+        } else if (questionType == QuestionType.MultipleChoice) {
+            return SubmittedAnswer.newBuilder()
+                    .setMultipleChoiceSubmittedAnswer(MultipleChoiceSubmittedAnswer.getDefaultInstance())
+                    .build();
+        } else if (questionType == QuestionType.Essay) {
+            return SubmittedAnswer.newBuilder()
+                    .setEssaySubmittedAnswer(EssaySubmittedAnswer.getDefaultInstance())
+                    .build();
+        } else {
+            return SubmittedAnswer.getDefaultInstance();
+        }
+    }
 
     public static int getCommentTypeRating(CourseCommentType courseCommentType) {
         if (courseCommentType == null) {

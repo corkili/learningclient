@@ -57,4 +57,9 @@ public class IUtils {
         return String.format(format.replace("{}", "%s"), objects);
     }
 
+    @SuppressLint("DefaultLocale")
+    public static String formatScore(double score) {
+        return String.format("%.2f", score);
+    }
+
 }

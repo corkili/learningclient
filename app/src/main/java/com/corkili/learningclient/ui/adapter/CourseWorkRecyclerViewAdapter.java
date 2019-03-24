@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 
 import java.util.Date;
 import java.util.List;
@@ -20,11 +22,14 @@ public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWo
     private final Context context;
     private final List<CourseWorkSimpleInfo> courseWorkSimpleInfos;
     private final OnItemInteractionListener mListener;
+    private final UserInfo userInfo;
 
-    public CourseWorkRecyclerViewAdapter(Context context, List<CourseWorkSimpleInfo> courseWorkSimpleInfos, OnItemInteractionListener mListener) {
+    public CourseWorkRecyclerViewAdapter(Context context, List<CourseWorkSimpleInfo> courseWorkSimpleInfos,
+                                         OnItemInteractionListener mListener, UserInfo userInfo) {
         this.context = context;
         this.courseWorkSimpleInfos = courseWorkSimpleInfos;
         this.mListener = mListener;
+        this.userInfo = userInfo;
     }
 
     @NonNull
@@ -39,14 +44,26 @@ public class CourseWorkRecyclerViewAdapter extends RecyclerView.Adapter<CourseWo
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = courseWorkSimpleInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
-        if (holder.mItem.getOpen()) {
-            if (holder.mItem.getHasDeadline() && holder.mItem.getDeadline() <= System.currentTimeMillis()) {
-                holder.submitView.setText("已关闭提交(点击查看)");
+        if (userInfo.getUserType() == UserType.Teacher) {
+            if (holder.mItem.getOpen()) {
+                if (holder.mItem.getHasDeadline() && holder.mItem.getDeadline() <= System.currentTimeMillis()) {
+                    holder.submitView.setText("已关闭提交(点击查看)");
+                } else {
+                    holder.submitView.setText("已开放提交(点击查看)");
+                }
             } else {
-                holder.submitView.setText("已开放提交(点击查看)");
+                holder.submitView.setText("未开放提交");
             }
         } else {
-            holder.submitView.setText("未开放提交");
+            if (holder.mItem.getOpen()) {
+                if (holder.mItem.getHasDeadline() && holder.mItem.getDeadline() <= System.currentTimeMillis()) {
+                    holder.submitView.setText("已关闭提交");
+                } else {
+                    holder.submitView.setText("已开放提交");
+                }
+            } else {
+                holder.submitView.setText("未开放提交");
+            }
         }
         holder.courseWorkNameView.setText(holder.mItem.getCourseWorkName());
         holder.deadlineView.setText(holder.mItem.getHasDeadline() ? IUtils.format("截止日期：{}",

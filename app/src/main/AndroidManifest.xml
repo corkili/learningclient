@@ -58,7 +58,7 @@
             android:label="创建作业" />
         <activity
             android:name=".ui.activity.QuestionSelectActivity"
-            android:label="选择试题"/>
+            android:label="选择试题" />
         <activity
             android:name=".ui.activity.ExamActivity"
             android:label="考试列表" />
@@ -67,14 +67,17 @@
             android:label="创建考试" />
         <activity
             android:name=".ui.activity.MessageActivity"
-            android:label="查看消息"
-            />
+            android:label="查看消息" />
         <activity
             android:name=".ui.activity.StudentMainActivity"
             android:theme="@style/AppTheme.NoTitle" />
         <activity
             android:name=".ui.activity.StudentCourseDetailActivity"
             android:label="课程详情" />
+        <activity
+            android:name=".ui.activity.CourseWorkDetailActivity"
+            android:label="作业详情"
+            />
     </application>
 
 </manifest>

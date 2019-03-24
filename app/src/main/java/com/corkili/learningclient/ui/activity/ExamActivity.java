@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -21,6 +21,7 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.ExamFindAllResponse;
 import com.corkili.learningclient.generate.protobuf.Response.ExamGetResponse;
 import com.corkili.learningclient.service.ExamService;
@@ -61,16 +62,20 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
         courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
         userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
         if (userInfo == null || courseInfo == null) {
-            throw new RuntimeException("Intent param lost");
+            throw new RuntimeException("Intent param expected");
         }
         startEditActivity = false;
         recyclerView = findViewById(R.id.activity_exam_list);
         swipeRefreshLayout = findViewById(R.id.activity_exam_swipe_refresh_layout);
         addExamFab = findViewById(R.id.fab_add_exam);
-        addExamFab.setOnClickListener(v -> enterAddExamActivity());
+        if (userInfo.getUserType() == UserType.Teacher) {
+            addExamFab.setOnClickListener(v -> enterAddExamActivity());
+        } else {
+            addExamFab.setVisibility(View.GONE);
+        }
         examSimpleInfos = new ArrayList<>();
         examInfoCache = new ConcurrentHashMap<>();
-        recyclerViewAdapter = new ExamRecyclerViewAdapter(this, examSimpleInfos, this);
+        recyclerViewAdapter = new ExamRecyclerViewAdapter(this, examSimpleInfos, this, userInfo);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -93,11 +98,13 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
     }
 
     private void enterEditExamActivity(ExamInfo examInfo) {
-        Intent intent = new Intent(ExamActivity.this, ExamEditActivity.class);
-        intent.putExtra(IntentParam.IS_CREATE, false);
-        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-        intent.putExtra(IntentParam.EXAM_INFO, examInfo);
-        startActivityForResult(intent, REQUEST_CODE_EDIT_EXAM);
+        if (userInfo.getUserType() == UserType.Teacher) {
+            Intent intent = new Intent(ExamActivity.this, ExamEditActivity.class);
+            intent.putExtra(IntentParam.IS_CREATE, false);
+            intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+            intent.putExtra(IntentParam.EXAM_INFO, examInfo);
+            startActivityForResult(intent, REQUEST_CODE_EDIT_EXAM);
+        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -148,8 +155,11 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
+            return;
+        }
+        if (data == null) {
             return;
         }
         ExamInfo examInfo = (ExamInfo) data.getSerializableExtra(IntentParam.EXAM_INFO);
@@ -193,11 +203,14 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
             startEditActivity = true;
             ExamService.getInstance().getExam(handler, examSimpleInfo.getExamId());
         }
+        // TODO 学生
     }
 
     @Override
     public void onSubmitViewClick(ViewHolder viewHolder) {
-        final ExamSimpleInfo examSimpleInfo = viewHolder.getExamSimpleInfo();
-        // TODO 跳转
+        if (userInfo.getUserType() == UserType.Teacher) {
+            final ExamSimpleInfo examSimpleInfo = viewHolder.getExamSimpleInfo();
+            // TODO 跳转
+        }
     }
 }

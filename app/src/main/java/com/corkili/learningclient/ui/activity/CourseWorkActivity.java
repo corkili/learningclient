@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -21,6 +21,7 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.CourseWorkFindAllResponse;
 import com.corkili.learningclient.generate.protobuf.Response.CourseWorkGetResponse;
 import com.corkili.learningclient.service.CourseWorkService;
@@ -52,6 +53,7 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
     private CourseWorkRecyclerViewAdapter recyclerViewAdapter;
 
     private boolean startEditActivity;
+    private boolean startDetailActivity;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -64,13 +66,18 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
             throw new RuntimeException("Intent param lost");
         }
         startEditActivity = false;
+        startDetailActivity = false;
         recyclerView = findViewById(R.id.activity_course_work_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_work_swipe_refresh_layout);
         addCourseWorkFab = findViewById(R.id.fab_add_course_work);
-        addCourseWorkFab.setOnClickListener(v -> enterAddCourseWorkActivity());
+        if (userInfo.getUserType() == UserType.Teacher) {
+            addCourseWorkFab.setOnClickListener(v -> enterAddCourseWorkActivity());
+        } else {
+            addCourseWorkFab.setVisibility(View.GONE);
+        }
         courseWorkSimpleInfos = new ArrayList<>();
         courseWorkInfoCache = new ConcurrentHashMap<>();
-        recyclerViewAdapter = new CourseWorkRecyclerViewAdapter(this, courseWorkSimpleInfos, this);
+        recyclerViewAdapter = new CourseWorkRecyclerViewAdapter(this, courseWorkSimpleInfos, this, userInfo);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -93,11 +100,22 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
     }
 
     private void enterEditCourseWorkActivity(CourseWorkInfo courseWorkInfo) {
-        Intent intent = new Intent(CourseWorkActivity.this, CourseWorkEditActivity.class);
-        intent.putExtra(IntentParam.IS_CREATE, false);
-        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-        intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
-        startActivityForResult(intent, REQUEST_CODE_EDIT_COURSE_WORK);
+        if (userInfo.getUserType() == UserType.Teacher) {
+            Intent intent = new Intent(CourseWorkActivity.this, CourseWorkEditActivity.class);
+            intent.putExtra(IntentParam.IS_CREATE, false);
+            intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+            intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
+            startActivityForResult(intent, REQUEST_CODE_EDIT_COURSE_WORK);
+        }
+    }
+
+    private void enterCourseWorkDetailActivity(CourseWorkInfo courseWorkInfo) {
+        if (userInfo.getUserType() == UserType.Student) {
+            Intent intent = new Intent(CourseWorkActivity.this, CourseWorkDetailActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
+            startActivity(intent);
+        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -118,7 +136,15 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
         if (serviceResult.isSuccess()) {
             courseWorkSimpleInfos.clear();
             courseWorkInfoCache.clear();
-            courseWorkSimpleInfos.addAll(serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList());
+            if (userInfo.getUserType() == UserType.Teacher) {
+                courseWorkSimpleInfos.addAll(serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList());
+            } else {
+                for (CourseWorkSimpleInfo courseWorkSimpleInfo : serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList()) {
+                    if (courseWorkSimpleInfo.getOpen()) {
+                        courseWorkSimpleInfos.add(courseWorkSimpleInfo);
+                    }
+                }
+            }
             swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
         }
@@ -144,12 +170,19 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
                 startEditActivity = false;
                 enterEditCourseWorkActivity(courseWorkInfo);
             }
+            if (startDetailActivity) {
+                startDetailActivity = false;
+                enterCourseWorkDetailActivity(courseWorkInfo);
+            }
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
+            return;
+        }
+        if (data == null) {
             return;
         }
         CourseWorkInfo courseWorkInfo = (CourseWorkInfo) data.getSerializableExtra(IntentParam.COURSE_WORK_INFO);
@@ -188,16 +221,26 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
         final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
         CourseWorkInfo courseWorkInfo = courseWorkInfoCache.get(courseWorkSimpleInfo.getCourseWorkId());
         if (courseWorkInfo != null) {
-            enterEditCourseWorkActivity(courseWorkInfo);
+            if (userInfo.getUserType() == UserType.Teacher) {
+                enterEditCourseWorkActivity(courseWorkInfo);
+            } else {
+                enterCourseWorkDetailActivity(courseWorkInfo);
+            }
         } else {
-            startEditActivity = true;
+            if (userInfo.getUserType() == UserType.Teacher) {
+                startEditActivity = true;
+            } else {
+                startDetailActivity = true;
+            }
             CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
         }
     }
 
     @Override
     public void onSubmitViewClick(ViewHolder viewHolder) {
-        final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
-        // TODO 跳转
+        if (userInfo.getUserType() == UserType.Teacher) {
+            final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
+            // TODO 跳转
+        }
     }
 }

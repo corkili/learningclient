@@ -159,17 +159,17 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
     }
 
     private void selectCourseWorkItem() {
-//        Intent intent = new Intent(StudentCourseDetailActivity.this, CourseWorkActivity.class);
-//        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-//        intent.putExtra(IntentParam.USER_INFO, userInfo);
-//        startActivity(intent);
+        Intent intent = new Intent(StudentCourseDetailActivity.this, CourseWorkActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        intent.putExtra(IntentParam.USER_INFO, userInfo);
+        startActivity(intent);
     }
 
     private void selectExamItem() {
-//        Intent intent = new Intent(StudentCourseDetailActivity.this, ExamActivity.class);
-//        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
-//        intent.putExtra(IntentParam.USER_INFO, userInfo);
-//        startActivity(intent);
+        Intent intent = new Intent(StudentCourseDetailActivity.this, ExamActivity.class);
+        intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+        intent.putExtra(IntentParam.USER_INFO, userInfo);
+        startActivity(intent);
     }
 
     @Override

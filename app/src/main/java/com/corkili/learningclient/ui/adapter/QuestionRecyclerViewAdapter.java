@@ -114,42 +114,45 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
         } else if (holder.mItem.getQuestionType() == QuestionType.SingleChoice
                 || holder.mItem.getQuestionType() == QuestionType.MultipleChoice) {
             if (holder.mItem.getChoicesCount() > 0) {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder descriptionText = new StringBuilder();
+                descriptionText.append(holder.mItem.getQuestion()).append("\n");
                 Map<Integer, String> choices = holder.mItem.getChoicesMap();
                 List<Integer> indexList = new ArrayList<>(choices.keySet());
                 Collections.sort(indexList, (o1, o2) -> o1 - o2);
                 for (int i = 0; i < indexList.size(); i++) {
                     Integer index = indexList.get(i);
                     if (choices.containsKey(index)) {
-                        sb.append("(").append(index).append(") ").append(choices.get(index)).append("\n");
+                        descriptionText.append("(").append(index).append(") ").append(choices.get(index)).append("\n");
                     }
                 }
+                holder.descriptionView.setText(descriptionText.substring(0, descriptionText.lastIndexOf("\n")));
+                StringBuilder ans = new StringBuilder();
                 if (holder.mItem.getQuestionType() == QuestionType.SingleChoice) {
                     if (holder.mItem.getAnswer().hasSingleChoiceAnswer()) {
-                        sb.append("正确选项为： ");
-                        sb.append(holder.mItem.getAnswer().getSingleChoiceAnswer().getChoice());
+                        ans.append("正确选项为： ");
+                        ans.append(holder.mItem.getAnswer().getSingleChoiceAnswer().getChoice());
                     } else {
-                        sb.append("未提供正确选项");
+                        ans.append("未提供正确选项");
                     }
                 } else {
                     if (holder.mItem.getAnswer().hasMultipleChoiceAnswer()) {
                         MultipleChoiceAnswer multipleChoiceAnswer = holder.mItem.getAnswer().getMultipleChoiceAnswer();
                         if (multipleChoiceAnswer.getChoiceCount() > 0) {
-                            sb.append("正确选项为");
+                            ans.append("正确选项为");
                             if (multipleChoiceAnswer.getSelectAllIsCorrect()) {
-                                sb.append("(少选或错选不得分)： ");
+                                ans.append("(少选或错选不得分)： ");
                             } else {
-                                sb.append("(错选不得分，少选得一半分)： ");
+                                ans.append("(错选不得分，少选得一半分)： ");
                             }
-                            sb.append(IUtils.list2String(multipleChoiceAnswer.getChoiceList(), ", "));
+                            ans.append(IUtils.list2String(multipleChoiceAnswer.getChoiceList(), ", "));
                         } else {
-                            sb.append("未提供正确选项");
+                            ans.append("未提供正确选项");
                         }
                     } else {
-                        sb.append("未提供正确选项");
+                        ans.append("未提供正确选项");
                     }
                 }
-                holder.answerView.setText(sb.toString());
+                holder.answerView.setText(ans.toString());
                 setAnswer = true;
             }
         } else if (holder.mItem.getQuestionType() == QuestionType.Essay) {
@@ -198,7 +201,7 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
     }
 
     @SuppressLint("DefaultLocale")
-    public void updateScoreView(ViewHolder holder) {
+    private void updateScoreView(ViewHolder holder) {
         if (scoreDataBus != null) {
             StringBuilder sb = new StringBuilder("分数： ");
             Score score = scoreDataBus.requireScoreFor(holder.mItem.getQuestionId());

@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.ExamSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 
 import java.util.Date;
 import java.util.List;
@@ -20,11 +22,14 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<ExamRecyclerVi
     private final Context context;
     private final List<ExamSimpleInfo> examSimpleInfos;
     private final OnItemInteractionListener mListener;
+    private final UserInfo userInfo;
 
-    public ExamRecyclerViewAdapter(Context context, List<ExamSimpleInfo> examSimpleInfos, OnItemInteractionListener mListener) {
+    public ExamRecyclerViewAdapter(Context context, List<ExamSimpleInfo> examSimpleInfos,
+                                   OnItemInteractionListener mListener, UserInfo userInfo) {
         this.context = context;
         this.examSimpleInfos = examSimpleInfos;
         this.mListener = mListener;
+        this.userInfo = userInfo;
     }
 
     @NonNull
@@ -39,16 +44,27 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<ExamRecyclerVi
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = examSimpleInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
-        if (holder.mItem.getStartTime() <= System.currentTimeMillis()) {
-            if (holder.mItem.getEndTime() <= System.currentTimeMillis()) {
-                holder.submitView.setText("已关闭提交(点击查看)");
+        if (userInfo.getUserType() == UserType.Teacher) {
+            if (holder.mItem.getStartTime() <= System.currentTimeMillis()) {
+                if (holder.mItem.getEndTime() <= System.currentTimeMillis()) {
+                    holder.submitView.setText("已关闭提交(点击查看)");
+                } else {
+                    holder.submitView.setText("已开放提交(点击查看)");
+                }
             } else {
-                holder.submitView.setText("已开放提交(点击查看)");
+                holder.submitView.setText("未开放提交");
             }
         } else {
-            holder.submitView.setText("未开放提交");
+            if (holder.mItem.getStartTime() <= System.currentTimeMillis()) {
+                if (holder.mItem.getEndTime() <= System.currentTimeMillis()) {
+                    holder.submitView.setText("已关闭提交");
+                } else {
+                    holder.submitView.setText("已开放提交");
+                }
+            } else {
+                holder.mView.setVisibility(View.GONE);
+            }
         }
-
         holder.examNameView.setText(holder.mItem.getExamName());
         holder.startTimeView.setText(IUtils.format("开始时间：{}", IUtils.DATE_TIME_FORMATTER
                 .format(new Date(holder.mItem.getStartTime()))));
