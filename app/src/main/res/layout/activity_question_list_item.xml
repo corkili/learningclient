@@ -160,7 +160,7 @@
                 android:id="@+id/essay_answer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="essay_answer"
+                android:hint="请输入答案"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:singleLine="false" />

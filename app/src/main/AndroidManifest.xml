@@ -76,8 +76,10 @@
             android:label="课程详情" />
         <activity
             android:name=".ui.activity.CourseWorkDetailActivity"
-            android:label="作业详情"
-            />
+            android:label="作业详情" />
+        <activity
+            android:name=".ui.activity.ExamDetailActivity"
+            android:label="考试详情" />
     </application>
 
 </manifest>

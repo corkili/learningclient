@@ -11,7 +11,7 @@
         tools:context=".ui.activity.CourseWorkDetailActivity">
 
         <LinearLayout
-            android:id="@+id/course_work_information_layout"
+            android:id="@+id/exam_information_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -21,8 +21,8 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <include 
-                android:id="@+id/course_work_information"
-                layout="@layout/activity_course_work_list_item" />
+                android:id="@+id/exam_information"
+                layout="@layout/activity_exam_list_item" />
             
             <View
                 android:layout_width="match_parent"
@@ -43,7 +43,7 @@
             android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/course_work_information_layout">
+            app:layout_constraintTop_toBottomOf="@id/exam_information_layout">
 
             <TextView
                 android:id="@+id/check_result"
@@ -92,12 +92,12 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/question_list"
-                android:name="com.corkili.learningclient.ui.activity.CourseWorkDetailActivity"
+                android:name="com.corkili.learningclient.ui.activity.ExamDetailActivity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-                tools:context=".ui.activity.CourseWorkDetailActivity"
+                tools:context=".ui.activity.ExamDetailActivity"
                 tools:listitem="@layout/activity_question_list_item" />
 
         </LinearLayout>
@@ -116,7 +116,7 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
-                android:id="@+id/course_work_detail_button_submit"
+                android:id="@+id/exam_detail_button_submit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.45"
@@ -129,7 +129,7 @@
                 android:layout_weight="0.1" />
 
             <Button
-                android:id="@+id/course_work_detail_button_save"
+                android:id="@+id/exam_detail_button_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.45"

@@ -53,6 +53,7 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
     private ExamRecyclerViewAdapter recyclerViewAdapter;
 
     private boolean startEditActivity;
+    private boolean startDetailActivity;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -65,6 +66,7 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
             throw new RuntimeException("Intent param expected");
         }
         startEditActivity = false;
+        startDetailActivity = false;
         recyclerView = findViewById(R.id.activity_exam_list);
         swipeRefreshLayout = findViewById(R.id.activity_exam_swipe_refresh_layout);
         addExamFab = findViewById(R.id.fab_add_exam);
@@ -104,6 +106,15 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
             intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
             intent.putExtra(IntentParam.EXAM_INFO, examInfo);
             startActivityForResult(intent, REQUEST_CODE_EDIT_EXAM);
+        }
+    }
+
+    private void enterExamDetailActivity(ExamInfo examInfo) {
+        if (userInfo.getUserType() == UserType.Student) {
+            Intent intent = new Intent(ExamActivity.this, ExamDetailActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.EXAM_INFO, examInfo);
+            startActivity(intent);
         }
     }
 
@@ -150,6 +161,10 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
             if (startEditActivity) {
                 startEditActivity = false;
                 enterEditExamActivity(examInfo);
+            }
+            if (startDetailActivity) {
+                startDetailActivity = false;
+                enterExamDetailActivity(examInfo);
             }
         }
     }
@@ -198,12 +213,19 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
         final ExamSimpleInfo examSimpleInfo = viewHolder.getExamSimpleInfo();
         ExamInfo examInfo = examInfoCache.get(examSimpleInfo.getExamId());
         if (examInfo != null) {
-            enterEditExamActivity(examInfo);
+            if (userInfo.getUserType() == UserType.Teacher) {
+                enterEditExamActivity(examInfo);
+            } else {
+                enterExamDetailActivity(examInfo);
+            }
         } else {
-            startEditActivity = true;
+            if (userInfo.getUserType() == UserType.Teacher) {
+                startEditActivity = true;
+            } else {
+                startDetailActivity = true;
+            }
             ExamService.getInstance().getExam(handler, examSimpleInfo.getExamId());
         }
-        // TODO 学生
     }
 
     @Override

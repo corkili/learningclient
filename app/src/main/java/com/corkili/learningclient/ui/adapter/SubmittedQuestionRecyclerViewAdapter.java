@@ -240,6 +240,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
             holder.scoreView.setVisibility(View.GONE);
         }
 
+        // 作答区
         for (FillingView fillingView : holder.fillingViewMap.values()) {
             holder.submitAnswerLayout.removeView(fillingView.view);
         }
@@ -342,6 +343,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
             holder.submitAnswerLayout.setVisibility(View.VISIBLE);
         }
 
+        // myAnswer
         if (isStudentFinishedState()) {
             SubmittedAnswer submittedAnswer = null;
             double checkStatusOrScore = QuestionCheckStatus.NOT_CHECK;
@@ -482,7 +484,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
     private boolean isStudentFinishedState() {
         if (userInfo.getUserType() == UserType.Student) {
             if (submitDataBus != null) {
-                return submitDataBus.isFinished();
+                return submitDataBus.isFinished() || !submitDataBus.canSubmitAnswer();
             }
         }
         return false;
@@ -605,6 +607,8 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
     public interface SubmitDataBus {
 
         boolean isFinished();
+
+        boolean canSubmitAnswer();
 
         SubmittedAnswer requireSubmittedAnswerFor(long questionId);
 

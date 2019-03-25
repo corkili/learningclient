@@ -21,7 +21,7 @@ public abstract class HttpUtils {
     private static String token = "";
 
     private static final String scheme = "http";
-    private static final String host = "192.168.155.2";
+    private static final String host = "192.168.155.4";
     private static final int port = 8080;
 
     public static <Req extends GeneratedMessageV3, Res extends GeneratedMessageV3> Res request(
