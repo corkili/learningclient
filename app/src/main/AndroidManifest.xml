@@ -80,6 +80,12 @@
         <activity
             android:name=".ui.activity.ExamDetailActivity"
             android:label="考试详情" />
+        <activity
+            android:name=".ui.activity.SubmittedCourseWorkActivity"
+            android:label="已提交作业列表" />
+        <activity
+            android:name=".ui.activity.SubmittedExamActivity"
+            android:label="已提交试卷列表" />
     </application>
 
 </manifest>

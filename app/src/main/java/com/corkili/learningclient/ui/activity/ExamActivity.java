@@ -54,6 +54,7 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
 
     private boolean startEditActivity;
     private boolean startDetailActivity;
+    private boolean startSubmitActivity;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -67,6 +68,7 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
         }
         startEditActivity = false;
         startDetailActivity = false;
+        startSubmitActivity = false;
         recyclerView = findViewById(R.id.activity_exam_list);
         swipeRefreshLayout = findViewById(R.id.activity_exam_swipe_refresh_layout);
         addExamFab = findViewById(R.id.fab_add_exam);
@@ -112,6 +114,15 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
     private void enterExamDetailActivity(ExamInfo examInfo) {
         if (userInfo.getUserType() == UserType.Student) {
             Intent intent = new Intent(ExamActivity.this, ExamDetailActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.EXAM_INFO, examInfo);
+            startActivity(intent);
+        }
+    }
+
+    private void enterSubmittedCourseWorkActivity(ExamInfo examInfo) {
+        if (userInfo.getUserType() == UserType.Teacher) {
+            Intent intent = new Intent(ExamActivity.this, SubmittedExamActivity.class);
             intent.putExtra(IntentParam.USER_INFO, userInfo);
             intent.putExtra(IntentParam.EXAM_INFO, examInfo);
             startActivity(intent);
@@ -165,6 +176,10 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
             if (startDetailActivity) {
                 startDetailActivity = false;
                 enterExamDetailActivity(examInfo);
+            }
+            if (startSubmitActivity) {
+                startSubmitActivity = false;
+                enterSubmittedCourseWorkActivity(examInfo);
             }
         }
     }
@@ -232,7 +247,13 @@ public class ExamActivity extends AppCompatActivity implements ExamRecyclerViewA
     public void onSubmitViewClick(ViewHolder viewHolder) {
         if (userInfo.getUserType() == UserType.Teacher) {
             final ExamSimpleInfo examSimpleInfo = viewHolder.getExamSimpleInfo();
-            // TODO 跳转
+            ExamInfo examInfo = examInfoCache.get(examSimpleInfo.getExamId());
+            if (examInfo != null) {
+                enterSubmittedCourseWorkActivity(examInfo);
+            } else {
+                startSubmitActivity = true;
+                ExamService.getInstance().getExam(handler, examSimpleInfo.getExamId());
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.corkili.learningclient.R;
@@ -17,10 +18,12 @@ import com.corkili.learningclient.common.ProtoUtils;
 import com.corkili.learningclient.common.QuestionCheckStatus;
 import com.corkili.learningclient.generate.protobuf.Info.MultipleChoiceAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingSubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.MultipleFillingSubmittedAnswer.Pair;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionType;
 import com.corkili.learningclient.generate.protobuf.Info.Score;
+import com.corkili.learningclient.generate.protobuf.Info.Score.MultipleScore;
 import com.corkili.learningclient.generate.protobuf.Info.SingleFillingAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.SubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
@@ -80,7 +83,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         if (holder.mItem.getQuestionType() == QuestionType.SingleChoice
                 || holder.mItem.getQuestionType() == QuestionType.MultipleChoice) {
             if (holder.mItem.getChoicesCount() > 0) {
-                if (isStudentFinishedState()) {
+                if (isStudentFinishedState() || isTeacher()) {
                     descriptionText.append("\n");
                     Map<Integer, String> choices = holder.mItem.getChoicesMap();
                     List<Integer> indexList = new ArrayList<>(choices.keySet());
@@ -100,7 +103,8 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
             holder.descriptionView.setText(descriptionText.toString().trim());
         }
 
-        if (isStudentFinishedState()) {
+        // 答案区
+        if (isStudentFinishedState() || isTeacher()) {
             boolean setAnswer = false;
             if (holder.mItem.getQuestionType() == QuestionType.SingleFilling) {
                 if (holder.mItem.getAnswer().hasSingleFillingAnswer()) {
@@ -249,7 +253,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         }
         holder.fillingViewMap.clear();
         holder.choiceViewMap.clear();
-        if (isStudentFinishedState()) {
+        if (isStudentFinishedState() || isTeacher()) {
             holder.submitAnswerTextView.setVisibility(View.GONE);
             holder.submitAnswerLayout.setVisibility(View.GONE);
         } else {
@@ -344,7 +348,7 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         }
 
         // myAnswer
-        if (isStudentFinishedState()) {
+        if (isStudentFinishedState() || isTeacher()) {
             SubmittedAnswer submittedAnswer = null;
             double checkStatusOrScore = QuestionCheckStatus.NOT_CHECK;
             if (submitDataBus != null) {
@@ -440,6 +444,12 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
                 holder.myAnswerView.setText(sb.toString().trim());
             }
 
+            if (isTeacher()) {
+                holder.myAnswerTextView.setText("学生答案：");
+            } else {
+                holder.myAnswerTextView.setText("我的答案：");
+            }
+
             holder.myAnswerTextView.setVisibility(View.VISIBLE);
             holder.myAnswerView.setVisibility(View.VISIBLE);
         } else {
@@ -447,12 +457,128 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
             holder.myAnswerView.setVisibility(View.GONE);
         }
 
-        holder.mView.setOnLongClickListener(v -> {
-            if (this.mListener != null) {
-                return this.mListener.onItemLongClick(holder);
+        // 批改区
+        for (CheckView checkView : holder.checkViewMap.values()) {
+            holder.checkAnswerLayout.removeView(checkView.view);
+        }
+        holder.checkViewMap.clear();
+        List<Integer> checkIndexList = new ArrayList<>();
+        Map<Integer, Double> maxScoreMap = new HashMap<>();
+        Map<Integer, Double> oldCheckStatusOrScoreMap = new HashMap<>();
+        Score score = null;
+        if (scoreDataBus != null) {
+            score = scoreDataBus.requireScoreFor(holder.mItem.getQuestionId());
+        }
+        boolean isEssay = false;
+        if (holder.mItem.getQuestionType() == QuestionType.SingleFilling || holder.mItem.getQuestionType() == QuestionType.Essay) {
+            checkIndexList.add(1);
+            if (score != null) {
+                if (!score.hasMultipleScore()) {
+                    maxScoreMap.put(1, score.getSingleScore());
+                } else {
+                    maxScoreMap.put(1, 0d);
+                }
+            } else {
+                maxScoreMap.put(1, 1d);
             }
-            return false;
-        });
+            isEssay = holder.mItem.getQuestionType() == QuestionType.Essay;
+            if (submitDataBus != null) {
+                oldCheckStatusOrScoreMap.put(1, submitDataBus.requireCheckStatusOrScoreFor(holder.mItem.getQuestionId()));
+            }
+        } else if (holder.mItem.getQuestionType() == QuestionType.MultipleFilling) {
+            checkIndexList.addAll(holder.mItem.getAnswer().getMultipleFillingAnswer().getAnswerMap().keySet());
+            MultipleScore multipleScore = null;
+            if (score != null) {
+                multipleScore = score.getMultipleScore();
+            }
+            MultipleFillingSubmittedAnswer multipleFillingSubmittedAnswer = null;
+            if (submitDataBus != null) {
+                SubmittedAnswer submittedAnswer = submitDataBus.requireSubmittedAnswerFor(holder.mItem.getQuestionId());
+                if (submittedAnswer != null && submittedAnswer.hasMultipleFillingSubmittedAnswer()) {
+                    multipleFillingSubmittedAnswer = submittedAnswer.getMultipleFillingSubmittedAnswer();
+                }
+            }
+            for (Integer index : checkIndexList) {
+                if (score != null) {
+                    if (multipleScore != null) {
+                        double s = multipleScore.getScoreOrDefault(index, -1);
+                        if (s < 0) {
+                            maxScoreMap.put(index, 0d);
+                        } else {
+                            maxScoreMap.put(index, s);
+                        }
+                    } else {
+                        maxScoreMap.put(index, 0d);
+                    }
+                } else {
+                    maxScoreMap.put(index, 1d);
+                }
+                Pair pair = multipleFillingSubmittedAnswer.getAnswerOrDefault(index, null);
+                if (pair != null) {
+                    oldCheckStatusOrScoreMap.put(index, pair.getScoreOrCheckStatus());
+                }
+            }
+        }
+        Collections.sort(checkIndexList, (o1, o2) -> o1 - o2);
+        if (isTeacher() && !holder.mItem.getAutoCheck() && !checkIndexList.isEmpty()) {
+            if (scoreDataBus != null) {
+                holder.checkAnswerTextView.setText("批改（选择分数）：");
+            } else {
+                holder.checkAnswerTextView.setText("批改（选择结果）：");
+            }
+
+            holder.checkAnswerTextView.setVisibility(View.VISIBLE);
+            holder.checkAnswerLayout.setVisibility(View.VISIBLE);
+
+            for (Integer index : checkIndexList){
+                View view = LayoutInflater.from(context)
+                        .inflate(R.layout.activity_question_check_answer, null);
+                CheckView checkView = new CheckView(view);
+                checkView.indexView.setText(IUtils.format("({}) ", index));
+                if (isEssay) {
+                    checkView.indexView.setVisibility(View.GONE);
+                } else {
+                    checkView.indexView.setVisibility(View.VISIBLE);
+                }
+                Double rawMax = maxScoreMap.get(index);
+                int max;
+                if (rawMax == null) {
+                    if (score != null) {
+                        max = 0;
+                    } else {
+                        max = 1;
+                    }
+                } else {
+                    max = (int) Math.ceil(rawMax);
+                }
+                checkView.scorePicker.setMinValue(0);
+                checkView.scorePicker.setMaxValue(max);
+                checkView.scorePicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //禁止输入
+                if (scoreDataBus == null) {
+                    checkView.scorePicker.setDisplayedValues(new String[]{"错误", "正确"});
+                }
+
+                Double oldCheckStatusOrScore = oldCheckStatusOrScoreMap.get(index);
+                if (oldCheckStatusOrScore != null) {
+                    if (oldCheckStatusOrScore < 0) {
+                        checkView.scorePicker.setValue(0);
+                    } else if (oldCheckStatusOrScore > max){
+                        checkView.scorePicker.setValue(max);
+                    } else {
+                        checkView.scorePicker.setValue((int) Math.ceil(oldCheckStatusOrScore));
+                    }
+                } else {
+                    checkView.scorePicker.setValue(0);
+                }
+
+                holder.checkViewMap.put(index, checkView);
+                holder.checkAnswerLayout.addView(view);
+            }
+
+        } else {
+            holder.checkAnswerTextView.setVisibility(View.GONE);
+            holder.checkAnswerLayout.setVisibility(View.GONE);
+        }
 
 //        if (position == opened) {
 //            holder.detailLayout.setVisibility(View.VISIBLE);
@@ -490,6 +616,10 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         return false;
     }
 
+    private boolean isTeacher() {
+        return userInfo.getUserType() == UserType.Teacher;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
         private final TextView indexView;
@@ -506,7 +636,10 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         private final EditText essayAnswerEditor;
         private final TextView myAnswerTextView;
         private final TextView myAnswerView;
-        private final View detailLayout;
+        private final TextView checkAnswerTextView;
+        private final LinearLayout checkAnswerLayout;
+        private final Map<Integer, CheckView> checkViewMap;
+//        private final View detailLayout;
         private QuestionInfo mItem;
 
         ViewHolder(View view) {
@@ -526,7 +659,10 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
             essayAnswerEditor = view.findViewById(R.id.essay_answer);
             myAnswerTextView = view.findViewById(R.id.my_answer_text);
             myAnswerView = view.findViewById(R.id.my_answer);
-            detailLayout = view.findViewById(R.id.detail_layout);
+            checkAnswerTextView = view.findViewById(R.id.check_answer_text);
+            checkAnswerLayout = view.findViewById(R.id.check_answer_layout);
+            checkViewMap = new HashMap<>();
+//            detailLayout = view.findViewById(R.id.detail_layout);
 
 //            mView.setOnClickListener(v -> {
 //                if (opened == getAdapterPosition()) {
@@ -556,6 +692,10 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
 
         public EditText getEssayAnswerEditor() {
             return essayAnswerEditor;
+        }
+
+        public Map<Integer, CheckView> getCheckViewMap() {
+            return checkViewMap;
         }
     }
 
@@ -592,9 +732,23 @@ public class SubmittedQuestionRecyclerViewAdapter extends RecyclerView.Adapter<S
         }
     }
 
-    public interface OnItemInteractionListener {
+    public class CheckView {
+        private final View view;
+        private final TextView indexView;
+        private final NumberPicker scorePicker;
 
-        boolean onItemLongClick(ViewHolder viewHolder);
+        CheckView(View view) {
+            this.view = view;
+            this.indexView = view.findViewById(R.id.filling_index);
+            this.scorePicker = view.findViewById(R.id.score_picker);
+        }
+
+        public NumberPicker getScorePicker() {
+            return scorePicker;
+        }
+    }
+
+    public interface OnItemInteractionListener {
 
     }
 

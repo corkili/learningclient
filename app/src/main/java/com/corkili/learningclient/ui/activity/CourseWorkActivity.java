@@ -54,6 +54,7 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
 
     private boolean startEditActivity;
     private boolean startDetailActivity;
+    private boolean startSubmitActivity;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -67,6 +68,7 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
         }
         startEditActivity = false;
         startDetailActivity = false;
+        startSubmitActivity = false;
         recyclerView = findViewById(R.id.activity_course_work_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_work_swipe_refresh_layout);
         addCourseWorkFab = findViewById(R.id.fab_add_course_work);
@@ -112,6 +114,15 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
     private void enterCourseWorkDetailActivity(CourseWorkInfo courseWorkInfo) {
         if (userInfo.getUserType() == UserType.Student) {
             Intent intent = new Intent(CourseWorkActivity.this, CourseWorkDetailActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
+            startActivity(intent);
+        }
+    }
+
+    private void enterSubmittedCourseWorkActivity(CourseWorkInfo courseWorkInfo) {
+        if (userInfo.getUserType() == UserType.Teacher) {
+            Intent intent = new Intent(CourseWorkActivity.this, SubmittedCourseWorkActivity.class);
             intent.putExtra(IntentParam.USER_INFO, userInfo);
             intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
             startActivity(intent);
@@ -173,6 +184,10 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
             if (startDetailActivity) {
                 startDetailActivity = false;
                 enterCourseWorkDetailActivity(courseWorkInfo);
+            }
+            if (startSubmitActivity) {
+                startSubmitActivity = false;
+                enterSubmittedCourseWorkActivity(courseWorkInfo);
             }
         }
     }
@@ -240,7 +255,13 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
     public void onSubmitViewClick(ViewHolder viewHolder) {
         if (userInfo.getUserType() == UserType.Teacher) {
             final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
-            // TODO 跳转
+            CourseWorkInfo courseWorkInfo = courseWorkInfoCache.get(courseWorkSimpleInfo.getCourseWorkId());
+            if (courseWorkInfo != null) {
+                enterSubmittedCourseWorkActivity(courseWorkInfo);
+            } else {
+                startSubmitActivity = true;
+                CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+            }
         }
     }
 }

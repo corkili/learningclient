@@ -38,6 +38,8 @@ public abstract class HttpUtils {
             }
             Req request = requestClass.cast(req.toBuilder().setField(brfd, baseRequest).build());
 
+            Log.i("HttpUtils", requestClass.getSimpleName() + ": " + request.toString());
+
             URI uri = new URI(scheme, null, host, port, path, "", null);
             byte[] data = post(uri.toURL(), request);
             Res response = responseClass.cast(responseClass
@@ -51,7 +53,7 @@ public abstract class HttpUtils {
                     break;
                 }
             }
-            BaseResponse baseResponse= (BaseResponse) response.getField(brfd);
+            BaseResponse baseResponse = (BaseResponse) response.getField(brfd);
             token = baseResponse.getToken();
             return response;
         } catch (Exception e) {

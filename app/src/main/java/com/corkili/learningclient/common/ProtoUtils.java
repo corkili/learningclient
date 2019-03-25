@@ -24,6 +24,10 @@ import com.corkili.learningclient.generate.protobuf.Info.SingleChoiceSubmittedAn
 import com.corkili.learningclient.generate.protobuf.Info.SingleFillingAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.SingleFillingSubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.SubmittedAnswer;
+import com.corkili.learningclient.generate.protobuf.Info.SubmittedCourseWorkInfo;
+import com.corkili.learningclient.generate.protobuf.Info.SubmittedCourseWorkSimpleInfo;
+import com.corkili.learningclient.generate.protobuf.Info.SubmittedExamInfo;
+import com.corkili.learningclient.generate.protobuf.Info.SubmittedExamSimpleInfo;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -327,4 +331,35 @@ public class ProtoUtils {
         return !StringUtils.isBlank(answer.getEssayAnswer().getText());
     }
 
+    public static SubmittedCourseWorkSimpleInfo simplifySubmittedCourseWorkInfo(SubmittedCourseWorkInfo submittedCourseWorkInfo) {
+        if (submittedCourseWorkInfo == null) {
+            return null;
+        }
+        return SubmittedCourseWorkSimpleInfo.newBuilder()
+                .setSubmittedCourseWorkId(submittedCourseWorkInfo.getSubmittedCourseWorkId())
+                .setCreateTime(submittedCourseWorkInfo.getCreateTime())
+                .setUpdateTime(submittedCourseWorkInfo.getUpdateTime())
+                .setAlreadyCheckAllAnswer(submittedCourseWorkInfo.getAlreadyCheckAllAnswer())
+                .setFinished(submittedCourseWorkInfo.getFinished())
+                .setBelongCourseWorkId(submittedCourseWorkInfo.getBelongCourseWorkId())
+                .setSubmitterId(submittedCourseWorkInfo.getSubmitterId())
+                .setSubmitterInfo(submittedCourseWorkInfo.getSubmitterInfo())
+                .build();
+    }
+
+    public static SubmittedExamSimpleInfo simplifySubmittedExamInfo(SubmittedExamInfo submittedExamInfo) {
+        if (submittedExamInfo == null) {
+            return null;
+        }
+        return SubmittedExamSimpleInfo.newBuilder()
+                .setSubmittedExamId(submittedExamInfo.getSubmittedExamId())
+                .setCreateTime(submittedExamInfo.getCreateTime())
+                .setUpdateTime(submittedExamInfo.getUpdateTime())
+                .setAlreadyCheckAllAnswer(submittedExamInfo.getAlreadyCheckAllAnswer())
+                .setFinished(submittedExamInfo.getFinished())
+                .setBelongExamId(submittedExamInfo.getBelongExamId())
+                .setSubmitterId(submittedExamInfo.getSubmitterId())
+                .setSubmitterInfo(submittedExamInfo.getSubmitterInfo())
+                .build();
+    }
 }

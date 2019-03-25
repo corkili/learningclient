@@ -1,6 +1,7 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -43,6 +44,7 @@ import com.corkili.learningclient.service.QuestionService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.SubmittedCourseWorkService;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter;
+import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.CheckView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ChoiceView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.FillingView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ViewHolder;
@@ -76,13 +78,13 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     private TextView checkResultView;
     private Button submitButton;
     private Button saveButton;
+    private View space;
 
     private List<QuestionInfo> questionInfos;
 
     private UserInfo userInfo;
-    private int courseWorkIndex;
     private CourseWorkInfo courseWorkInfo;
-    private int submittedCourseWorkId;
+    private long submittedCourseWorkId;
 
     private LoadingDailog waitingDialog;
     private AtomicInteger counter;
@@ -96,10 +98,10 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_work_detail);
 
+        Intent intent = getIntent();
         userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
-        courseWorkIndex = getIntent().getIntExtra(IntentParam.INDEX, 1);
         courseWorkInfo = (CourseWorkInfo) getIntent().getSerializableExtra(IntentParam.COURSE_WORK_INFO);
-        submittedCourseWorkId = getIntent().getIntExtra(IntentParam.SUBMITTED_COURSE_WORK_ID, -1);
+        submittedCourseWorkId = getIntent().getLongExtra(IntentParam.SUBMITTED_COURSE_WORK_ID, -1);
 
         if (userInfo == null || courseWorkInfo == null) {
             throw new RuntimeException("Intent param expected");
@@ -126,8 +128,9 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
         submitButton = findViewById(R.id.course_work_detail_button_submit);
         saveButton = findViewById(R.id.course_work_detail_button_save);
+        space = findViewById(R.id.space);
 
-        indexView.setText(String.valueOf(courseWorkIndex));
+        indexView.setVisibility(View.GONE);
         if (courseWorkInfo.getOpen()) {
             if (courseWorkInfo.getHasDeadline() && courseWorkInfo.getDeadline() <= System.currentTimeMillis()) {
                 submitView.setText("已关闭提交");
@@ -158,6 +161,10 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
         saveButton.setOnClickListener(v -> submitOrSave(false));
 
+        if (userInfo.getUserType() == UserType.Teacher) {
+            saveButton.setVisibility(View.GONE);
+        }
+
         if (userInfo.getUserType() == UserType.Student) {
             SubmittedCourseWorkService.getInstance().getSubmittedCourseWork(handler, false, 0,
                     courseWorkInfo.getCourseWorkId(), userInfo.getUserId());
@@ -182,151 +189,230 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                     questionInfos, submittedCourseWorkInfo != null ? submittedCourseWorkInfo.getSubmittedAnswerMap() : null);
         }
         List<String> notDoQuestionIndexList = new ArrayList<>();
-        for (CourseWorkQuestionInfo courseWorkQuestionInfo : courseWorkInfo.getCourseWorkQuestionInfoList()) {
-            ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(courseWorkQuestionInfo.getQuestionId());
-            CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
-            if (viewHolder != null && courseWorkSubmittedAnswer != null) {
-                QuestionInfo questionInfo = viewHolder.getQuestionInfo();
-                if (questionInfo.getQuestionType() == QuestionType.SingleChoice) {
-                    int choice = -1;
-                    for (Entry<Integer, ChoiceView> entry : viewHolder.getChoiceViewMap().entrySet()) {
-                        if (entry.getValue().getCheckBox().isChecked()) {
-                            choice = entry.getKey();
-                            break;
-                        }
-                    }
-                    if (choice < 0) {
-                        notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
-                    }
-                    SingleChoiceSubmittedAnswer singleChoiceSubmittedAnswer =
-                            SingleChoiceSubmittedAnswer.newBuilder().setChoice(choice).build();
-                    courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
-                            .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
-                                    .setSingleChoiceSubmittedAnswer(singleChoiceSubmittedAnswer)
-                                    .build())
-                            .build();
-                    submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
-                } else if (questionInfo.getQuestionType() == QuestionType.MultipleChoice) {
-                    List<Integer> choiceList = new ArrayList<>();
-                    for (Entry<Integer, ChoiceView> entry : viewHolder.getChoiceViewMap().entrySet()) {
-                        if (entry.getValue().getCheckBox().isChecked()) {
-                            choiceList.add(entry.getKey());
-                        }
-                    }
-                    if (choiceList.isEmpty()) {
-                        notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
-                    }
-                    MultipleChoiceSubmittedAnswer multipleChoiceSubmittedAnswer =
-                            MultipleChoiceSubmittedAnswer.newBuilder().addAllChoice(choiceList).build();
-                    courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
-                            .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
-                                    .setMultipleChoiceSubmittedAnswer(multipleChoiceSubmittedAnswer)
-                                    .build())
-                            .build();
-                    submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
-                } else if (questionInfo.getQuestionType() == QuestionType.SingleFilling) {
-                    String filling = "";
-                    Iterator<Entry<Integer, FillingView>> iterator = viewHolder.getFillingViewMap().entrySet().iterator();
-                    if (iterator.hasNext()) {
-                        Entry<Integer, FillingView> entry = iterator.next();
-                        filling = entry.getValue().getFillingEditor().getText().toString().trim();
-                    }
-                    if (StringUtils.isBlank(filling)) {
-                        notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
-                    }
-                    SingleFillingSubmittedAnswer singleFillingSubmittedAnswer
-                            = SingleFillingSubmittedAnswer.newBuilder().setAnswer(filling).build();
-                    courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
-                            .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
-                                    .setSingleFillingSubmittedAnswer(singleFillingSubmittedAnswer)
-                                    .build())
-                            .build();
-                    submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
-                } else if (questionInfo.getQuestionType() == QuestionType.MultipleFilling) {
-                    Map<Integer, String> ansMap = new HashMap<>();
-                    for (Entry<Integer, FillingView> entry : viewHolder.getFillingViewMap().entrySet()) {
-                        ansMap.put(entry.getKey(), entry.getValue().getFillingEditor().getText().toString().trim());
-                    }
-                    boolean finish = ansMap.size() == questionInfo.getAnswer().getMultipleFillingAnswer().getAnswerCount();
-                    if (finish) {
-                        for (String ans : ansMap.values()) {
-                            if (StringUtils.isBlank(ans)) {
-                                finish = false;
+        if (userInfo.getUserType() == UserType.Student) {
+            for (CourseWorkQuestionInfo courseWorkQuestionInfo : courseWorkInfo.getCourseWorkQuestionInfoList()) {
+                ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(courseWorkQuestionInfo.getQuestionId());
+                CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
+                if (viewHolder != null && courseWorkSubmittedAnswer != null) {
+                    QuestionInfo questionInfo = viewHolder.getQuestionInfo();
+                    if (questionInfo.getQuestionType() == QuestionType.SingleChoice) {
+                        int choice = -1;
+                        for (Entry<Integer, ChoiceView> entry : viewHolder.getChoiceViewMap().entrySet()) {
+                            if (entry.getValue().getCheckBox().isChecked()) {
+                                choice = entry.getKey();
                                 break;
                             }
                         }
+                        if (choice < 0) {
+                            notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                        }
+                        SingleChoiceSubmittedAnswer singleChoiceSubmittedAnswer =
+                                SingleChoiceSubmittedAnswer.newBuilder().setChoice(choice).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setSingleChoiceSubmittedAnswer(singleChoiceSubmittedAnswer)
+                                        .build())
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+                    } else if (questionInfo.getQuestionType() == QuestionType.MultipleChoice) {
+                        List<Integer> choiceList = new ArrayList<>();
+                        for (Entry<Integer, ChoiceView> entry : viewHolder.getChoiceViewMap().entrySet()) {
+                            if (entry.getValue().getCheckBox().isChecked()) {
+                                choiceList.add(entry.getKey());
+                            }
+                        }
+                        if (choiceList.isEmpty()) {
+                            notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                        }
+                        MultipleChoiceSubmittedAnswer multipleChoiceSubmittedAnswer =
+                                MultipleChoiceSubmittedAnswer.newBuilder().addAllChoice(choiceList).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setMultipleChoiceSubmittedAnswer(multipleChoiceSubmittedAnswer)
+                                        .build())
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+                    } else if (questionInfo.getQuestionType() == QuestionType.SingleFilling) {
+                        String filling = "";
+                        Iterator<Entry<Integer, FillingView>> iterator = viewHolder.getFillingViewMap().entrySet().iterator();
+                        if (iterator.hasNext()) {
+                            Entry<Integer, FillingView> entry = iterator.next();
+                            filling = entry.getValue().getFillingEditor().getText().toString().trim();
+                        }
+                        if (StringUtils.isBlank(filling)) {
+                            notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                        }
+                        SingleFillingSubmittedAnswer singleFillingSubmittedAnswer
+                                = SingleFillingSubmittedAnswer.newBuilder().setAnswer(filling).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setSingleFillingSubmittedAnswer(singleFillingSubmittedAnswer)
+                                        .build())
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+                    } else if (questionInfo.getQuestionType() == QuestionType.MultipleFilling) {
+                        Map<Integer, String> ansMap = new HashMap<>();
+                        for (Entry<Integer, FillingView> entry : viewHolder.getFillingViewMap().entrySet()) {
+                            ansMap.put(entry.getKey(), entry.getValue().getFillingEditor().getText().toString().trim());
+                        }
+                        boolean finish = ansMap.size() == questionInfo.getAnswer().getMultipleFillingAnswer().getAnswerCount();
+                        if (finish) {
+                            for (String ans : ansMap.values()) {
+                                if (StringUtils.isBlank(ans)) {
+                                    finish = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!finish) {
+                            notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                        }
+                        MultipleFillingSubmittedAnswer rawMultipleFillingSubmittedAnswer =
+                                courseWorkSubmittedAnswer.getSubmittedAnswer().getMultipleFillingSubmittedAnswer();
+                        Map<Integer, Pair> pairMap = new HashMap<>();
+                        for (Entry<Integer, Pair> pairEntry : rawMultipleFillingSubmittedAnswer.getAnswerMap().entrySet()) {
+                            pairMap.put(pairEntry.getKey(), pairEntry.getValue().toBuilder()
+                                    .setAnswer(ansMap.get(pairEntry.getKey()))
+                                    .build());
+                        }
+                        MultipleFillingSubmittedAnswer multipleFillingSubmittedAnswer =
+                                MultipleFillingSubmittedAnswer.newBuilder().putAllAnswer(pairMap).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setMultipleFillingSubmittedAnswer(multipleFillingSubmittedAnswer)
+                                        .build())
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+                    } else if (questionInfo.getQuestionType() == QuestionType.Essay) {
+                        String text = viewHolder.getEssayAnswerEditor().getText().toString().trim();
+                        if (StringUtils.isBlank(text)) {
+                            notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                        }
+                        EssaySubmittedAnswer essaySubmittedAnswer =
+                                EssaySubmittedAnswer.newBuilder().setText(text).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setEssaySubmittedAnswer(essaySubmittedAnswer)
+                                        .build())
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
                     }
-                    if (!finish) {
-                        notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
+                }
+            }
+        } else { // 教师端
+            for (CourseWorkQuestionInfo courseWorkQuestionInfo : courseWorkInfo.getCourseWorkQuestionInfoList()) {
+                ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(courseWorkQuestionInfo.getQuestionId());
+                CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
+                if (viewHolder != null && courseWorkSubmittedAnswer != null
+                        && !viewHolder.getQuestionInfo().getAutoCheck()
+                        && courseWorkSubmittedAnswer.getCheckStatus() < 0) {
+                    QuestionInfo questionInfo = viewHolder.getQuestionInfo();
+                    if (questionInfo.getQuestionType() == QuestionType.SingleFilling
+                            || questionInfo.getQuestionType() == QuestionType.Essay) {
+                        if (!viewHolder.getCheckViewMap().isEmpty()) {
+                            CheckView checkView = viewHolder.getCheckViewMap().values().iterator().next();
+                            int pickedCheckStatus = checkView.getScorePicker().getValue();
+                            if (pickedCheckStatus < 0) {
+                                pickedCheckStatus = 0;
+                            } else if (pickedCheckStatus > 1) {
+                                pickedCheckStatus = 1;
+                            }
+                            courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                    .setCheckStatus(pickedCheckStatus)
+                                    .build();
+                            submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
+                        }
+                    } else if (questionInfo.getQuestionType() == QuestionType.MultipleFilling) {
+                        Map<Integer, Integer> checkStatusMap = new HashMap<>();
+                        for (Entry<Integer, CheckView> entry : viewHolder.getCheckViewMap().entrySet()) {
+                            int picked = entry.getValue().getScorePicker().getValue();
+                            if (picked < 0) {
+                                picked = 0;
+                            } else if (picked > 1) {
+                                picked = 1;
+                            }
+                            checkStatusMap.put(entry.getKey(), picked);
+                        }
+                        MultipleFillingSubmittedAnswer rawMultipleFillingSubmittedAnswer =
+                                courseWorkSubmittedAnswer.getSubmittedAnswer().getMultipleFillingSubmittedAnswer();
+                        Map<Integer, Pair> pairMap = new HashMap<>();
+                        for (Entry<Integer, Pair> pairEntry : rawMultipleFillingSubmittedAnswer.getAnswerMap().entrySet()) {
+                            Integer checkStatus = checkStatusMap.get(pairEntry.getKey());
+                            pairMap.put(pairEntry.getKey(), pairEntry.getValue().toBuilder()
+                                    .setScoreOrCheckStatus(checkStatus == null ? QuestionCheckStatus.NOT_CHECK : checkStatus)
+                                    .build());
+                        }
+                        int sumCheckStatus = QuestionCheckStatus.CHECK_TRUE;
+                        for (Pair pair : pairMap.values()) {
+                            if ((int) pair.getScoreOrCheckStatus() == QuestionCheckStatus.CHECK_FALSE) {
+                                sumCheckStatus = QuestionCheckStatus.CHECK_FALSE;
+                                break;
+                            } else if ((int) pair.getScoreOrCheckStatus() == QuestionCheckStatus.NOT_CHECK) {
+                                sumCheckStatus = QuestionCheckStatus.NOT_CHECK;
+                                break;
+                            }
+                        }
+                        MultipleFillingSubmittedAnswer multipleFillingSubmittedAnswer =
+                                MultipleFillingSubmittedAnswer.newBuilder().putAllAnswer(pairMap).build();
+                        courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
+                                .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
+                                        .setMultipleFillingSubmittedAnswer(multipleFillingSubmittedAnswer)
+                                        .build())
+                                .setCheckStatus(sumCheckStatus)
+                                .build();
+                        submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
                     }
-                    MultipleFillingSubmittedAnswer rawMultipleFillingSubmittedAnswer =
-                            courseWorkSubmittedAnswer.getSubmittedAnswer().getMultipleFillingSubmittedAnswer();
-                    Map<Integer, Pair> pairMap = new HashMap<>();
-                    for (Entry<Integer, Pair> pairEntry : rawMultipleFillingSubmittedAnswer.getAnswerMap().entrySet()) {
-                        pairMap.put(pairEntry.getKey(), pairEntry.getValue().toBuilder()
-                                .setAnswer(ansMap.get(pairEntry.getKey()))
-                                .build());
-                    }
-                    MultipleFillingSubmittedAnswer multipleFillingSubmittedAnswer =
-                            MultipleFillingSubmittedAnswer.newBuilder().putAllAnswer(pairMap).build();
-                    courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
-                            .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
-                                    .setMultipleFillingSubmittedAnswer(multipleFillingSubmittedAnswer)
-                                    .build())
-                            .build();
-                    submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
-                } else if (questionInfo.getQuestionType() == QuestionType.Essay) {
-                    String text = viewHolder.getEssayAnswerEditor().getText().toString().trim();
-                    if (StringUtils.isBlank(text)) {
-                        notDoQuestionIndexList.add(String.valueOf(courseWorkQuestionInfo.getIndex()));
-                    }
-                    EssaySubmittedAnswer essaySubmittedAnswer =
-                            EssaySubmittedAnswer.newBuilder().setText(text).build();
-                    courseWorkSubmittedAnswer = courseWorkSubmittedAnswer.toBuilder()
-                            .setSubmittedAnswer(courseWorkSubmittedAnswer.getSubmittedAnswer().toBuilder()
-                                    .setEssaySubmittedAnswer(essaySubmittedAnswer)
-                                    .build())
-                            .build();
-                    submittedAnswerMap.put(courseWorkQuestionInfo.getIndex(), courseWorkSubmittedAnswer);
                 }
             }
         }
 
         if (finished && !isSystemSubmit) {
-            AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
-            confirmDialog.setTitle("确认保存？");
-            if (notDoQuestionIndexList.isEmpty()) {
-                confirmDialog.setMessage("你已完成所有题目，确认保存（保存后不可修改）？");
-            } else {
-                confirmDialog.setMessage(IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
-                        notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", ")));
-            }
-            confirmDialog.setPositiveButton("确认", (dialog, which) -> {
-                if (alreadySubmitted()) {
-                    if (!submittedCourseWorkInfo.getFinished()) {
-                        SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
-                                submittedCourseWorkInfo.getSubmittedCourseWorkId(),
-                                !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
-                                submittedAnswerMap, true, true);
-                    } else {
-                        Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
-                    }
+            if (userInfo.getUserType() == UserType.Student) {
+                AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
+                confirmDialog.setTitle("确认保存？");
+                if (notDoQuestionIndexList.isEmpty()) {
+                    confirmDialog.setMessage("你已完成所有题目，确认保存（保存后不可修改）？");
                 } else {
-                    Map<Integer, SubmittedAnswer> map = new HashMap<>();
-                    for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
-                        map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
-                    }
-                    SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
-                            courseWorkInfo.getCourseWorkId(), true, map);
+                    confirmDialog.setMessage(IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
+                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", ")));
                 }
-            });
-            confirmDialog.setNegativeButton("取消", ((dialog, which) -> {
-                dialog.cancel();
-                dialog.dismiss();
-                saveButton.setEnabled(true);
-                submitButton.setEnabled(true);
-            }));
-            confirmDialog.show();
+                confirmDialog.setPositiveButton("确认", (dialog, which) -> {
+                    if (alreadySubmitted()) {
+                        if (!submittedCourseWorkInfo.getFinished()) {
+                            SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
+                                    submittedCourseWorkInfo.getSubmittedCourseWorkId(),
+                                    !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
+                                    submittedAnswerMap, true, true);
+                        } else {
+                            Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Map<Integer, SubmittedAnswer> map = new HashMap<>();
+                        for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
+                            map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
+                        }
+                        SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
+                                courseWorkInfo.getCourseWorkId(), true, map);
+                    }
+                });
+                confirmDialog.setNegativeButton("取消", ((dialog, which) -> {
+                    dialog.cancel();
+                    dialog.dismiss();
+                    saveButton.setEnabled(true);
+                    submitButton.setEnabled(true);
+                }));
+                confirmDialog.show();
+            } else {
+                if (alreadySubmitted()) {
+                    SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
+                            submittedCourseWorkInfo.getSubmittedCourseWorkId(),
+                            !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
+                            submittedAnswerMap, true, true);
+                } else {
+                    saveButton.setEnabled(true);
+                    submitButton.setEnabled(true);
+                }
+            }
         } else {
             if (alreadySubmitted()) {
                 if (!submittedCourseWorkInfo.getFinished()) {
@@ -349,43 +435,106 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         isSystemSubmit = false;
     }
 
+    private boolean allIsAutoCheck() {
+        for (QuestionInfo questionInfo : questionInfos) {
+            if (!questionInfo.getAutoCheck()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void refresh() {
+        if (userInfo.getUserType() == UserType.Teacher && alreadySubmitted()) {
+            setTitle(submittedCourseWorkInfo.getSubmitterInfo().getUsername());
+        }
+
+        // submittedAnswerMap
         if (alreadySubmitted()) {
             submittedAnswerMap = ProtoUtils.generateSubmittedCourseWorkAnswerMap(courseWorkInfo,
                     questionInfos, submittedCourseWorkInfo.getSubmittedAnswerMap());
-            if (!submittedCourseWorkInfo.getFinished()) {
-                checkResultLayout.setVisibility(View.GONE);
-                submitButton.setVisibility(View.VISIBLE);
-                saveButton.setVisibility(View.VISIBLE);
-            } else {
-                if (submittedCourseWorkInfo.getAlreadyCheckAllAnswer()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("[已全部批改] 正确率：");
-                    int total = courseWorkInfo.getCourseWorkQuestionInfoCount();
-                    double count = 0;
-                    for (CourseWorkSubmittedAnswer courseWorkSubmittedAnswer : submittedCourseWorkInfo.getSubmittedAnswerMap().values()) {
-                        if (courseWorkSubmittedAnswer.getCheckStatus() == QuestionCheckStatus.CHECK_TRUE) {
-                            count += 1;
-                        } else if (courseWorkSubmittedAnswer.getCheckStatus() == QuestionCheckStatus.CHECK_HALF_TRUE) {
-                            count += 0.5;
-                        }
-                    }
-                    sb.append(count).append("/").append(total);
-                    checkResultView.setText(sb.toString().trim());
-                } else {
-                    checkResultView.setText("[尚未全部批改]");
-                }
-                checkResultLayout.setVisibility(View.VISIBLE);
-                submitButton.setVisibility(View.GONE);
-                saveButton.setVisibility(View.GONE);
-            }
         } else {
             submittedAnswerMap = ProtoUtils.generateSubmittedCourseWorkAnswerMap(courseWorkInfo,
                     questionInfos, null);
-            checkResultLayout.setVisibility(View.GONE);
-            submitButton.setVisibility(View.VISIBLE);
-            saveButton.setVisibility(View.VISIBLE);
         }
+
+        // check result
+        if (alreadySubmitted()) {
+            if (submittedCourseWorkInfo.getAlreadyCheckAllAnswer()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("[已全部批改] 正确率：");
+                int total = courseWorkInfo.getCourseWorkQuestionInfoCount();
+                double count = 0;
+                for (CourseWorkSubmittedAnswer courseWorkSubmittedAnswer : submittedCourseWorkInfo.getSubmittedAnswerMap().values()) {
+                    if (courseWorkSubmittedAnswer.getCheckStatus() == QuestionCheckStatus.CHECK_TRUE) {
+                        count += 1;
+                    } else if (courseWorkSubmittedAnswer.getCheckStatus() == QuestionCheckStatus.CHECK_HALF_TRUE) {
+                        count += 0.5;
+                    }
+                }
+                sb.append(count).append("/").append(total);
+                checkResultView.setText(sb.toString().trim());
+            } else {
+                checkResultView.setText("[尚未全部批改]");
+            }
+        } else {
+            checkResultView.setText("[尚未全部批改]");
+        }
+        if (userInfo.getUserType() == UserType.Teacher) {
+            checkResultLayout.setVisibility(View.VISIBLE);
+        } else {
+            if (canSubmitAnswer()) {
+                if (alreadySubmitted()) {
+                    if (submittedCourseWorkInfo.getFinished()) {
+                        checkResultLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        checkResultLayout.setVisibility(View.GONE);
+                    }
+                } else {
+                    checkResultLayout.setVisibility(View.GONE);
+                }
+            } else {
+                checkResultLayout.setVisibility(View.VISIBLE);
+            }
+        }
+
+        // button
+        if (userInfo.getUserType() == UserType.Teacher) {
+            saveButton.setVisibility(View.GONE);
+            space.setVisibility(View.GONE);
+            if (allIsAutoCheck()) {
+                submitButton.setVisibility(View.GONE);
+            } else {
+                if (alreadySubmitted()) {
+                    if (submittedCourseWorkInfo.getFinished()) {
+                        submitButton.setVisibility(View.VISIBLE);
+                    } else {
+                        submitButton.setVisibility(View.GONE);
+                    }
+                } else {
+                    submitButton.setVisibility(View.GONE);
+                }
+            }
+        } else {
+            if (canSubmitAnswer()) {
+                if (alreadySubmitted()) {
+                    if (submittedCourseWorkInfo.getFinished()) {
+                        submitButton.setVisibility(View.GONE);
+                        saveButton.setVisibility(View.GONE);
+                    } else {
+                        submitButton.setVisibility(View.VISIBLE);
+                        saveButton.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    submitButton.setVisibility(View.VISIBLE);
+                    saveButton.setVisibility(View.VISIBLE);
+                }
+            } else{
+                submitButton.setVisibility(View.GONE);
+                saveButton.setVisibility(View.GONE);
+            }
+        }
+
         recyclerViewAdapter.notifyDataSetChanged();
     }
 
@@ -414,15 +563,19 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             submittedCourseWorkInfo = serviceResult.extra(SubmittedCourseWorkGetResponse.class).getSubmittedCourseWorkInfo();
-            refresh();
             finishInit();
         } else {
             if (serviceResult.extra(Boolean.class)) {
+                setResult(RESULT_CANCELED);
                 CourseWorkDetailActivity.this.finish();
             } else {
-                submittedCourseWorkInfo = null;
-                refresh();
-                finishInit();
+                if (userInfo.getUserType() == UserType.Teacher) {
+                    setResult(RESULT_CANCELED);
+                    CourseWorkDetailActivity.this.finish();
+                } else {
+                    submittedCourseWorkInfo = null;
+                    finishInit();
+                }
             }
         }
     }
@@ -457,13 +610,14 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
             questionInfos.addAll(serviceResult.extra(QuestionGetResponse.class).getQuestionInfoList());
             if (questionInfos.size() != courseWorkInfo.getCourseWorkQuestionInfoCount()) {
                 Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_CANCELED);
                 CourseWorkDetailActivity.this.finish();
             } else {
-                refresh();
                 finishInit();
             }
         } else {
             Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_CANCELED);
             CourseWorkDetailActivity.this.finish();
         }
     }
@@ -471,17 +625,26 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     private void finishInit() {
         if (waitingDialog != null && counter.incrementAndGet() == 2) {
             waitingDialog.dismiss();
-            if (!canSubmitAnswer()) {
-                isSystemSubmit = true;
-                submitButton.performClick();
+            refresh();
+            if (userInfo.getUserType() == UserType.Student) {
+                if (!canSubmitAnswer()) {
+                    if (!alreadySubmitted() || !submittedCourseWorkInfo.getFinished()) {
+                        isSystemSubmit = true;
+                        submitButton.performClick();
+                    }
+                }
             }
         }
     }
 
     @Override
-    public boolean onItemLongClick(ViewHolder viewHolder) {
-        // TODO 老师端
-        return false;
+    public void onBackPressed() {
+        if (userInfo.getUserType() == UserType.Teacher) {
+            Intent intent = new Intent();
+            intent.putExtra(IntentParam.SUBMITTED_COURSE_WORK_INFO, submittedCourseWorkInfo);
+            setResult(RESULT_OK, intent);
+        }
+        super.onBackPressed();
     }
 
     @Override
