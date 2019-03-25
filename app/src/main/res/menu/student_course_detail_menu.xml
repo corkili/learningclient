@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_item_course_comment" android:title="评论" />
+    <item android:id="@+id/menu_item_course_forum" android:title="论坛" />
+    <item android:id="@+id/menu_item_course_work" android:title="作业" />
+    <item android:id="@+id/menu_item_course_exam" android:title="考试" />
+
+</menu>

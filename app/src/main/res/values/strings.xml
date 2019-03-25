@@ -1,3 +1,16 @@
 <resources>
-    <string name="app_name">Learningclient</string>
+    <string name="app_name">学习百分百</string>
+    <string name="title_activity_teacher_main">TeacherMainActivity</string>
+    <string name="title_activity_student_main">StudentMainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="navigation_course">课程</string>
+    <string name="navigation_question">试题</string>
+    <string name="navigation_subscription">订阅</string>
+    <string name="navigation_message">消息</string>
+    <string name="navigation_user_info">我的</string>
+    <string name="single_choice_info">请设置两个及以上的可选选项，并勾选一个作为正确答案：</string>
+    <string name="multiple_choice_info">请设置两个及以上的可选选项，并勾选任意多个作为正确答案：</string>
+
 </resources>
