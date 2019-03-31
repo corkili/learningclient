@@ -38,6 +38,8 @@ dependencies {
     api 'com.googlecode.protobuf-java-format:protobuf-java-format:1.2'
     api 'org.apache.commons:commons-lang3:3.8.1'
     api 'com.github.gittjy:LoadingDialog:1.0.2'
+    api group: 'commons-io', name: 'commons-io', version: '2.4'
+    api 'com.leon:lfilepickerlibrary:1.8.0'
 }
 
 //packagingOptions {
