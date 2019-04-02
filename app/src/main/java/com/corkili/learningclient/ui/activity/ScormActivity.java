@@ -63,6 +63,7 @@ public class ScormActivity extends AppCompatActivity {
     private CourseCatalogInfo courseCatalogInfo;
     private List<CourseCatalogItemInfo> level1ItemInfoList;
     private CourseCatalogItemInfo currentLevel1Item;
+    private CourseCatalogItemInfo currentLevel1ItemBeforeChoose;
     private DeliveryContentInfo currentDeliveryContentInfo;
 
     private boolean alreadyStart;
@@ -360,6 +361,10 @@ public class ScormActivity extends AppCompatActivity {
         this.isSuspend = isSuspend;
     }
 
+    private CourseCatalogItemInfo searchParentLevel1Item(String itemId) {
+        return null;
+    }
+
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -461,6 +466,8 @@ public class ScormActivity extends AppCompatActivity {
                 setState(true, false);
                 refreshView();
             } else {
+                currentLevel1Item = currentLevel1ItemBeforeChoose;
+                currentLevel1ItemBeforeChoose = null;
                 Toast.makeText(this, "[跳转] 无法加载学习内容", Toast.LENGTH_LONG).show();
             }
         } else if (response.getNavigationEventType() == NavigationEventType.SuspendAll) {
@@ -502,6 +509,15 @@ public class ScormActivity extends AppCompatActivity {
             if (courseCatalogItemInfo == null) {
                 Toast.makeText(this, "未选择任何活动", Toast.LENGTH_SHORT).show();
                 return;
+            }
+            currentLevel1ItemBeforeChoose = currentLevel1Item;
+            currentLevel1Item = courseCatalogItemInfo.getParentItem();
+            while (true) {
+                if (currentLevel1Item.hasParentItem()) {
+                    currentLevel1Item = currentLevel1Item.getParentItem();
+                } else {
+                    break;
+                }
             }
             triggerNavigationEvent(NavigationEventType.Choose, courseCatalogItemInfo.getItemId());
         }
