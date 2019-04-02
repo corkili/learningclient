@@ -88,7 +88,11 @@
         <activity
             android:name=".ui.activity.SubmittedExamActivity"
             android:label="已提交试卷列表" />
-        <activity android:name=".ui.activity.ScormActivity"></activity>
+        <activity
+            android:name=".ui.activity.ScormActivity"
+            android:label="课件播放" />
+        <activity android:name=".ui.activity.CourseCatalogActivity"
+            android:label="选择学习活动" />
     </application>
 
 </manifest>

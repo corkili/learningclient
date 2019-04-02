@@ -105,10 +105,10 @@ public class ScormService {
             } else {
                 if (response.getResponse().getResult()) {
                     msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
-                            CoursewareUpdateResponse.class, response);
+                            CourseCatalogQueryResponse.class, response);
                 } else {
                     msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
-                            CoursewareUpdateResponse.class, response);
+                            CourseCatalogQueryResponse.class, response);
                 }
             }
             handler.sendMessage(msg);
@@ -134,10 +134,10 @@ public class ScormService {
             } else {
                 if (response.getResponse().getResult()) {
                     msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
-                            CoursewareUpdateResponse.class, response);
+                            NavigationProcessResponse.class, response);
                 } else {
                     msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
-                            CoursewareUpdateResponse.class, response);
+                            NavigationProcessResponse.class, response);
                 }
             }
             handler.sendMessage(msg);

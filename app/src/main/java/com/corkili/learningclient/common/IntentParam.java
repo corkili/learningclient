@@ -15,6 +15,8 @@ public class IntentParam {
     public static final String SUBMITTED_EXAM_INFO = "submittedExamInfo";
     public static final String SUBMITTED_COURSE_WORK_ID = "submittedCourseWorkId";
     public static final String SUBMITTED_EXAM_ID = "submittedExamId";
+    public static final String COURSE_CATALOG_INFO = "courseCatalogInfo";
+    public static final String COURSE_CATALOG_ITEM_INFO = "courseCatalogItemInfo";
     public static final String COUNT = "count";
     public static final String IS_CREATE = "isCreate";
     public static final String USER_TYPE = "userType";

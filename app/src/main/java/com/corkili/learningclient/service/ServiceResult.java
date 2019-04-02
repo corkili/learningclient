@@ -92,6 +92,9 @@ public class ServiceResult {
     }
 
     public Object extra(Object key) {
+        if (extraMap == null) {
+            return null;
+        }
         if (extraMap.containsKey(key)) {
             return extraMap.get(key);
         } else {
@@ -100,6 +103,9 @@ public class ServiceResult {
     }
 
     public Object extra(String key) {
+        if (extraMap == null) {
+            return null;
+        }
         if (extraMap.containsKey(key)) {
             return extraMap.get(key);
         } else {
@@ -108,6 +114,9 @@ public class ServiceResult {
     }
 
     public <T> T extra(Class<T> key) {
+        if (extraMap == null) {
+            return null;
+        }
         Object value = null;
         if (extraMap.containsKey(key)) {
             value = extraMap.get(key);

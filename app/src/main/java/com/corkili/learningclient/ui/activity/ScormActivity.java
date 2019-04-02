@@ -1,11 +1,13 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -44,6 +46,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ScormActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_CHOOSE_ITEM = 0xF1;
 
     private WebView scormView;
     private ProgressBar scormLoadProgressBar;
@@ -108,6 +112,12 @@ public class ScormActivity extends AppCompatActivity {
 
         scormView.setWebViewClient(webViewClient);
         scormView.setWebChromeClient(webChromeClient);
+
+        chooseButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ScormActivity.this, CourseCatalogActivity.class);
+            intent.putExtra(IntentParam.COURSE_CATALOG_INFO, courseCatalogInfo);
+            startActivityForResult(intent, REQUEST_CODE_CHOOSE_ITEM);
+        });
 
         previousButton.setOnClickListener(v -> {
             if (alreadyStart && !isSuspend) {
@@ -354,7 +364,7 @@ public class ScormActivity extends AppCompatActivity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == ScormService.UPDATE_SCORM_MSG) {
+            if (msg.what == ScormService.QUERY_CATALOG_MSG) {
                 handleQueryCatalogMsg(msg);
             } else if (msg.what == ScormService.PROCESS_NAVIGATION_MSG) {
                 handleProcessNavigationMsg(msg);
@@ -367,11 +377,11 @@ public class ScormActivity extends AppCompatActivity {
         Toast.makeText(ScormActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseCatalogInfo = serviceResult.extra(CourseCatalogQueryResponse.class).getCourseCatalogInfo();
-            List<CourseCatalogItemInfo> courseCatalogItemInfoList = courseCatalogInfo
+            level1ItemInfoList = new ArrayList<>(courseCatalogInfo
                     .getItemsOrDefault(1, CourseCatalogItemInfoList.getDefaultInstance())
-                    .getCourseCatalogItemInfoList();
-            Collections.sort(courseCatalogItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
-            if (courseCatalogItemInfoList.isEmpty()) {
+                    .getCourseCatalogItemInfoList());
+            Collections.sort(level1ItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
+            if (level1ItemInfoList.isEmpty()) {
                 Toast.makeText(this, "无内容可以学习", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
@@ -389,6 +399,11 @@ public class ScormActivity extends AppCompatActivity {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
         boolean isSuccess = serviceResult.isSuccess();
         NavigationProcessResponse response = serviceResult.extra(NavigationProcessResponse.class);
+        if (response == null) {
+            waitingDialog.dismiss();
+            Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+            return;
+        }
         boolean hasDeliveryContentInfo = response.getHasDeliveryContentInfo();
         DeliveryContentInfo deliveryContentInfo = response.getDeliveryContentInfo();
         if (response.getNavigationEventType() == NavigationEventType.Start) {
@@ -471,6 +486,24 @@ public class ScormActivity extends AppCompatActivity {
                 shouldFinish = false;
                 finish();
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        CourseCatalogItemInfo courseCatalogItemInfo = null;
+        if (data != null) {
+            courseCatalogItemInfo = (CourseCatalogItemInfo) data.getSerializableExtra(IntentParam.COURSE_CATALOG_ITEM_INFO);
+        }
+        if (requestCode == REQUEST_CODE_CHOOSE_ITEM) {
+            if (courseCatalogItemInfo == null) {
+                Toast.makeText(this, "未选择任何活动", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            triggerNavigationEvent(NavigationEventType.Choose, courseCatalogItemInfo.getItemId());
         }
     }
 
