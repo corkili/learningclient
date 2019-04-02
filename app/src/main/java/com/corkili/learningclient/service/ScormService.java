@@ -4,8 +4,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.corkili.learningclient.generate.protobuf.Info.NavigationEventType;
+import com.corkili.learningclient.generate.protobuf.Request.CourseCatalogQueryRequest;
 import com.corkili.learningclient.generate.protobuf.Request.CoursewareUpdateRequest;
+import com.corkili.learningclient.generate.protobuf.Request.NavigationProcessRequest;
+import com.corkili.learningclient.generate.protobuf.Response.CourseCatalogQueryResponse;
 import com.corkili.learningclient.generate.protobuf.Response.CoursewareUpdateResponse;
+import com.corkili.learningclient.generate.protobuf.Response.NavigationProcessResponse;
 import com.corkili.learningclient.network.HttpUtils;
 import com.google.protobuf.ByteString;
 
@@ -17,6 +22,8 @@ import java.io.IOException;
 public class ScormService {
 
     public static final int UPDATE_SCORM_MSG = 0xB1;
+    public static final int QUERY_CATALOG_MSG = 0xB2;
+    public static final int PROCESS_NAVIGATION_MSG = 0xB3;
 
     private static final String TAG = "ScormService";
     private static ScormService instance;
@@ -67,7 +74,7 @@ public class ScormService {
                     .build();
             CoursewareUpdateResponse response = HttpUtils.request(request,
                     CoursewareUpdateRequest.class, CoursewareUpdateResponse.class, "/course/updateCourseware");
-            Log.i(TAG, "createCourse: " + response);
+            Log.i(TAG, "updateCourseware: " + response);
             if (response == null) {
                 msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
             } else {
@@ -83,4 +90,57 @@ public class ScormService {
         });
     }
 
+    public void queryCatalog(final Handler handler, long scormId) {
+        Message msg = new Message();
+        msg.what = QUERY_CATALOG_MSG;
+        final CourseCatalogQueryRequest request = CourseCatalogQueryRequest.newBuilder()
+                .setScormId(scormId)
+                .build();
+        AsyncTaskExecutor.execute(() -> {
+            CourseCatalogQueryResponse response = HttpUtils.request(request,
+                    CourseCatalogQueryRequest.class, CourseCatalogQueryResponse.class, "/scorm/queryCatalog");
+            Log.i(TAG, "queryCatalog: " + response);
+            if (response == null) {
+                msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
+            } else {
+                if (response.getResponse().getResult()) {
+                    msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
+                            CoursewareUpdateResponse.class, response);
+                } else {
+                    msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
+                            CoursewareUpdateResponse.class, response);
+                }
+            }
+            handler.sendMessage(msg);
+        });
+    }
+
+    public void processNavigation(final Handler handler, NavigationEventType eventType,
+                                  String targetItemId, long scormId, String level1CatalogItemId) {
+        Message msg = new Message();
+        msg.what = PROCESS_NAVIGATION_MSG;
+        final NavigationProcessRequest request = NavigationProcessRequest.newBuilder()
+                .setNavigationEventType(eventType)
+                .setTargetItemId(targetItemId)
+                .setScormId(scormId)
+                .setLevel1CatalogItemId(level1CatalogItemId)
+                .build();
+        AsyncTaskExecutor.execute(() -> {
+            NavigationProcessResponse response = HttpUtils.request(request,
+                    NavigationProcessRequest.class, NavigationProcessResponse.class, "/scorm/processNavigation");
+            Log.i(TAG, "processNavigation: " + response);
+            if (response == null) {
+                msg.obj = ServiceResult.failResultWithMessage("网络请求错误");
+            } else {
+                if (response.getResponse().getResult()) {
+                    msg.obj = ServiceResult.successResult(response.getResponse().getMsg(),
+                            CoursewareUpdateResponse.class, response);
+                } else {
+                    msg.obj = ServiceResult.failResult(response.getResponse().getMsg(),
+                            CoursewareUpdateResponse.class, response);
+                }
+            }
+            handler.sendMessage(msg);
+        });
+    }
 }

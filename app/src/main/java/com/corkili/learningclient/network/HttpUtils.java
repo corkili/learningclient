@@ -2,6 +2,7 @@ package com.corkili.learningclient.network;
 
 import android.util.Log;
 
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Request.BaseRequest;
 import com.corkili.learningclient.generate.protobuf.Response.BaseResponse;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -94,6 +95,10 @@ public abstract class HttpUtils {
         }
         connection.disconnect();
         return baos.toByteArray();
+    }
+
+    public static String getLaunchContentObjectUrl(long scormId, String itemId) {
+        return IUtils.format("{}://{}:{}/{}/{}/{}/launchContentObject", scheme, host, port, token, scormId, itemId);
     }
 
 }

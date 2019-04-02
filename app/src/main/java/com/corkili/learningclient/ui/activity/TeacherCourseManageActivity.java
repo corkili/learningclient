@@ -83,6 +83,13 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
             }
         });
 
+        previewScormButton.setOnClickListener(v -> {
+            Intent intent = new Intent(TeacherCourseManageActivity.this, ScormActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
+            startActivity(intent);
+        });
+
         waitingDialog = new LoadingDialog.Builder(this)
                 .setMessage("正在上传课件...")
                 .setCancelable(false)
