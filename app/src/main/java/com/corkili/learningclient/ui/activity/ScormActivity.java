@@ -10,6 +10,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JsPromptResult;
@@ -21,11 +22,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.tu.loadingdialog.LoadingDialog;
+import com.android.tu.loadingdialog.LoadingDialog.Builder;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
@@ -49,6 +52,7 @@ public class ScormActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_CHOOSE_ITEM = 0xF1;
 
+    private FrameLayout scormViewLayout;
     private WebView scormView;
     private ProgressBar scormLoadProgressBar;
     private TextView tipView;
@@ -57,6 +61,8 @@ public class ScormActivity extends AppCompatActivity {
     private Button nextButton;
     private Button suspendAndResumeButton;
     private Button startAndExitButton;
+
+    private List<WebView> openWebViewList;
 
     private UserInfo userInfo;
     private CourseInfo courseInfo;
@@ -86,6 +92,7 @@ public class ScormActivity extends AppCompatActivity {
             throw new RuntimeException("expected intent param");
         }
 
+        scormViewLayout = findViewById(R.id.scorm_view_layout);
         scormView = findViewById(R.id.scorm_view);
         scormLoadProgressBar = findViewById(R.id.scorm_load_progress_bar);
         tipView = findViewById(R.id.scorm_view_tip);
@@ -94,25 +101,9 @@ public class ScormActivity extends AppCompatActivity {
         nextButton = findViewById(R.id.button_next);
         suspendAndResumeButton = findViewById(R.id.button_suspend_and_resume);
         startAndExitButton = findViewById(R.id.button_start_and_exit);
+        openWebViewList = new ArrayList<>();
 
-        WebSettings webSettings = scormView.getSettings();
-
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(true);
-
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webSettings.setAllowFileAccess(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setDefaultTextEncodingName("utf-8");
-
-        scormView.setWebViewClient(webViewClient);
-        scormView.setWebChromeClient(webChromeClient);
+        initWebView(scormView);
 
         chooseButton.setOnClickListener(v -> {
             Intent intent = new Intent(ScormActivity.this, CourseCatalogActivity.class);
@@ -165,7 +156,7 @@ public class ScormActivity extends AppCompatActivity {
         currentLevel1Item = null;
         level1ItemInfoList = new ArrayList<>();
 
-        waitingDialog = new LoadingDialog.Builder(this)
+        waitingDialog = new Builder(this)
                 .setMessage("正在加载...")
                 .setCancelable(false)
                 .setCancelOutside(false)
@@ -174,6 +165,29 @@ public class ScormActivity extends AppCompatActivity {
         waitingDialog.show();
 
         loadCourseCatalog();
+    }
+
+    private void initWebView(WebView webView) {
+        WebSettings webSettings = webView.getSettings();
+
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setDefaultTextEncodingName("utf-8");
+
+        webSettings.setSupportMultipleWindows(true);
+
+        webView.setWebViewClient(webViewClient);
+        webView.setWebChromeClient(webChromeClient);
     }
 
     private void refreshView() {
@@ -211,7 +225,14 @@ public class ScormActivity extends AppCompatActivity {
         if (currentDeliveryContentInfo != null) {
             scormView.setVisibility(View.VISIBLE);
             tipView.setVisibility(View.GONE);
-            scormView.loadUrl(HttpUtils.getLaunchContentObjectUrl(courseInfo.getCoursewareId(), currentDeliveryContentInfo.getItemId()));
+            String url = HttpUtils.getLaunchContentObjectUrl(courseInfo.getCoursewareId(), currentDeliveryContentInfo.getItemId());
+            Log.i("ScromActivity", "refreshView: " + url);
+            for (WebView webView : openWebViewList) {
+                webView.setVisibility(View.GONE);
+                webView.destroy();
+            }
+            openWebViewList.clear();
+            scormView.loadUrl(url);
         } else {
             scormView.setVisibility(View.GONE);
             tipView.setVisibility(View.VISIBLE);
@@ -284,6 +305,7 @@ public class ScormActivity extends AppCompatActivity {
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.i("ScormActivity", "shouldOverrideUrlLoading: " + url);
             view.loadUrl(url);
             return true;
         }
@@ -352,6 +374,18 @@ public class ScormActivity extends AppCompatActivity {
                     .setNegativeButton("取消", (((dialog, which) -> result.cancel())));
             promptDialog.setCancelable(false);
             promptDialog.create().show();
+            return true;
+        }
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+            WebView newWebView = new WebView(ScormActivity.this);
+            initWebView(newWebView);
+            scormView.setVisibility(View.GONE);
+            scormViewLayout.addView(newWebView);
+            WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+            transport.setWebView(newWebView);
+            resultMsg.sendToTarget();
             return true;
         }
     };
@@ -529,5 +563,7 @@ public class ScormActivity extends AppCompatActivity {
 
         scormView.destroy();
         scormView = null;
+
+
     }
 }
