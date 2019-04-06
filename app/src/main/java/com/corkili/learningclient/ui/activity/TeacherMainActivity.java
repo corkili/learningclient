@@ -38,15 +38,19 @@ public class TeacherMainActivity extends AppCompatActivity
         navigation.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_course_manager:
+                    setTitle("我的课程");
                     loadCourseFragment();
                     return true;
                 case R.id.navigation_question_manager:
+                    setTitle("试题仓库");
                     loadQuestionFragment();
                     return true;
                 case R.id.navigation_message_manager:
+                    setTitle("我的消息");
                     loadMessageFragment();
                     return true;
                 case R.id.navigation_user_info:
+                    setTitle("个人信息");
                     loadUserFragment();
                     return true;
             }

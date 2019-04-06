@@ -3,19 +3,23 @@
 
     <item
         android:id="@+id/navigation_course_manager"
+        android:icon="@drawable/ic_course_manage_24dp"
         android:title="@string/navigation_course" />
 
     <item
         android:id="@+id/navigation_question_manager"
+        android:icon="@drawable/ic_question_24dp"
         android:title="@string/navigation_question" />
 
     <item
         android:id="@+id/navigation_message_manager"
+        android:icon="@drawable/ic_message_24dp"
         android:title="@string/navigation_message" />
 
     <item
         android:id="@+id/navigation_user_info"
-        android:checked="true"
-        android:title="@string/navigation_user_info" />
+        android:icon="@drawable/ic_myinfo_24dp"
+        android:title="@string/navigation_user_info"
+        android:checked="true" />
 
 </menu>

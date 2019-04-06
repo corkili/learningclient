@@ -29,8 +29,7 @@
             android:name=".ui.activity.LoginActivity"
             android:label="用户登录" />
         <activity
-            android:name=".ui.activity.TeacherMainActivity"
-            android:theme="@style/AppTheme.NoTitle" />
+            android:name=".ui.activity.TeacherMainActivity" />
         <activity
             android:name=".ui.activity.TeacherCourseEditActivity"
             android:label="课程信息编辑" />
