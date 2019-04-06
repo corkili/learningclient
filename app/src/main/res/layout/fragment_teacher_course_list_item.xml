@@ -54,7 +54,8 @@
         android:singleLine="false"
         android:maxLines="2"
         app:layout_constraintTop_toBottomOf="@id/item_course_name"
-        app:layout_constraintLeft_toRightOf="@id/item_index" />
+        app:layout_constraintLeft_toRightOf="@id/item_index"
+        app:layout_constraintRight_toRightOf="parent"/>
 
     <TextView
         android:id="@+id/item_create_time"
