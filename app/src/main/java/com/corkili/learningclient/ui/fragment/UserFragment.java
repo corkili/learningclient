@@ -124,10 +124,16 @@ public class UserFragment extends Fragment {
         int size = QMUIDisplayHelper.dp2px(getContext(), 24);
 
         QMUIGroupListView.newSection(getContext())
+                .setTitle("基本信息")
                 .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addItemView(usernameItem, null)
                 .addItemView(phoneItem, null)
                 .addItemView(userTypeItem, null)
+                .addTo(userInfoListView);
+
+        QMUIGroupListView.newSection(getContext())
+                .setTitle("账号操作")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addItemView(passwordItem, null)
                 .addItemView(logoutItem, null)
                 .addTo(userInfoListView);

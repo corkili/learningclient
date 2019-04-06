@@ -33,8 +33,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/item_content_left"
@@ -43,10 +42,9 @@
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDtextAppearanceListItem"
             android:text="item_content_left"
-            android:maxEms="16"
+            android:maxEms="10"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_username_left"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/item_username_left" />
 
         <TextView
             android:id="@+id/item_time_left"
@@ -56,8 +54,7 @@
             android:textAppearance="@style/QDTextAppearanceListItemSmall"
             android:text="item_time_left"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_content_left"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/item_content_left" />
 
     </android.support.constraint.ConstraintLayout>
 
@@ -85,8 +82,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/item_content_right"
@@ -95,10 +91,9 @@
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDtextAppearanceListItem"
             android:text="item_content_right"
-            android:maxEms="16"
+            android:maxEms="10"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_username_right"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/item_username_right" />
 
         <TextView
             android:id="@+id/item_time_right"
@@ -110,8 +105,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_content_right"
-            app:layout_constraintLeft_toLeftOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/item_content_right" />
 
     </android.support.constraint.ConstraintLayout>
 
