@@ -140,26 +140,23 @@
         <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/button_login"
             style="@style/QDRoundButtonStyle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="登录"
-            android:layout_marginStart="@dimen/login_activity_button_margin"
-            android:layout_marginLeft="@dimen/login_activity_button_margin"
-            android:layout_marginEnd="@dimen/login_activity_button_margin"
-            android:layout_marginRight="@dimen/login_activity_button_margin"
-            android:layout_weight="0.5" />
+            android:layout_weight="0.45" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1" />
 
         <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/button_to_register"
             style="@style/QDRoundButtonStyle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="注册"
-            android:layout_marginStart="@dimen/login_activity_button_margin"
-            android:layout_marginLeft="@dimen/login_activity_button_margin"
-            android:layout_marginEnd="@dimen/login_activity_button_margin"
-            android:layout_marginRight="@dimen/login_activity_button_margin"
-            android:layout_weight="0.5" />
+            android:layout_weight="0.45" />
 
     </LinearLayout>
 

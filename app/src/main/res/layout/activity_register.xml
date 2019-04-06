@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,17 +24,16 @@
 
         <TextView
             android:id="@+id/text_view_phone"
+            style="@style/QDCommonTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="手机号"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:gravity="center" />
 
         <EditText
             android:id="@+id/text_edit_phone"
+            style="@style/CommonEditText"
             android:hint="请输入手机号"
-            android:ems="10"
             android:inputType="phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,17 +57,16 @@
 
         <TextView
             android:id="@+id/text_view_password"
+            style="@style/QDCommonTitle"
             android:text="密&#12288;码"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/text_edit_password"
+            style="@style/CommonEditText"
             android:hint="请输入密码"
-            android:ems="10"
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,10 +90,9 @@
 
         <TextView
             android:id="@+id/text_view_user_type"
+            style="@style/QDCommonTitle"
             android:text="类&#12288;型"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -110,20 +106,20 @@
 
             <RadioButton
                 android:id="@+id/user_type_teacher"
+                style="@style/QDCommonTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:text="老师"
-                android:textSize="24sp"
-                android:checked="true" />
+                android:checked="true"/>
 
             <RadioButton
                 android:id="@+id/user_type_student"
+                style="@style/QDCommonTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="学生"
-                android:textSize="24sp" />
+                android:text="学生" />
         </RadioGroup>
 
     </LinearLayout>
@@ -143,17 +139,16 @@
 
         <TextView
             android:id="@+id/text_view_username"
+            style="@style/QDCommonTitle"
             android:text="用户名"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/text_edit_username"
+            style="@style/CommonEditText"
             android:hint="请输入用户名"
-            android:ems="10"
             android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -176,26 +171,26 @@
         android:layout_below="@id/username_layout">
 
 
-        <Button
+        <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/button_register"
+            style="@style/QDRoundButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.45"
-            android:text="注册"
-            android:textSize="24sp"/>
+            android:text="注册"/>
 
         <Space
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.1" />
 
-        <Button
+        <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/button_cancel"
+            style="@style/QDRoundButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.45"
-            android:text="取消"
-            android:textSize="24sp"/>
+            android:text="取消"/>
 
     </LinearLayout>
 
