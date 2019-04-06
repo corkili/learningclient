@@ -2,6 +2,7 @@ package com.corkili.learningclient.network;
 
 import android.util.Log;
 
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Request.BaseRequest;
 import com.corkili.learningclient.generate.protobuf.Response.BaseResponse;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -21,7 +22,7 @@ public abstract class HttpUtils {
     private static String token = "";
 
     private static final String scheme = "http";
-    private static final String host = "192.168.155.4";
+    private static final String host = "192.168.155.2";
     private static final int port = 8080;
 
     public static <Req extends GeneratedMessageV3, Res extends GeneratedMessageV3> Res request(
@@ -94,6 +95,10 @@ public abstract class HttpUtils {
         }
         connection.disconnect();
         return baos.toByteArray();
+    }
+
+    public static String getLaunchContentObjectUrl(long scormId, String itemId) {
+        return IUtils.format("{}://{}:{}/scorm/{}/{}/{}/launchContentObject", scheme, host, port, token, scormId, itemId);
     }
 
 }

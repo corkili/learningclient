@@ -34,7 +34,9 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
     private TextView teacherView;
     private TextView tagsView;
     private TextView descriptionView;
+    private Button studyScormButton;
     private Button subscribeButton;
+    private View scormLayout;
     
     private Menu menu;
 
@@ -52,7 +54,9 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
         teacherView = findViewById(R.id.course_detail_text_edit_teacher);
         tagsView = findViewById(R.id.course_detail_text_edit_tags);
         descriptionView = findViewById(R.id.course_detail_text_edit_description);
+        studyScormButton = findViewById(R.id.course_detail_button_study_scorm);
         subscribeButton = findViewById(R.id.course_detail_button_subscribe);
+        scormLayout = findViewById(R.id.scorm_layout);
 
         subscribeButton.setOnClickListener(v -> {
             subscribeButton.setEnabled(false);
@@ -73,6 +77,13 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
             intent.putExtra(IntentParam.USER_INFO, courseInfo.getTeacherInfo());
             intent.putExtra(IntentParam.SELF_USER_INFO, userInfo);
             intent.putExtra(IntentParam.COUNT, 0);
+            startActivity(intent);
+        });
+
+        studyScormButton.setOnClickListener(v -> {
+            Intent intent = new Intent(StudentCourseDetailActivity.this, ScormActivity.class);
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.COURSE_INFO, courseInfo);
             startActivity(intent);
         });
 
@@ -100,6 +111,18 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
             subscribeButton.setVisibility(View.GONE);
             subscribeButton.setEnabled(false);
         }
+        if (courseSubscriptionInfo != null) {
+            if (courseInfo.getHasCourseware()) {
+                studyScormButton.setText("学习课件");
+                studyScormButton.setEnabled(true);
+            } else {
+                studyScormButton.setText("尚未上传课件");
+                studyScormButton.setEnabled(false);
+            }
+        } else {
+            scormLayout.setVisibility(View.GONE);
+        }
+
     }
 
     private void refreshMenu() {
