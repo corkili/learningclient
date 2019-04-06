@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_message_swipe_refresh_layout">
@@ -19,7 +19,7 @@
             tools:context=".ui.fragment.MessageFragment"
             tools:listitem="@layout/fragment_message_list_item" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 
 </android.support.constraint.ConstraintLayout>
 

@@ -65,7 +65,7 @@ public class MessageFragmentRecyclerViewAdapter extends RecyclerView.Adapter<Mes
         } else {
             holder.lastMessageView.setText(lastMessageInfo.getText());
         }
-        holder.lastMessageTimeView.setText(IUtils.format("创建时间：{}",
+        holder.lastMessageTimeView.setText(IUtils.format("{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(lastMessageInfo.getCreateTime()))));
 
         holder.mView.setOnClickListener(v -> {

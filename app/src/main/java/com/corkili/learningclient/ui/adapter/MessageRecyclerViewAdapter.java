@@ -40,28 +40,20 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecy
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = messageInfos.get(position);
         if (holder.mItem.getSenderInfo().getUserId() == self.getUserId()) {
-            holder.leftTimeView.setVisibility(View.GONE);
-            holder.leftUsernameView.setVisibility(View.GONE);
-            holder.leftContentView.setVisibility(View.GONE);
-            holder.rightTimeView.setVisibility(View.VISIBLE);
-            holder.rightUsernameView.setVisibility(View.VISIBLE);
-            holder.rightContentView.setVisibility(View.VISIBLE);
+            holder.leftLayout.setVisibility(View.GONE);
+            holder.rightLayout.setVisibility(View.VISIBLE);
 
             holder.rightTimeView.setText(IUtils.format("{}",
                     IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
-            holder.rightUsernameView.setText("我");
+            holder.rightUsernameView.setText("@我");
             holder.rightContentView.setText(holder.mItem.getText());
         } else {
-            holder.leftTimeView.setVisibility(View.VISIBLE);
-            holder.leftUsernameView.setVisibility(View.VISIBLE);
-            holder.leftContentView.setVisibility(View.VISIBLE);
-            holder.rightTimeView.setVisibility(View.GONE);
-            holder.rightUsernameView.setVisibility(View.GONE);
-            holder.rightContentView.setVisibility(View.GONE);
+            holder.leftLayout.setVisibility(View.VISIBLE);
+            holder.rightLayout.setVisibility(View.GONE);
 
             holder.leftTimeView.setText(IUtils.format("{}",
                     IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
-            holder.leftUsernameView.setText(holder.mItem.getSenderInfo().getUsername());
+            holder.leftUsernameView.setText(IUtils.format("@{}", holder.mItem.getSenderInfo().getUsername()));
             holder.leftContentView.setText(holder.mItem.getText());
         }
     }
@@ -73,9 +65,11 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecy
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final View mView;
+        private final View leftLayout;
         private final TextView leftTimeView;
         private final TextView leftUsernameView;
         private final TextView leftContentView;
+        private final View rightLayout;
         private final TextView rightTimeView;
         private final TextView rightUsernameView;
         private final TextView rightContentView;
@@ -84,9 +78,11 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecy
         ViewHolder(View view) {
             super(view);
             mView = view;
+            leftLayout = view.findViewById(R.id.left_layout);
             leftTimeView = view.findViewById(R.id.item_time_left);
             leftUsernameView = view.findViewById(R.id.item_username_left);
             leftContentView = view.findViewById(R.id.item_content_left);
+            rightLayout = view.findViewById(R.id.right_layout);
             rightTimeView = view.findViewById(R.id.item_time_right);
             rightUsernameView = view.findViewById(R.id.item_username_right);
             rightContentView = view.findViewById(R.id.item_content_right);

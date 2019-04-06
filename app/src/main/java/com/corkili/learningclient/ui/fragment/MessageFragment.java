@@ -9,8 +9,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,7 +26,8 @@ import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.MessageActivity;
 import com.corkili.learningclient.ui.adapter.MessageFragmentRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.MessageFragmentRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +42,9 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
     public static final int REQUEST_CODE_MESSAGE_ACTIVITY = 0xF1;
 
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
+
+    private boolean shouldFinishRefresh = false;
 
     private MessageFragmentRecyclerViewAdapter recyclerViewAdapter;
 
@@ -81,15 +82,31 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
+//        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
+//                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout.setOnRefreshListener(this::refreshMessageInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshMessageInfos();
+            }
+        });
 
         refreshMessageInfos();
     }
@@ -146,8 +163,11 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
                     }
                 });
             }
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+        }
+        if (shouldFinishRefresh) {
+            shouldFinishRefresh = false;
+            swipeRefreshLayout.finishRefresh();
         }
     }
 
