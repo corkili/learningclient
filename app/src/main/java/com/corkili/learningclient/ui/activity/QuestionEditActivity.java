@@ -100,7 +100,7 @@ public class QuestionEditActivity extends AppCompatActivity {
             setTitle("试题详情");
         }
 
-        editMode = !isCreate;
+        editMode = true;
 
         questionEditor = findViewById(R.id.question_edit_text_edit_question);
         questionTypeSelector = findViewById(R.id.question_edit_radio_group_question_type);
@@ -213,9 +213,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                     setResult(RESULT_CANCELED);
                     QuestionEditActivity.this.finish();
                 } else {
-                    if (editMode) {
-                        switchEditMode();
-                    }
+                    switchEditMode();
                 }
             } else {
                 if (!isCreate) {
