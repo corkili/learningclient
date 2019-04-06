@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_teacher_course_swipe_refresh_layout">
@@ -19,7 +19,7 @@
             tools:context=".ui.fragment.TeacherCourseFragment"
             tools:listitem="@layout/fragment_teacher_course_list_item" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_create_course"
@@ -29,7 +29,9 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_margin="16dp"
         app:pressedTranslationZ="12dp"
-        app:srcCompat="@drawable/ic_add_white" />
+        app:srcCompat="@drawable/ic_add_white"
+        app:backgroundTint="@color/app_color_blue_2"
+        app:rippleColor="@color/app_color_blue_2_pressed"/>
 
 </android.support.constraint.ConstraintLayout>
 

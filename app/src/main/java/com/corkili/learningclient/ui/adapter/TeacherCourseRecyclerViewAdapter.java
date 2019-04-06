@@ -43,15 +43,15 @@ public class TeacherCourseRecyclerViewAdapter extends RecyclerView.Adapter<Teach
         holder.mItem = courseInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
         if (holder.mItem.getOpen()) {
-            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_yes_bk_green));
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_open_24dp));
         } else {
-            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_no_bk_red));
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_close_24dp));
         }
         holder.courseNameView.setText(holder.mItem.getCourseName());
         holder.descriptionView.setText(holder.mItem.getDescription());
-        holder.createTimeView.setText(IUtils.format("创建时间：{}",
+        holder.createTimeView.setText(IUtils.format("创建于：{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
-        holder.updateTimeView.setText(IUtils.format("更新时间：{}",
+        holder.updateTimeView.setText(IUtils.format("更新于：{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getUpdateTime()))));
         holder.mView.setOnClickListener(v -> {
             if (this.mListener != null) {

@@ -10,8 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,7 +28,8 @@ import com.corkili.learningclient.ui.activity.TeacherCourseEditActivity;
 import com.corkili.learningclient.ui.activity.TeacherCourseManageActivity;
 import com.corkili.learningclient.ui.adapter.TeacherCourseRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.TeacherCourseRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
     public static final int REQUEST_CODE_MANAGE_COURSE = 0xF2;
 
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
     private FloatingActionButton createCourseFab;
 
     private TeacherCourseRecyclerViewAdapter recyclerViewAdapter;
@@ -49,6 +48,8 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
     private List<CourseInfo> courseInfos;
 
     private DataBus dataBus;
+
+    private boolean shouldFinishRefresh;
 
     public TeacherCourseFragment() {
     }
@@ -79,15 +80,32 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
+//        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
+//                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
+        shouldFinishRefresh = false;
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout.setOnRefreshListener(this::refreshCourseInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshCourseInfos();
+            }
+        });
 
         createCourseFab.setOnClickListener(view -> {
             Intent intent = new Intent(getActivity(), TeacherCourseEditActivity.class);
@@ -120,8 +138,10 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
         if (serviceResult.isSuccess()) {
             courseInfos.clear();
             courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+        }
+        if (shouldFinishRefresh) {
+            swipeRefreshLayout.finishRefresh();
         }
     }
 
