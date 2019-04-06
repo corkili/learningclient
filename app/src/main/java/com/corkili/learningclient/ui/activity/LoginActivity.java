@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -18,14 +17,15 @@ import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.UserService;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText phoneEditText;
     private EditText passwordEditText;
     private RadioGroup userTypeRadioGroup;
-    private Button loginButton;
-    private Button toRegisterButton;
+    private QMUIRoundButton loginButton;
+    private QMUIRoundButton toRegisterButton;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
