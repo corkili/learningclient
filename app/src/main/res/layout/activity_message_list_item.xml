@@ -25,6 +25,7 @@
             android:id="@+id/item_username_left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="left"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDTextAppearanceListItemSmall"
             android:text="item_username_left"
@@ -33,28 +34,32 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <TextView
             android:id="@+id/item_content_left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="left"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDtextAppearanceListItem"
             android:text="item_content_left"
-            android:maxEms="10"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_username_left" />
+            app:layout_constraintTop_toBottomOf="@id/item_username_left"
+            app:layout_constraintRight_toRightOf="parent" />
 
         <TextView
             android:id="@+id/item_time_left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="left"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDTextAppearanceListItemSmall"
             android:text="item_time_left"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_content_left" />
+            app:layout_constraintTop_toBottomOf="@id/item_content_left"
+            app:layout_constraintRight_toRightOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 
@@ -74,6 +79,7 @@
             android:id="@+id/item_username_right"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="right"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDTextAppearanceListItemSmall"
             android:text="item_username_right"
@@ -82,30 +88,32 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
         <TextView
             android:id="@+id/item_content_right"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="right"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDtextAppearanceListItem"
             android:text="item_content_right"
-            android:maxEms="10"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_username_right" />
+            app:layout_constraintTop_toBottomOf="@id/item_username_right"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
         <TextView
             android:id="@+id/item_time_right"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="right"
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="@style/QDTextAppearanceListItemSmall"
             android:text="item_time_right"
-            android:textSize="16sp"
-            android:textStyle="bold"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_content_right" />
+            app:layout_constraintTop_toBottomOf="@id/item_content_right"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 
