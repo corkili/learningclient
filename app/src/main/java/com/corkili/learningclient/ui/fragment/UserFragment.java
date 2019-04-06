@@ -42,8 +42,6 @@ public class UserFragment extends Fragment {
 
     private QMUIGroupListView userInfoListView;
 
-    private boolean alreadyInit;
-
     private UserInfo userInfo;
 
     @SuppressLint("HandlerLeak")
@@ -62,7 +60,6 @@ public class UserFragment extends Fragment {
 
     public UserFragment() {
         // Required empty public constructor
-        alreadyInit = false;
     }
 
 
@@ -89,57 +86,51 @@ public class UserFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_user, container, false);
         userInfoListView = view.findViewById(R.id.user_info_list);
 
-        if (!alreadyInit) {
+        usernameItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_user_24dp),
+                "用户名",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
 
-            usernameItem = userInfoListView.createItemView(
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_user_24dp),
-                    "用户名",
-                    null,
-                    QMUICommonListItemView.HORIZONTAL,
-                    QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        phoneItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_24dp),
+                "手机号",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
 
-            phoneItem = userInfoListView.createItemView(
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_24dp),
-                    "手机号",
-                    null,
-                    QMUICommonListItemView.HORIZONTAL,
-                    QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+        userTypeItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_usertype_24dp),
+                "类型",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
 
-            userTypeItem = userInfoListView.createItemView(
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_usertype_24dp),
-                    "类型",
-                    null,
-                    QMUICommonListItemView.HORIZONTAL,
-                    QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+        passwordItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_password_24dp),
+                "修改密码",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
 
-            passwordItem = userInfoListView.createItemView(
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_password_24dp),
-                    "修改密码",
-                    null,
-                    QMUICommonListItemView.HORIZONTAL,
-                    QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        logoutItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_logout_24dp),
+                "退出登录",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
 
-            logoutItem = userInfoListView.createItemView(
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_logout_24dp),
-                    "退出登录",
-                    null,
-                    QMUICommonListItemView.HORIZONTAL,
-                    QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        int size = QMUIDisplayHelper.dp2px(getContext(), 24);
 
-            int size = QMUIDisplayHelper.dp2px(getContext(), 24);
-
-            QMUIGroupListView.newSection(getContext())
-                    .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    .addItemView(usernameItem, null)
-                    .addItemView(phoneItem, null)
-                    .addItemView(userTypeItem, null)
-                    .addItemView(passwordItem, null)
-                    .addItemView(logoutItem, null)
-                    .addTo(userInfoListView);
-
-            alreadyInit = true;
-
-        }
+        QMUIGroupListView.newSection(getContext())
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(usernameItem, null)
+                .addItemView(phoneItem, null)
+                .addItemView(userTypeItem, null)
+                .addItemView(passwordItem, null)
+                .addItemView(logoutItem, null)
+                .addTo(userInfoListView);
 
         return view;
     }
