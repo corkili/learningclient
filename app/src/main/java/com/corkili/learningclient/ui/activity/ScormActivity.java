@@ -395,8 +395,29 @@ public class ScormActivity extends AppCompatActivity {
         this.isSuspend = isSuspend;
     }
 
-    private CourseCatalogItemInfo searchParentLevel1Item(String itemId) {
-        return null;
+    private CourseCatalogItemInfo searchParentLevel1Item(CourseCatalogItemInfo item) {
+        if (item.getLevel() < 1) {
+            return item;
+        }
+        List<CourseCatalogItemInfo> list;
+        while (item.getLevel() != 1) {
+            list = courseCatalogInfo.getItemsOrDefault(item.getLevel() - 1, CourseCatalogItemInfoList
+                    .getDefaultInstance()).getCourseCatalogItemInfoList();
+            for (CourseCatalogItemInfo courseCatalogItemInfo : list) {
+                boolean searched = false;
+                for (CourseCatalogItemInfo catalogItemInfo : courseCatalogItemInfo.getNextLevelItems().getCourseCatalogItemInfoList()) {
+                    if (catalogItemInfo.getItemId().equals(item.getItemId())) {
+                        searched = true;
+                        break;
+                    }
+                }
+                if (searched) {
+                    item = courseCatalogItemInfo;
+                    break;
+                }
+            }
+        }
+        return item;
     }
 
     @SuppressLint("HandlerLeak")
@@ -545,14 +566,7 @@ public class ScormActivity extends AppCompatActivity {
                 return;
             }
             currentLevel1ItemBeforeChoose = currentLevel1Item;
-            currentLevel1Item = courseCatalogItemInfo.getParentItem();
-            while (true) {
-                if (currentLevel1Item.hasParentItem()) {
-                    currentLevel1Item = currentLevel1Item.getParentItem();
-                } else {
-                    break;
-                }
-            }
+            currentLevel1Item = searchParentLevel1Item(courseCatalogItemInfo);
             triggerNavigationEvent(NavigationEventType.Choose, courseCatalogItemInfo.getItemId());
         }
     }
@@ -564,6 +578,14 @@ public class ScormActivity extends AppCompatActivity {
         scormView.destroy();
         scormView = null;
 
+        for (WebView webView : openWebViewList) {
+            webView.destroy();
+        }
+        openWebViewList.clear();
+    }
 
+    @Override
+    public void onBackPressed() {
+        finishActivity();
     }
 }

@@ -92,7 +92,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/button_next"
-            app:layout_constraintRight_toLeftOf="@id/button_start_and_exit"/>
+            app:layout_constraintRight_toLeftOf="@id/button_start_and_exit"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/button_start_and_exit"
