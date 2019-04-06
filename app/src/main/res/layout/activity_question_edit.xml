@@ -1,261 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.activity.QuestionEditActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:context=".ui.activity.QuestionEditActivity">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/qmui_topbar_height"
+        android:fitsSystemWindows="true">
 
-        <LinearLayout
-            android:id="@+id/question_layout"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/question_edit_text_view_question"
-                android:text="题目"
-                android:gravity="center"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <EditText
-                android:id="@+id/question_edit_text_edit_question"
-                android:ems="10"
-                android:inputType="textMultiLine"
-                android:scrollHorizontally="false"
-                android:singleLine="false"
-                android:maxLength="50"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/question_type_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/question_layout">
-
-            <TextView
-                android:id="@+id/question_edit_text_view_question_type"
-                android:text="类型"
-                android:gravity="center"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <RadioGroup
-                android:id="@+id/question_edit_radio_group_question_type"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp" >
-
-                <RadioButton
-                    android:id="@+id/type_single_filling"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="填空题（仅一个空）"
-                    android:textSize="24sp"
-                    android:checked="true" />
-
-                <RadioButton
-                    android:id="@+id/type_multiple_filling"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="填空题（有多个空）"
-                    android:textSize="24sp" />
-
-                <RadioButton
-                    android:id="@+id/type_single_choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="单选题"
-                    android:textSize="24sp" />
-
-                <RadioButton
-                    android:id="@+id/type_multiple_choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="多选题"
-                    android:textSize="24sp" />
-
-                <RadioButton
-                    android:id="@+id/type_essay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="问答题"
-                    android:textSize="24sp" />
-            </RadioGroup>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/auto_check_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/question_type_layout">
-
-            <TextView
-                android:id="@+id/question_edit_text_view_auto_check"
-                android:text="是否自动批改"
-                android:gravity="center"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <RadioGroup
-                android:id="@+id/question_edit_radio_group_auto_check"
+            <LinearLayout
+                android:id="@+id/question_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp" >
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <RadioButton
-                    android:id="@+id/auto_check_yes"
+                <TextView
+                    android:id="@+id/question_edit_text_view_question"
+                    style="@style/QDCommonTitle"
+                    android:text="题目"
+                    android:gravity="center"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="是"
-                    android:textSize="24sp"
-                    android:checked="true" />
+                    android:layout_height="wrap_content"/>
 
-                <RadioButton
-                    android:id="@+id/auto_check_no"
+                <EditText
+                    android:id="@+id/question_edit_text_edit_question"
+                    style="@style/CommonEditText"
+                    android:ems="10"
+                    android:inputType="textMultiLine"
+                    android:scrollHorizontally="false"
+                    android:singleLine="false"
+                    android:maxLength="50"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginLeft="20dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/question_type_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/question_layout">
+
+                <TextView
+                    android:id="@+id/question_edit_text_view_question_type"
+                    style="@style/QDCommonTitle"
+                    android:text="类型"
+                    android:gravity="center"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <RadioGroup
+                    android:id="@+id/question_edit_radio_group_question_type"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="否"
-                    android:textSize="24sp" />
-            </RadioGroup>
+                    android:orientation="vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginLeft="20dp" >
 
-        </LinearLayout>
+                    <RadioButton
+                        android:id="@+id/type_single_filling"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="填空题（仅一个空）"
+                        android:checked="true" />
 
-        <LinearLayout
-            android:id="@+id/answer_info_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:visibility="gone"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/auto_check_layout">
+                    <RadioButton
+                        android:id="@+id/type_multiple_filling"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="填空题（有多个空）" />
 
-        <TextView
-            android:text="答案（及选项）："
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        </LinearLayout>
+                    <RadioButton
+                        android:id="@+id/type_single_choice"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="单选题" />
 
-        <LinearLayout
-            android:id="@+id/attach_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/answer_info_layout">
+                    <RadioButton
+                        android:id="@+id/type_multiple_choice"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="多选题" />
 
-            <include layout="@layout/activity_question_edit_attach_single_filling"
-                android:id="@+id/attach_single_filling_layout"
-                android:visibility="visible" />
+                    <RadioButton
+                        android:id="@+id/type_essay"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="问答题" />
+                </RadioGroup>
 
-            <include layout="@layout/activity_question_edit_attach_multiple_filling"
-                android:id="@+id/attach_multiple_filling_layout"
-                android:visibility="gone" />
+            </LinearLayout>
 
-            <include layout="@layout/activity_question_edit_attach_choice"
-                android:id="@+id/attach_choice_layout"
-                android:visibility="gone" />
-
-            <include layout="@layout/activity_question_edit_attach_essay"
-                android:id="@+id/attach_essay_layout"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/button_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/attach_layout">
-
-            <Button
-                android:id="@+id/question_edit_button_positive"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/auto_check_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.45"
-                android:text="保存"
-                android:textSize="24sp"/>
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/question_type_layout">
 
-            <Space
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/question_edit_text_view_auto_check"
+                    style="@style/QDCommonTitle"
+                    android:text="是否自动批改"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <RadioGroup
+                    android:id="@+id/question_edit_radio_group_auto_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginLeft="20dp" >
+
+                    <RadioButton
+                        android:id="@+id/auto_check_yes"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="是"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/auto_check_no"
+                        style="@style/QDCommonTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="否" />
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/answer_info_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.1" />
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/auto_check_layout">
 
-            <Button
-                android:id="@+id/question_edit_button_negative"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:text="答案（及选项）："
+                    style="@style/QDCommonTitle"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/attach_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.45"
-                android:text="取消"
-                android:textSize="24sp"/>
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/answer_info_layout">
 
-        </LinearLayout>
+                <include layout="@layout/activity_question_edit_attach_single_filling"
+                    android:id="@+id/attach_single_filling_layout"
+                    android:visibility="visible" />
 
-    </android.support.constraint.ConstraintLayout>
-</ScrollView>
+                <include layout="@layout/activity_question_edit_attach_multiple_filling"
+                    android:id="@+id/attach_multiple_filling_layout"
+                    android:visibility="gone" />
+
+                <include layout="@layout/activity_question_edit_attach_choice"
+                    android:id="@+id/attach_choice_layout"
+                    android:visibility="gone" />
+
+                <include layout="@layout/activity_question_edit_attach_essay"
+                    android:id="@+id/attach_essay_layout"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+
+    <com.qmuiteam.qmui.widget.QMUITopBarLayout
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"/>
+
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>
+

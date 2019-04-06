@@ -17,10 +17,9 @@
 
         <TextView
             android:id="@+id/multiple_choice_all_select_is_correct"
+            style="@style/QDCommonTitle"
             android:text="是否全选正确才得分"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -34,20 +33,20 @@
 
             <RadioButton
                 android:id="@+id/all_select_yes"
+                style="@style/QDCommonTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:text="是"
-                android:textSize="24sp"
                 android:checked="true" />
 
             <RadioButton
                 android:id="@+id/all_select_no"
+                style="@style/QDCommonTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="否"
-                android:textSize="24sp" />
+                android:text="否" />
         </RadioGroup>
 
     </LinearLayout>
@@ -63,10 +62,9 @@
 
         <TextView
             android:id="@+id/choice_info"
+            style="@style/QDCommonDescription"
             android:text="@string/single_choice_info"
             android:gravity="fill_horizontal"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -99,11 +97,12 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/choice_answer_layout">
 
-        <Button
+        <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/add_a_choice_answer"
+            style="@style/QDRoundButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+"
+            android:text="添加选项"
             android:textSize="24sp"/>
 
     </LinearLayout>

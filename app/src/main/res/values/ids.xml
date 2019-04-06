@@ -17,4 +17,6 @@
 
 <resources>
     <item name="topbar_right_refresh" type="id"/>
+    <item name="topbar_right_more" type="id"/>
+    <item name="topbar_right_save" type="id"/>
 </resources>
