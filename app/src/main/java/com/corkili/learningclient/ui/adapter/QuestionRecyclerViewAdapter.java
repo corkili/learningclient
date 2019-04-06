@@ -55,9 +55,9 @@ public class QuestionRecyclerViewAdapter extends RecyclerView.Adapter<QuestionRe
         holder.mItem = questionInfos.get(position);
         holder.indexView.setText(String.valueOf(position + 1));
         if (holder.mItem.getAutoCheck()) {
-            holder.autoCheckView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_yes_bk_green));
+            holder.autoCheckView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_check_24dp));
         } else {
-            holder.autoCheckView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_no_bk_red));
+            holder.autoCheckView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_check_dark_24dp));
         }
         holder.questionTypeView.setText(ProtoUtils.getQuestionTypeUIName(holder.mItem.getQuestionType()));
         holder.simpleDescriptionView.setText(holder.mItem.getQuestion());
