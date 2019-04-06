@@ -15,12 +15,14 @@ import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserRegisterResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.UserService;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
+    private QMUITopBarLayout topBar;
     private EditText phoneEditText;
     private EditText passwordEditText;
     private RadioGroup userTypeRadioGroup;
@@ -42,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        topBar = findViewById(R.id.topbar);
         phoneEditText = findViewById(R.id.text_edit_phone);
         passwordEditText = findViewById(R.id.text_edit_password);
         userTypeRadioGroup = findViewById(R.id.radio_group_user_type);
@@ -49,6 +52,14 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.button_register);
         cancelButton = findViewById(R.id.button_cancel);
         initListener();
+
+        topBar.setTitle("注册");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setClass(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            RegisterActivity.this.finish();
+        });
     }
 
     private void initListener() {

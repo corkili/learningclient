@@ -17,10 +17,12 @@ import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.UserService;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private QMUITopBarLayout topBar;
     private EditText phoneEditText;
     private EditText passwordEditText;
     private RadioGroup userTypeRadioGroup;
@@ -41,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        topBar = findViewById(R.id.topbar);
         phoneEditText = findViewById(R.id.text_edit_phone);
         passwordEditText = findViewById(R.id.text_edit_password);
         userTypeRadioGroup = findViewById(R.id.radio_group_user_type);
@@ -59,6 +62,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
         initListener();
+        topBar.setTitle("登录");
     }
 
     private void initListener() {
