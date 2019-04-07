@@ -85,6 +85,17 @@ public class MessageActivity extends AppCompatActivity {
         topBar = findViewById(R.id.topbar);
 
         topBar.setTitle(userInfo.getUsername());
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.putExtra(IntentParam.USER_INFO, userInfo);
+            intent.putExtra(IntentParam.COUNT, messageInfos.size());
+            List<MessageInfo> messageInfoList = messageInfos;
+            for (int i = 0; i < messageInfoList.size(); i++) {
+                intent.putExtra(IntentParam.MESSAGE_INFO + i, messageInfoList.get(i));
+            }
+            setResult(RESULT_OK, intent);
+            MessageActivity.this.finish();
+        });
         refreshButton = topBar.addRightImageButton(R.drawable.ic_refresh_24dp, R.id.topbar_right_refresh);
         refreshButton.setOnClickListener(v -> {
             refreshMessageInfos();
