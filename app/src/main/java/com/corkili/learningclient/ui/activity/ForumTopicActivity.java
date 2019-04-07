@@ -69,7 +69,7 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
 
         this.<TextView>findViewById(R.id.topic_title).setText(forumTopicInfo.getTitle());
         this.<TextView>findViewById(R.id.topic_user_name).setText(IUtils.format("{}{}",
-                forumTopicInfo.getAuthorInfo().getUserType() == UserType.Teacher ? "老师" : "",
+                forumTopicInfo.getAuthorInfo().getUserType() == UserType.Teacher ? "[老师]" : "",
                 forumTopicInfo.getAuthorInfo().getUsername()));
         this.<TextView>findViewById(R.id.topic_description).setText(forumTopicInfo.getDescription());
         this.<TextView>findViewById(R.id.topic_time).setText(IUtils.DATE_TIME_FORMATTER.format(forumTopicInfo.getUpdateTime()));

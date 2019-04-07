@@ -54,7 +54,7 @@
 
         <TextView
             android:id="@+id/text_view_description"
-            android:text="评论"
+            android:text="描述"
             android:gravity="center"
             android:textSize="24sp"
             android:textStyle="bold"
