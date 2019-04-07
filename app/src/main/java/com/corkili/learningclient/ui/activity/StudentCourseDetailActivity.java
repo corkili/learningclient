@@ -152,14 +152,14 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
 
         workItem = courseInfoListView.createItemView(
                 ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
-                "作业管理",
+                "我的作业",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
 
         examItem = courseInfoListView.createItemView(
                 ContextCompat.getDrawable(this, R.drawable.ic_exam_24dp),
-                "考试管理",
+                "我的考试",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
