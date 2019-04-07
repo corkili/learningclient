@@ -9,7 +9,7 @@
 
         <!-- 配置Android提供的theme -->
         <item name="android:textAppearanceListItemSmall">@style/QDTextAppearanceListItemSmall</item>
-        <item name="android:textAppearanceListItem">@style/QDtextAppearanceListItem</item>
+        <item name="android:textAppearanceListItem">@style/QDTextAppearanceListItem</item>
         <item name="android:listPreferredItemHeight">?attr/qmui_list_item_height_higher</item>
         <item name="android:listPreferredItemHeightSmall">?attr/qmui_list_item_height</item>
 
@@ -39,7 +39,7 @@
         <item name="android:textColor">@color/qmui_config_color_75_pure_black</item>
     </style>
 
-    <style name="QDtextAppearanceListItem">
+    <style name="QDTextAppearanceListItem">
         <item name="android:textColor">?attr/qmui_config_color_black</item>
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>

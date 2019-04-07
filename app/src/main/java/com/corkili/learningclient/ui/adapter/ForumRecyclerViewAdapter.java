@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.generate.protobuf.Info.ForumTopicInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 
 import java.util.Date;
@@ -20,11 +21,13 @@ public class ForumRecyclerViewAdapter extends RecyclerView.Adapter<ForumRecycler
 
     private final Context context;
     private final List<ForumTopicInfo> forumTopicInfos;
+    private final UserInfo userInfo;
     private final OnItemInteractionListener mListener;
 
-    public ForumRecyclerViewAdapter(Context context, List<ForumTopicInfo> forumTopicInfos, OnItemInteractionListener mListener) {
+    public ForumRecyclerViewAdapter(Context context, List<ForumTopicInfo> forumTopicInfos, UserInfo userInfo, OnItemInteractionListener mListener) {
         this.context = context;
         this.forumTopicInfos = forumTopicInfos;
+        this.userInfo = userInfo;
         this.mListener = mListener;
     }
 
@@ -40,10 +43,14 @@ public class ForumRecyclerViewAdapter extends RecyclerView.Adapter<ForumRecycler
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = forumTopicInfos.get(position);
         holder.titleView.setText(holder.mItem.getTitle());
-        if (holder.mItem.getAuthorInfo().getUserType() == UserType.Teacher) {
-            holder.usernameView.setText(IUtils.format("[老师]{}", holder.mItem.getAuthorInfo().getUsername()));
+        if (userInfo.getUserId() == holder.mItem.getAuthorInfo().getUserId()) {
+            holder.usernameView.setText(IUtils.format("@[我]{}", holder.mItem.getAuthorInfo().getUsername()));
         } else {
-            holder.usernameView.setText(holder.mItem.getAuthorInfo().getUsername());
+            if (holder.mItem.getAuthorInfo().getUserType() == UserType.Teacher) {
+                holder.usernameView.setText(IUtils.format("@[老师]{}", holder.mItem.getAuthorInfo().getUsername()));
+            } else {
+                holder.usernameView.setText(IUtils.format("@{}", holder.mItem.getAuthorInfo().getUsername()));
+            }
         }
         holder.descriptionView.setText(holder.mItem.getDescription());
         holder.timeView.setText(IUtils.format("{}",
