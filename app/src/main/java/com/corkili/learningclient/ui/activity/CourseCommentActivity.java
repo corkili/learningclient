@@ -8,8 +8,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -39,6 +41,7 @@ public class CourseCommentActivity extends AppCompatActivity {
     private QMUITopBarLayout topBar;
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
 
     private CourseInfo courseInfo;
 
@@ -68,6 +71,7 @@ public class CourseCommentActivity extends AppCompatActivity {
                     .setOnClickListener(v -> showAddCommentDialog());
         }
 
+        tipView = findViewById(R.id.tip);
         recyclerView = findViewById(R.id.activity_course_comment_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_comment_swipe_refresh_layout);
         courseCommentInfos = new ArrayList<>();
@@ -96,6 +100,14 @@ public class CourseCommentActivity extends AppCompatActivity {
             }
         });
         refreshCourseCommentInfos();
+    }
+
+    private void updateTipView() {
+        if (courseCommentInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshCourseCommentInfos() {
@@ -165,6 +177,7 @@ public class CourseCommentActivity extends AppCompatActivity {
         if (shouldFinishRefresh) {
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     private void handleCreateCourseCommentMsg(Message msg) {
@@ -177,6 +190,7 @@ public class CourseCommentActivity extends AppCompatActivity {
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
 }

@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -44,6 +46,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
     private QMUITopBarLayout topBar;
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
 
     private CourseInfo courseInfo;
     private UserInfo userInfo;
@@ -71,6 +74,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
         topBar.addLeftBackImageButton().setOnClickListener(v -> ForumActivity.this.finish());
         topBar.addRightImageButton(R.drawable.ic_edit_24dp, R.id.topbar_right_edit).setOnClickListener(v -> showAddTopicDialog());
 
+        tipView = findViewById(R.id.tip);
         recyclerView = findViewById(R.id.activity_forum_topic_list);
         swipeRefreshLayout = findViewById(R.id.activity_forum_topic_swipe_refresh_layout);
         forumTopicInfos = new ArrayList<>();
@@ -99,6 +103,14 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
             }
         });
         refreshForumTopicInfos();
+    }
+
+    private void updateTipView() {
+        if (forumTopicInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshForumTopicInfos() {
@@ -149,6 +161,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     private void handleCreateForumTopicMsg(Message msg) {
@@ -161,6 +174,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     private void handleUpdateForumTopicMsg(Message msg) {
@@ -180,6 +194,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     private void handleDeleteForumTopicMsg(Message msg) {
@@ -199,6 +214,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     @Override

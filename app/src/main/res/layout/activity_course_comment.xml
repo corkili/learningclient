@@ -12,6 +12,22 @@
         android:layout_marginTop="?attr/qmui_topbar_height"
         android:fitsSystemWindows="true">
 
+        <TextView
+            android:id="@+id/tip"
+            style="@style/QDCommonDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_margin="@dimen/text_margin"
+            android:text="当前没有评论被发表"
+            android:maxEms="8"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
         <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
