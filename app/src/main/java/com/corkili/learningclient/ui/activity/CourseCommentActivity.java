@@ -1,17 +1,13 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
@@ -30,6 +26,8 @@ import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.adapter.CourseCommentRecyclerViewAdapter;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog.CustomDialogBuilder;
 import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
 import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
@@ -41,7 +39,6 @@ public class CourseCommentActivity extends AppCompatActivity {
     private QMUITopBarLayout topBar;
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton addCommentFab;
 
     private CourseInfo courseInfo;
 
@@ -66,16 +63,13 @@ public class CourseCommentActivity extends AppCompatActivity {
         topBar.setTitle("课程评论");
         topBar.addLeftBackImageButton().setOnClickListener(v -> CourseCommentActivity.this.finish());
 
+        if (userType == UserType.Student && getIntent().getBooleanExtra(IntentParam.ALREADY_SUBSCRIBE, false)) {
+            topBar.addRightImageButton(R.drawable.ic_comment_24dp, R.id.topbar_right_comment)
+                    .setOnClickListener(v -> showAddCommentDialog());
+        }
+
         recyclerView = findViewById(R.id.activity_course_comment_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_comment_swipe_refresh_layout);
-        addCommentFab = findViewById(R.id.fab_add_course_comment);
-        if (userType != UserType.Student || !getIntent().getBooleanExtra(IntentParam.ALREADY_SUBSCRIBE, false)) {
-            addCommentFab.setVisibility(View.GONE); // RestrictedApi
-            addCommentFab.setSystemUiVisibility(View.GONE);
-            addCommentFab.setEnabled(false);
-        } else {
-            addCommentFab.setOnClickListener(v -> showAddCommentDialog());
-        }
         courseCommentInfos = new ArrayList<>();
         recyclerViewAdapter = new CourseCommentRecyclerViewAdapter(this, courseCommentInfos);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
@@ -109,27 +103,43 @@ public class CourseCommentActivity extends AppCompatActivity {
     }
 
     private void showAddCommentDialog() {
-        AlertDialog.Builder addCommentDialog =
-                new AlertDialog.Builder(CourseCommentActivity.this);
-        final View dialogView = LayoutInflater.from(CourseCommentActivity.this)
-                .inflate(R.layout.dialog_add_course_comment,null);
-        addCommentDialog.setTitle("增加评论");
-        addCommentDialog.setView(dialogView);
-        addCommentDialog.setPositiveButton("确定",
-                (dialog, which) -> {
-                    // 获取EditView中的输入内容
-                    RatingBar ratingBar = dialogView.findViewById(R.id.rating_bar_comment);
-                    EditText commentEditView = dialogView.findViewById(R.id.text_edit_comment);
-                    CourseCommentType commentType = ProtoUtils.generateCommentTypeFromRating(
-                            (int) ratingBar.getRating());
-                    CourseCommentService.getInstance().createCourseComment(handler,
-                            commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
-                })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    dialog.cancel();
-                    dialog.dismiss();
-                });
-        addCommentDialog.show();
+        QMUIDialog.CustomDialogBuilder builder = new CustomDialogBuilder(this);
+        builder.setTitle("添加评论");
+        builder.setLayout(R.layout.dialog_add_course_comment);
+        builder.addAction("取消", (dialog, index) -> dialog.dismiss());
+        builder.addAction("确定", ((dialog, index) -> {
+            dialog.dismiss();
+            // 获取EditView中的输入内容
+            RatingBar ratingBar = dialog.findViewById(R.id.rating_bar_comment);
+            EditText commentEditView = dialog.findViewById(R.id.text_edit_comment);
+            CourseCommentType commentType = ProtoUtils.generateCommentTypeFromRating(
+                    (int) ratingBar.getRating());
+            CourseCommentService.getInstance().createCourseComment(handler,
+                    commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
+        }));
+        builder.show();
+
+//        AlertDialog.Builder addCommentDialog =
+//                new AlertDialog.Builder(CourseCommentActivity.this);
+//        final View dialogView = LayoutInflater.from(CourseCommentActivity.this)
+//                .inflate(R.layout.dialog_add_course_comment,null);
+//        addCommentDialog.setTitle("增加评论");
+//        addCommentDialog.setView(dialogView);
+//        addCommentDialog.setPositiveButton("确定",
+//                (dialog, which) -> {
+//                    // 获取EditView中的输入内容
+//                    RatingBar ratingBar = dialogView.findViewById(R.id.rating_bar_comment);
+//                    EditText commentEditView = dialogView.findViewById(R.id.text_edit_comment);
+//                    CourseCommentType commentType = ProtoUtils.generateCommentTypeFromRating(
+//                            (int) ratingBar.getRating());
+//                    CourseCommentService.getInstance().createCourseComment(handler,
+//                            commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
+//                })
+//                .setNegativeButton("取消", (dialog, which) -> {
+//                    dialog.cancel();
+//                    dialog.dismiss();
+//                });
+//        addCommentDialog.show();
     }
 
     @SuppressLint("HandlerLeak")

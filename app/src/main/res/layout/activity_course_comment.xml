@@ -28,18 +28,6 @@
 
         </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_course_comment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_margin="16dp"
-            app:pressedTranslationZ="12dp"
-            app:srcCompat="@drawable/ic_add_white"
-            app:backgroundTint="@color/app_color_blue_2"
-            app:rippleColor="@color/app_color_blue_2_pressed"/>
-
     </android.support.constraint.ConstraintLayout>
 
     <com.qmuiteam.qmui.widget.QMUITopBarLayout
