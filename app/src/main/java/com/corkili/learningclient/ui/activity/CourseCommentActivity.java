@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,14 +29,18 @@ import com.corkili.learningclient.service.CourseCommentService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.adapter.CourseCommentRecyclerViewAdapter;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CourseCommentActivity extends AppCompatActivity {
 
+    private QMUITopBarLayout topBar;
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
     private FloatingActionButton addCommentFab;
 
     private CourseInfo courseInfo;
@@ -45,6 +48,8 @@ public class CourseCommentActivity extends AppCompatActivity {
     private List<CourseCommentInfo> courseCommentInfos;
 
     private CourseCommentRecyclerViewAdapter recyclerViewAdapter;
+
+    private boolean shouldFinishRefresh;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -56,6 +61,11 @@ public class CourseCommentActivity extends AppCompatActivity {
         if (userType == null || courseInfo == null) {
             throw new RuntimeException("Intent param lost");
         }
+        topBar = findViewById(R.id.topbar);
+
+        topBar.setTitle("课程评论");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> CourseCommentActivity.this.finish());
+
         recyclerView = findViewById(R.id.activity_course_comment_list);
         swipeRefreshLayout = findViewById(R.id.activity_course_comment_swipe_refresh_layout);
         addCommentFab = findViewById(R.id.fab_add_course_comment);
@@ -74,7 +84,23 @@ public class CourseCommentActivity extends AppCompatActivity {
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
                 1,ContextCompat.getColor(this,R.color.colorBlack)));
-        swipeRefreshLayout.setOnRefreshListener(this::refreshCourseCommentInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshCourseCommentInfos();
+            }
+        });
         refreshCourseCommentInfos();
     }
 
@@ -124,8 +150,10 @@ public class CourseCommentActivity extends AppCompatActivity {
         if (serviceResult.isSuccess()) {
             courseCommentInfos.clear();
             courseCommentInfos.addAll(serviceResult.extra(CourseCommentFindAllResponse.class).getCourseCommentInfoList());
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+        }
+        if (shouldFinishRefresh) {
+            swipeRefreshLayout.finishRefresh();
         }
     }
 

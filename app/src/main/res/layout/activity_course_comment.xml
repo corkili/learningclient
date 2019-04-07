@@ -1,35 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activity.CourseCommentActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/activity_course_comment_swipe_refresh_layout">
+        android:layout_marginTop="?attr/qmui_topbar_height"
+        android:fitsSystemWindows="true">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/activity_course_comment_list"
-            android:name="com.corkili.learningclient.ui.fragment.TeacherCourseFragment"
+        <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            tools:context=".ui.activity.CourseCommentActivity"
-            tools:listitem="@layout/activity_course_comment_list_item" />
+            android:id="@+id/activity_course_comment_swipe_refresh_layout">
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/activity_course_comment_list"
+                android:name="com.corkili.learningclient.ui.fragment.TeacherCourseFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                tools:context=".ui.activity.CourseCommentActivity"
+                tools:listitem="@layout/activity_course_comment_list_item" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_add_course_comment"
-        android:layout_width="wrap_content"
+        </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_course_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_margin="16dp"
+            app:pressedTranslationZ="12dp"
+            app:srcCompat="@drawable/ic_add_white"
+            app:backgroundTint="@color/app_color_blue_2"
+            app:rippleColor="@color/app_color_blue_2_pressed"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <com.qmuiteam.qmui.widget.QMUITopBarLayout
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="16dp"
-        app:pressedTranslationZ="12dp"
-        app:srcCompat="@drawable/ic_add_white" />
+        android:fitsSystemWindows="true"/>
 
-</android.support.constraint.ConstraintLayout>
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>
