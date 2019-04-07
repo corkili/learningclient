@@ -259,6 +259,7 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
                 }
             }
         }
+        updateTipView();
     }
 
     @Override

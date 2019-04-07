@@ -189,6 +189,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             questionInfos.add(questionInfo);
             recyclerViewAdapter.notifyDataSetChanged();
         }
+        updateTipView();
     }
 
     @Override

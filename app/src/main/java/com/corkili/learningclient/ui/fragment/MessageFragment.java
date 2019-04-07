@@ -205,6 +205,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
             messageInfos.put(userInfo.getUserId(), messageInfoList);
             recyclerViewAdapter.notifyDataSetChanged();
         }
+        updateTipView();
     }
 
     @Override

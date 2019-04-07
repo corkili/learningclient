@@ -180,6 +180,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     @Override
