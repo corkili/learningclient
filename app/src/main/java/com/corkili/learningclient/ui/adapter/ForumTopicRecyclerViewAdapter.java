@@ -1,7 +1,6 @@
 package com.corkili.learningclient.ui.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -13,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +28,9 @@ import com.corkili.learningclient.generate.protobuf.Response.TopicReplyFindAllRe
 import com.corkili.learningclient.service.ForumService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,10 +65,14 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = topicCommentInfos.get(position);
         holder.indexView.setText(IUtils.format("{}楼", position + 1));
-        if (holder.mItem.getAuthorInfo().getUserType() == UserType.Teacher) {
-            holder.usernameView.setText(IUtils.format("[老师]{}", holder.mItem.getAuthorInfo().getUsername()));
+        if (holder.mItem.getAuthorInfo().getUserId() == userInfo.getUserId()) {
+            holder.usernameView.setText(IUtils.format("@[我]{}", holder.mItem.getAuthorInfo().getUsername()));
         } else {
-            holder.usernameView.setText(holder.mItem.getAuthorInfo().getUsername());
+            if (holder.mItem.getAuthorInfo().getUserType() == UserType.Teacher) {
+                holder.usernameView.setText(IUtils.format("@[老师]{}", holder.mItem.getAuthorInfo().getUsername()));
+            } else {
+                holder.usernameView.setText(IUtils.format("@{}", holder.mItem.getAuthorInfo().getUsername()));
+            }
         }
         holder.contentView.setText(holder.mItem.getContent());
         holder.timeView.setText(IUtils.format("{}",
@@ -105,7 +110,8 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
         private final ConstraintLayout replyLayout;
         private final RecyclerView recyclerView;
         private final EditText replyEditView;
-        private final Button addReplyButton;
+        private final QMUIRoundButton addReplyButton;
+        private final TextView replyTipView;
 
         private final List<TopicReplyInfo> topicReplyInfos;
         private final ForumTopicReplyRecyclerViewAdapter recyclerViewAdapter;
@@ -124,8 +130,9 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
             recyclerView = view.findViewById(R.id.comment_reply_list);
             replyEditView = view.findViewById(R.id.comment_reply_editor);
             addReplyButton = view.findViewById(R.id.add_comment_reply);
+            replyTipView = view.findViewById(R.id.reply_tip);
             topicReplyInfos = new ArrayList<>();
-            recyclerViewAdapter = new ForumTopicReplyRecyclerViewAdapter(context, this.topicReplyInfos, this);
+            recyclerViewAdapter = new ForumTopicReplyRecyclerViewAdapter(context, this.topicReplyInfos, userInfo, this);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
             linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(linearLayoutManager);
@@ -151,6 +158,14 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
             
         }
 
+        private void updateReplyTipView() {
+            if (topicReplyInfos.isEmpty()) {
+                replyTipView.setVisibility(View.VISIBLE);
+            } else {
+                replyTipView.setVisibility(View.GONE);
+            }
+        }
+
         public TopicCommentInfo getTopicCommentInfo() {
             return mItem;
         }
@@ -162,6 +177,7 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
         private void onReplyInfoSetChange() {
             replyView.setText(IUtils.format("回复({})", topicReplyInfos.size()));
             recyclerViewAdapter.notifyDataSetChanged();
+            updateReplyTipView();
         }
 
         @Override
@@ -170,18 +186,16 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
             if (topicReplyInfo.getAuthorId() != userInfo.getUserId()) {
                 return false;
             }
-            AlertDialog.Builder confirmDeleteDialog =
-                    new AlertDialog.Builder(context);
-            confirmDeleteDialog.setTitle("删除回复");
-            confirmDeleteDialog.setMessage("确定删除该回复？");
-            confirmDeleteDialog.setPositiveButton("确定", (ed, which) -> {
-                ForumService.getInstance().deleteTopicReply(handler, topicReplyInfo.getTopicReplyId());
-            });
-            confirmDeleteDialog.setNegativeButton("取消", (ed, which) -> {
-                ed.cancel();
-                ed.dismiss();
-            });
-            confirmDeleteDialog.show();
+
+            new QMUIDialog.MessageDialogBuilder(context)
+                    .setTitle("删除回复")
+                    .setMessage("确定删除该回复？")
+                    .addAction("取消", (dialog, index) -> dialog.dismiss())
+                    .addAction(0, "删除", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                        ForumService.getInstance().deleteTopicReply(handler, topicReplyInfo.getTopicReplyId());
+                        dialog.dismiss();
+                    })
+                    .show();
 
             return true;
         }

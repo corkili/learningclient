@@ -242,6 +242,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                     if (position == 0) {
                         final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(this);
                         builder.setTitle("修改帖子描述")
+                                .setPlaceholder("输入帖子描述")
                                 .setDefaultText(forumTopicInfo.getDescription())
                                 .setInputType(InputType.TYPE_CLASS_TEXT)
                                 .addAction("取消", (d, index) -> d.dismiss())

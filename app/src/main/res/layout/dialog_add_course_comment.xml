@@ -66,7 +66,7 @@
         <EditText
             android:id="@+id/text_edit_comment"
             style="@style/CommonEditText"
-            android:ems="10"
+            android:hint="输入帖子评论"
             android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

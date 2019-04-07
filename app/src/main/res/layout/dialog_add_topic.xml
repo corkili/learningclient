@@ -21,16 +21,16 @@
 
         <TextView
             android:id="@+id/text_view_title"
+            style="@style/QDCommonTitle"
             android:text="标题"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/text_edit_title"
-            android:ems="10"
+            style="@style/CommonEditText"
+            android:hint="输入帖子标题"
             android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -54,16 +54,16 @@
 
         <TextView
             android:id="@+id/text_view_description"
+            style="@style/QDCommonTitle"
             android:text="描述"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/text_edit_description"
-            android:ems="10"
+            style="@style/CommonEditText"
+            android:hint="输入帖子描述"
             android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
