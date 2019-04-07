@@ -67,7 +67,7 @@ public class CourseCommentActivity extends AppCompatActivity {
         topBar.addLeftBackImageButton().setOnClickListener(v -> CourseCommentActivity.this.finish());
 
         if (userType == UserType.Student && getIntent().getBooleanExtra(IntentParam.ALREADY_SUBSCRIBE, false)) {
-            topBar.addRightImageButton(R.drawable.ic_comment_24dp, R.id.topbar_right_comment)
+            topBar.addRightImageButton(R.drawable.ic_comment_white_24dp, R.id.topbar_right_comment)
                     .setOnClickListener(v -> showAddCommentDialog());
         }
 
@@ -130,28 +130,6 @@ public class CourseCommentActivity extends AppCompatActivity {
                     commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
         }));
         builder.show();
-
-//        AlertDialog.Builder addCommentDialog =
-//                new AlertDialog.Builder(CourseCommentActivity.this);
-//        final View dialogView = LayoutInflater.from(CourseCommentActivity.this)
-//                .inflate(R.layout.dialog_add_course_comment,null);
-//        addCommentDialog.setTitle("增加评论");
-//        addCommentDialog.setView(dialogView);
-//        addCommentDialog.setPositiveButton("确定",
-//                (dialog, which) -> {
-//                    // 获取EditView中的输入内容
-//                    RatingBar ratingBar = dialogView.findViewById(R.id.rating_bar_comment);
-//                    EditText commentEditView = dialogView.findViewById(R.id.text_edit_comment);
-//                    CourseCommentType commentType = ProtoUtils.generateCommentTypeFromRating(
-//                            (int) ratingBar.getRating());
-//                    CourseCommentService.getInstance().createCourseComment(handler,
-//                            commentType, commentEditView.getText().toString().trim(), courseInfo.getCourseId());
-//                })
-//                .setNegativeButton("取消", (dialog, which) -> {
-//                    dialog.cancel();
-//                    dialog.dismiss();
-//                });
-//        addCommentDialog.show();
     }
 
     @SuppressLint("HandlerLeak")
