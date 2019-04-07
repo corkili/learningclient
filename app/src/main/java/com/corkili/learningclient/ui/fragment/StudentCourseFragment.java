@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -47,6 +48,7 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
     
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
 
     private StudentCourseRecyclerViewAdapter recyclerViewAdapter;
 
@@ -81,6 +83,7 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_student_course, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_student_course_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_student_course_swipe_refresh_layout);
         courseInfos = new ArrayList<>();
@@ -117,6 +120,14 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
         });
 
         refreshCourseInfos();
+    }
+
+    private void updateTipView() {
+        if (courseInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshCourseInfos() {
@@ -170,6 +181,7 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     private void handleFindAllSubscribedCourseMsg(Message msg) {
@@ -191,6 +203,7 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     @Override

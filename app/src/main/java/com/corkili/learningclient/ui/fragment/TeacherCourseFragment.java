@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -42,6 +43,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
     private FloatingActionButton createCourseFab;
+    private TextView tipView;
 
     private TeacherCourseRecyclerViewAdapter recyclerViewAdapter;
 
@@ -71,6 +73,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_teacher_course, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_teacher_course_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_teacher_course_swipe_refresh_layout);
         createCourseFab = view.findViewById(R.id.fab_create_course);
@@ -116,6 +119,14 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
         refreshCourseInfos();
     }
 
+    private void updateTipView() {
+        if (courseInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
+    }
+
     private void refreshCourseInfos() {
         CourseService.getInstance().findAllCourse(handler, false, true, null, null, null);
     }
@@ -143,6 +154,7 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
         if (shouldFinishRefresh) {
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     @Override

@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -44,6 +45,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
     private FloatingActionButton addQuestionFab;
+    private TextView tipView;
 
     private QuestionRecyclerViewAdapter recyclerViewAdapter;
 
@@ -71,6 +73,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_question, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_question_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_question_swipe_refresh_layout);
         addQuestionFab = view.findViewById(R.id.fab_add_question);
@@ -122,6 +125,14 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         refreshQuestionInfos();
     }
 
+    private void updateTipView() {
+        if (questionInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
+    }
+
     private void refreshQuestionInfos() {
         QuestionService.getInstance().findAllQuestion(handler, true, null, null);
     }
@@ -148,6 +159,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     @Override

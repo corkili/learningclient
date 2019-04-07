@@ -6,6 +6,15 @@
     android:layout_width="match_parent"
     tools:context=".ui.fragment.QuestionFragment">
 
+    <TextView
+        android:id="@+id/tip"
+        style="@style/QDCommonDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="@dimen/text_margin"
+        android:text="没有导入任何试题~" />
+
     <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -43,6 +44,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
 
     private RecyclerView recyclerView;
     private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
 
     private boolean shouldFinishRefresh = false;
 
@@ -73,6 +75,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_message, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_message_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_message_swipe_refresh_layout);
         messageInfos = new HashMap<>();
@@ -109,6 +112,14 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
         });
 
         refreshMessageInfos();
+    }
+
+    private void updateTipView() {
+        if (messageInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshMessageInfos() {
@@ -169,6 +180,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
         }
+        updateTipView();
     }
 
     @Override
