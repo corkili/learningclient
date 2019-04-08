@@ -2,16 +2,13 @@ package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.TextView;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.corkili.learningclient.R;
@@ -26,34 +23,28 @@ import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.SubmittedExamFindAllResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.SubmittedExamService;
-import com.corkili.learningclient.ui.adapter.SubmittedRecyclerViewAdapter;
-import com.corkili.learningclient.ui.adapter.SubmittedRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView.Section;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class SubmittedExamActivity extends AppCompatActivity implements SubmittedRecyclerViewAdapter.OnItemInteractionListener {
+public class SubmittedExamActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_CHECK_SUBMITTED_EXAM = 0xF1;
 
-    private View examInformationView;
-    private TextView indexView;
-    private TextView submitView;
-    private TextView examNameView;
-    private TextView startTimeView;
-    private TextView endTimeView;
-    
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView submitListView;
+    private Section submitterSection;
 
     private ExamInfo examInfo;
     private UserInfo userInfo;
 
     private List<SubmittedExamSimpleInfo> submittedExamSimpleInfos;
-
-    private SubmittedRecyclerViewAdapter recyclerViewAdapter;
     
     @SuppressLint("RestrictedApi")
     @Override
@@ -66,40 +57,71 @@ public class SubmittedExamActivity extends AppCompatActivity implements Submitte
             throw new RuntimeException("Intent param lost");
         }
 
-        examInformationView = findViewById(R.id.exam_information);
-        indexView = examInformationView.findViewById(R.id.item_index);
-        submitView = examInformationView.findViewById(R.id.item_submit);
-        examNameView = examInformationView.findViewById(R.id.item_exam_name);
-        startTimeView = examInformationView.findViewById(R.id.item_start_time);
-        endTimeView = examInformationView.findViewById(R.id.item_end_time);
+        topBar = findViewById(R.id.topbar);
 
-        indexView.setVisibility(View.GONE);
-        if (examInfo.getStartTime() <= System.currentTimeMillis()) {
-            if (examInfo.getEndTime() <= System.currentTimeMillis()) {
-                submitView.setText("已关闭提交");
-            } else {
-                submitView.setText("已开放提交");
-            }
-        }
-        examNameView.setSingleLine(false);
-        examNameView.setText(examInfo.getExamName());
-        startTimeView.setText(IUtils.format("开始时间：{}", IUtils.DATE_TIME_FORMATTER
-                .format(new Date(examInfo.getStartTime()))));
-        endTimeView.setText(IUtils.format("结束时间：{}", IUtils.DATE_TIME_FORMATTER
-                .format(new Date(examInfo.getEndTime()))));
-        
-        recyclerView = findViewById(R.id.activity_submit_list);
-        swipeRefreshLayout = findViewById(R.id.activity_submitted_exam_swipe_refresh_layout);
+        topBar.setTitle("作业提交列表");
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> finish());
+
+        topBar.addRightImageButton(R.drawable.ic_refresh_24dp, R.id.topbar_right_refresh)
+                .setOnClickListener(v -> refreshSubmittedExamSimpleInfos());
+
+        submitListView = findViewById(R.id.submit_list);
         
         submittedExamSimpleInfos = new ArrayList<>();
-        recyclerViewAdapter = new SubmittedRecyclerViewAdapter(submittedExamSimpleInfos, this, this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(this,R.color.colorBlack)));
-        swipeRefreshLayout.setOnRefreshListener(this::refreshSubmittedExamSimpleInfos);
+
+        QMUICommonListItemView courseWorkNameItemView = submitListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
+                "考试名称",
+                examInfo.getExamName(),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        String submitMsg;
+        if (examInfo.getStartTime() <= System.currentTimeMillis()) {
+            if (examInfo.getEndTime() <= System.currentTimeMillis()) {
+                submitMsg = "已关闭提交";
+            } else {
+                submitMsg = "已开放提交";
+            }
+        } else {
+            submitMsg = "未开放提交";
+        }
+
+        QMUICommonListItemView submitItemView = submitListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_state_24dp),
+                "提交状态",
+                submitMsg,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView startTimeItemView = submitListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "开始时间",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(examInfo.getStartTime())),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView endTimeItemView = submitListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "结束时间",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(examInfo.getEndTime())),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("考试基本信息")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(courseWorkNameItemView, null)
+                .addItemView(submitItemView, null)
+                .addItemView(startTimeItemView, null)
+                .addItemView(endTimeItemView, null)
+                .addTo(submitListView);
+
+        refreshListView();
+        
         refreshSubmittedExamSimpleInfos();
     }
 
@@ -114,6 +136,48 @@ public class SubmittedExamActivity extends AppCompatActivity implements Submitte
             intent.putExtra(IntentParam.EXAM_INFO, examInfo);
             intent.putExtra(IntentParam.SUBMITTED_EXAM_ID, submittedExamSimpleInfo.getSubmittedExamId());
             startActivityForResult(intent, REQUEST_CODE_CHECK_SUBMITTED_EXAM);
+        }
+    }
+
+    private synchronized void refreshListView() {
+        if (submitterSection != null) {
+            submitterSection.removeFrom(submitListView);
+        }
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+
+        Section section = QMUIGroupListView.newSection(this)
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT);
+        for (SubmittedExamSimpleInfo submittedExamSimpleInfo : submittedExamSimpleInfos) {
+            Drawable drawable;
+            if (submittedExamSimpleInfo.getAlreadyCheckAllAnswer()) {
+                drawable = ContextCompat.getDrawable(this, R.drawable.ic_finish_24dp);
+            } else {
+                drawable = ContextCompat.getDrawable(this, R.drawable.ic_notfinish_24dp);
+            }
+
+            QMUICommonListItemView itemView = submitListView.createItemView(
+                    drawable,
+                    submittedExamSimpleInfo.getSubmitterInfo().getUsername(),
+                    IUtils.DATE_TIME_FORMATTER.format(new Date(submittedExamSimpleInfo.getUpdateTime())),
+                    QMUICommonListItemView.HORIZONTAL,
+                    QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+
+            section.addItemView(itemView, v -> onItemClick(submittedExamSimpleInfo));
+        }
+        String title;
+        if (submittedExamSimpleInfos.isEmpty()) {
+            title = "没有提交的试卷";
+        } else {
+            title = IUtils.format("共有{}份已提交试卷", submittedExamSimpleInfos.size());
+        }
+        section.setTitle(title);
+        this.submitterSection = section;
+        submitterSection.addTo(submitListView);
+    }
+
+    private void onItemClick(SubmittedExamSimpleInfo submittedExamSimpleInfo) {
+        if (submittedExamSimpleInfo != null) {
+            enterExamDetailActivity(submittedExamSimpleInfo);
         }
     }
 
@@ -137,8 +201,7 @@ public class SubmittedExamActivity extends AppCompatActivity implements Submitte
                     submittedExamSimpleInfos.add(submittedExamSimpleInfo);
                 }
             }
-            swipeRefreshLayout.setRefreshing(false);
-            recyclerViewAdapter.notifyDataSetChanged();
+            refreshListView();
         }
     }
 
@@ -165,19 +228,11 @@ public class SubmittedExamActivity extends AppCompatActivity implements Submitte
             }
             if (needReplaceIndex >= 0) {
                 submittedExamSimpleInfos.set(needReplaceIndex, ProtoUtils.simplifySubmittedExamInfo(submittedExamInfo));
-                recyclerViewAdapter.notifyItemChanged(needReplaceIndex);
+                refreshListView();
             } else {
                 submittedExamSimpleInfos.add(ProtoUtils.simplifySubmittedExamInfo(submittedExamInfo));
-                recyclerViewAdapter.notifyDataSetChanged();
+                refreshListView();
             }
-        }
-    }
-
-    @Override
-    public void onItemClick(ViewHolder viewHolder) {
-        final SubmittedExamSimpleInfo submittedExamSimpleInfo = viewHolder.getSubmittedExamSimpleInfo();
-        if (submittedExamSimpleInfo != null) {
-            enterExamDetailActivity(submittedExamSimpleInfo);
         }
     }
     
