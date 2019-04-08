@@ -20,7 +20,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
@@ -38,11 +37,14 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.DeliveryContentInfo;
 import com.corkili.learningclient.generate.protobuf.Info.NavigationEventType;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.CourseCatalogQueryResponse;
 import com.corkili.learningclient.generate.protobuf.Response.NavigationProcessResponse;
 import com.corkili.learningclient.network.HttpUtils;
 import com.corkili.learningclient.service.ScormService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,15 +54,16 @@ public class ScormActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_CHOOSE_ITEM = 0xF1;
 
+    private QMUITopBarLayout topBar;
     private FrameLayout scormViewLayout;
     private WebView scormView;
     private ProgressBar scormLoadProgressBar;
     private TextView tipView;
-    private Button chooseButton;
-    private Button previousButton;
-    private Button nextButton;
-    private Button suspendAndResumeButton;
-    private Button startAndExitButton;
+    private QMUIRoundButton chooseButton;
+    private QMUIRoundButton previousButton;
+    private QMUIRoundButton nextButton;
+    private QMUIRoundButton suspendAndResumeButton;
+    private QMUIRoundButton startAndExitButton;
 
     private List<WebView> openWebViewList;
 
@@ -90,6 +93,16 @@ public class ScormActivity extends AppCompatActivity {
 
         if (userInfo == null || courseInfo == null) {
             throw new RuntimeException("expected intent param");
+        }
+
+        topBar = findViewById(R.id.topbar);
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> finishActivity());
+
+        if (userInfo.getUserType() == UserType.Teacher) {
+            topBar.setTitle("课件预览");
+        } else {
+            topBar.setTitle("课件学习");
         }
 
         scormViewLayout = findViewById(R.id.scorm_view_layout);
@@ -222,11 +235,16 @@ public class ScormActivity extends AppCompatActivity {
             suspendAndResumeButton.setText("暂停");
         }
 
+        boolean alreadySetTitle = false;
         if (currentDeliveryContentInfo != null) {
             scormView.setVisibility(View.VISIBLE);
             tipView.setVisibility(View.GONE);
+            String title = getTitleForItemInLastLevel(currentDeliveryContentInfo.getItemId());
+            if (title != null) {
+                alreadySetTitle = true;
+                topBar.setTitle(title);
+            }
             String url = HttpUtils.getLaunchContentObjectUrl(courseInfo.getCoursewareId(), currentDeliveryContentInfo.getItemId());
-            Log.i("ScromActivity", "refreshView: " + url);
             for (WebView webView : openWebViewList) {
                 webView.setVisibility(View.GONE);
                 webView.destroy();
@@ -236,6 +254,13 @@ public class ScormActivity extends AppCompatActivity {
         } else {
             scormView.setVisibility(View.GONE);
             tipView.setVisibility(View.VISIBLE);
+        }
+        if (!alreadySetTitle) {
+            if (userInfo.getUserType() == UserType.Teacher) {
+                topBar.setTitle("课件预览");
+            } else {
+                topBar.setTitle("课件学习");
+            }
         }
     }
 
@@ -302,6 +327,23 @@ public class ScormActivity extends AppCompatActivity {
         }
     }
 
+    private String getTitleForItemInLastLevel(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        if (courseCatalogInfo != null) {
+            CourseCatalogItemInfoList courseCatalogItemInfoList = courseCatalogInfo.getItemsMap().get(courseCatalogInfo.getMaxLevel());
+            if (courseCatalogItemInfoList != null) {
+                for (CourseCatalogItemInfo courseCatalogItemInfo : courseCatalogItemInfoList.getCourseCatalogItemInfoList()) {
+                    if (itemId.equals(courseCatalogItemInfo.getItemId())) {
+                        return courseCatalogItemInfo.getItemTitle();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -331,11 +373,6 @@ public class ScormActivity extends AppCompatActivity {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             scormLoadProgressBar.setProgress(newProgress);
-        }
-
-        @Override
-        public void onReceivedTitle(WebView view, String title) {
-            ScormActivity.this.setTitle(title);
         }
 
         @Override

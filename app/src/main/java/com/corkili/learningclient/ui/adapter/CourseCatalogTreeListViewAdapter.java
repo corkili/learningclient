@@ -3,6 +3,7 @@ package com.corkili.learningclient.ui.adapter;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,16 +35,29 @@ public class CourseCatalogTreeListViewAdapter extends TreeListViewAdapter<Course
 
         viewHolder.titleView.setText(node.getName());
 
+        if (node.isLeaf()) {
+            viewHolder.iconView.setVisibility(View.INVISIBLE);
+        } else {
+            viewHolder.iconView.setVisibility(View.VISIBLE);
+            if (node.isExpand()) {
+                viewHolder.iconView.setImageResource(R.drawable.ic_list_expand_24dp);
+            } else {
+                viewHolder.iconView.setImageResource(R.drawable.ic_list_no_expand_24dp);
+            }
+        }
+
         return convertView;
     }
 
     private final class ViewHolder {
 
         private View mView;
+        private ImageView iconView;
         private TextView titleView;
 
         public ViewHolder(View view) {
             this.mView = view;
+            iconView = view.findViewById(R.id.icon);
             titleView = view.findViewById(R.id.catalog_item_title);
         }
     }

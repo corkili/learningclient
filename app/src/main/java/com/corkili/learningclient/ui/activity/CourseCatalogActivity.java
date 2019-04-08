@@ -13,6 +13,7 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
 import com.corkili.learningclient.ui.adapter.CourseCatalogTreeListViewAdapter;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.zhy.tree.bean.Node;
 import com.zhy.tree.bean.TreeListViewAdapter;
 
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CourseCatalogActivity extends AppCompatActivity implements TreeListViewAdapter.OnTreeNodeClickListener {
 
+    private QMUITopBarLayout topBar;
     private ListView catalogListView;
     private TreeListViewAdapter mAdapter;
 
@@ -46,6 +48,13 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
             finish();
             return;
         }
+
+        topBar = findViewById(R.id.topbar);
+        topBar.setTitle("选择要跳转到的活动");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            setResult(RESULT_CANCELED);
+            finish();
+        });
 
         catalogListView = findViewById(R.id.catalog_item_list);
 
