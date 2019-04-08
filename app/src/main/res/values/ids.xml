@@ -22,4 +22,5 @@
     <item name="topbar_right_edit" type="id"/>
     <item name="topbar_right_comment" type="id"/>
     <item name="topbar_right_subscribe" type="id" />
+    <item name="topbar_right_add" type="id" />
 </resources>
