@@ -27,15 +27,14 @@ public class UIHelper {
     }
 
     public synchronized static void showLoadingDialog(Context context) {
-        if (context != null && loadingDialog == null) {
+        if (context != null) {
+            dismissLoadingDialog();
             loadingDialog = new QMUITipDialog.Builder(context)
                     .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
                     .setTipWord("请稍后")
                     .create();
-        }
-        loadingDialog.setCancelable(false);
-        loadingDialog.setCanceledOnTouchOutside(false);
-        if (!loadingDialog.isShowing()) {
+            loadingDialog.setCancelable(false);
+            loadingDialog.setCanceledOnTouchOutside(false);
             loadingDialog.show();
         }
     }

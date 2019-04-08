@@ -14,11 +14,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.tu.loadingdialog.LoadingDailog;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.EssaySubmittedAnswer;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamQuestionInfo;
@@ -87,7 +87,6 @@ public class ExamDetailActivity extends AppCompatActivity implements
     private ExamInfo examInfo;
     private long submittedExamId;
 
-    private LoadingDailog waitingDialog;
     private AtomicInteger counter;
     private boolean isSystemSubmit;
 
@@ -123,13 +122,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
         submitButton = topBar.addRightTextButton("提交", R.id.topbar_right_submit);
         saveButton = topBar.addRightTextButton("暂存", R.id.topbar_right_save);
 
-        waitingDialog = new LoadingDailog.Builder(this)
-                .setMessage("请稍后...")
-                .setCancelable(false)
-                .setCancelOutside(false)
-                .create();
-
-        waitingDialog.show();
+        UIHelper.showLoadingDialog(this);
         counter = new AtomicInteger(0);
         isSystemSubmit = false;
 
@@ -689,8 +682,8 @@ public class ExamDetailActivity extends AppCompatActivity implements
     }
 
     private void finishInit() {
-        if (waitingDialog != null && counter.incrementAndGet() == 2) {
-            waitingDialog.dismiss();
+        if (counter.incrementAndGet() == 2) {
+            UIHelper.dismissLoadingDialog();
             refresh();
             if (userInfo.getUserType() == UserType.Student) {
                 if (!canSubmitAnswer()) {

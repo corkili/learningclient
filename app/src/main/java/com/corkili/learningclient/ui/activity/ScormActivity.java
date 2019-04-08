@@ -24,10 +24,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.tu.loadingdialog.LoadingDialog;
-import com.android.tu.loadingdialog.LoadingDialog.Builder;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
@@ -79,9 +78,7 @@ public class ScormActivity extends AppCompatActivity {
     private boolean isSuspend;
 
     private boolean shouldFinish;
-
-    private LoadingDialog waitingDialog;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,21 +123,21 @@ public class ScormActivity extends AppCompatActivity {
 
         previousButton.setOnClickListener(v -> {
             if (alreadyStart && !isSuspend) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 triggerNavigationEvent(NavigationEventType.Previous);
             }
         });
 
         nextButton.setOnClickListener(v -> {
             if (alreadyStart && !isSuspend) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 triggerNavigationEvent(NavigationEventType.Continue);
             }
         });
 
         suspendAndResumeButton.setOnClickListener(v -> {
             if (alreadyStart) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 if (!isSuspend) {
                     triggerNavigationEvent(NavigationEventType.SuspendAll);
                 } else {
@@ -150,7 +147,7 @@ public class ScormActivity extends AppCompatActivity {
         });
 
         startAndExitButton.setOnClickListener(v -> {
-            waitingDialog.show();
+            UIHelper.showLoadingDialog(ScormActivity.this);
             if (!alreadyStart) {
                 // start
                 if (currentLevel1Item == null) {
@@ -169,13 +166,7 @@ public class ScormActivity extends AppCompatActivity {
         currentLevel1Item = null;
         level1ItemInfoList = new ArrayList<>();
 
-        waitingDialog = new Builder(this)
-                .setMessage("正在加载...")
-                .setCancelable(false)
-                .setCancelOutside(false)
-                .create();
-
-        waitingDialog.show();
+        UIHelper.showLoadingDialog(ScormActivity.this);
 
         loadCourseCatalog();
     }
@@ -498,9 +489,9 @@ public class ScormActivity extends AppCompatActivity {
             }
             setState(false, false);
             refreshView();
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
         } else {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             finishActivity();
         }
     }
@@ -510,14 +501,14 @@ public class ScormActivity extends AppCompatActivity {
         boolean isSuccess = serviceResult.isSuccess();
         NavigationProcessResponse response = serviceResult.extra(NavigationProcessResponse.class);
         if (response == null) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
             return;
         }
         boolean hasDeliveryContentInfo = response.getHasDeliveryContentInfo();
         DeliveryContentInfo deliveryContentInfo = response.getDeliveryContentInfo();
         if (response.getNavigationEventType() == NavigationEventType.Start) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
@@ -526,7 +517,7 @@ public class ScormActivity extends AppCompatActivity {
                 Toast.makeText(this, "[开始] 无法加载学习内容", Toast.LENGTH_LONG).show();
             }
         } else if (response.getNavigationEventType() == NavigationEventType.ResumeAll) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
@@ -536,7 +527,7 @@ public class ScormActivity extends AppCompatActivity {
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Continue) {
             if (isSuccess && hasDeliveryContentInfo) {
-                waitingDialog.dismiss();
+                UIHelper.dismissLoadingDialog();
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
@@ -545,13 +536,13 @@ public class ScormActivity extends AppCompatActivity {
                 if (nextLevel1Item()) {
                     triggerNavigationEvent(NavigationEventType.Continue);
                 } else {
-                    waitingDialog.dismiss();
+                    UIHelper.dismissLoadingDialog();
                     Toast.makeText(this, "[向后] 已到达最后一个学习活动", Toast.LENGTH_LONG).show();
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Previous) {
             if (isSuccess && hasDeliveryContentInfo) {
-                waitingDialog.dismiss();
+                UIHelper.dismissLoadingDialog();
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
@@ -560,12 +551,12 @@ public class ScormActivity extends AppCompatActivity {
                 if (previousLevel1Item()) {
                     triggerNavigationEvent(NavigationEventType.Previous);
                 } else {
-                    waitingDialog.dismiss();
+                    UIHelper.dismissLoadingDialog();
                     Toast.makeText(this, "[向前] 已到达第一个活动", Toast.LENGTH_LONG).show();
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Choose) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
@@ -576,7 +567,7 @@ public class ScormActivity extends AppCompatActivity {
                 Toast.makeText(this, "[跳转] 无法加载学习内容", Toast.LENGTH_LONG).show();
             }
         } else if (response.getNavigationEventType() == NavigationEventType.SuspendAll) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess) {
                 currentDeliveryContentInfo = null;
                 setState(true, true);
@@ -585,7 +576,7 @@ public class ScormActivity extends AppCompatActivity {
                 Toast.makeText(this, "无法暂停", Toast.LENGTH_LONG).show();
             }
         } else if (response.getNavigationEventType() == NavigationEventType.UnqualifiedExit) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess) {
                 currentDeliveryContentInfo = null;
                 setState(false, false);

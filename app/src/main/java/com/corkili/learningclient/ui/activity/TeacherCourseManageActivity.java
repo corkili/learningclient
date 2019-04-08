@@ -18,10 +18,10 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.tu.loadingdialog.LoadingDialog;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
@@ -58,8 +58,6 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     private QMUICommonListItemView workItem;
     private QMUICommonListItemView examItem;
     private QMUICommonListItemView subscriptionItem;
-
-    private LoadingDialog waitingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,12 +173,6 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 .addItemView(examItem, v -> enterExam())
                 .addItemView(subscriptionItem, v -> enterCourseSubscription())
                 .addTo(courseInfoListView);
-
-        waitingDialog = new LoadingDialog.Builder(this)
-                .setMessage("正在上传课件...")
-                .setCancelable(false)
-                .setCancelOutside(false)
-                .create();
 
         refreshViewContent();
     }
@@ -315,7 +307,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                     if (!path.toLowerCase().endsWith(".zip")) {
                         Toast.makeText(this, "请选择.zip类型的文件", Toast.LENGTH_SHORT).show();
                     } else {
-                        waitingDialog.show();
+                        UIHelper.showLoadingDialog(this);
                         ScormService.getInstance().updateScorm(handler, courseInfo.getCourseId(), false, new File(path));
                     }
                 }
@@ -372,7 +364,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     };
 
     private void handleUpdateScormMsg(Message msg) {
-        waitingDialog.dismiss();
+        UIHelper.dismissLoadingDialog();
         ServiceResult serviceResult = (ServiceResult) msg.obj;
         Toast.makeText(TeacherCourseManageActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
