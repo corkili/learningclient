@@ -11,8 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.tu.loadingdialog.LoadingDailog;
@@ -48,7 +48,10 @@ import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapte
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ChoiceView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.FillingView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,20 +68,25 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         SubmittedQuestionRecyclerViewAdapter.OnItemInteractionListener,
         SubmittedQuestionRecyclerViewAdapter.SubmitDataBus {
 
-    private View courseWorkInformationView;
-    private TextView indexView;
-    private TextView submitView;
-    private TextView courseWorkNameView;
-    private TextView deadlineView;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView infoListView;
+    private QMUICommonListItemView checkResultItemView;
+
+
+//    private View courseWorkInformationView;
+//    private TextView indexView;
+//    private TextView submitView;
+//    private TextView courseWorkNameView;
+//    private TextView deadlineView;
 
     private RecyclerView recyclerView;
     private SubmittedQuestionRecyclerViewAdapter recyclerViewAdapter;
 
-    private View checkResultLayout;
-    private TextView checkResultView;
+//    private View checkResultLayout;
+//    private TextView checkResultView;
     private Button submitButton;
     private Button saveButton;
-    private View space;
+//    private View space;
 
     private List<QuestionInfo> questionInfos;
 
@@ -98,7 +106,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_work_detail);
 
-        Intent intent = getIntent();
         userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
         courseWorkInfo = (CourseWorkInfo) getIntent().getSerializableExtra(IntentParam.COURSE_WORK_INFO);
         submittedCourseWorkId = getIntent().getLongExtra(IntentParam.SUBMITTED_COURSE_WORK_ID, -1);
@@ -106,6 +113,22 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         if (userInfo == null || courseWorkInfo == null) {
             throw new RuntimeException("Intent param expected");
         }
+
+        topBar = findViewById(R.id.topbar);
+
+        topBar.setTitle("作业详情");
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            if (userInfo.getUserType() == UserType.Teacher) {
+                Intent intent = new Intent();
+                intent.putExtra(IntentParam.SUBMITTED_COURSE_WORK_INFO, submittedCourseWorkInfo);
+                setResult(RESULT_OK, intent);
+            }
+            finish();
+        });
+
+        submitButton = topBar.addRightTextButton("提交", R.id.topbar_right_submit);
+        saveButton = topBar.addRightTextButton("暂存", R.id.topbar_right_save);
 
         waitingDialog = new LoadingDailog.Builder(this)
                 .setMessage("请稍后...")
@@ -117,31 +140,90 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         counter = new AtomicInteger(0);
         isSystemSubmit = false;
 
-        courseWorkInformationView = findViewById(R.id.course_work_information);
-        indexView = courseWorkInformationView.findViewById(R.id.item_index);
-        submitView = courseWorkInformationView.findViewById(R.id.item_submit);
-        courseWorkNameView = courseWorkInformationView.findViewById(R.id.item_course_work_name);
-        deadlineView = courseWorkInformationView.findViewById(R.id.item_deadline);
+//        courseWorkInformationView = findViewById(R.id.course_work_information);
+//        indexView = courseWorkInformationView.findViewById(R.id.item_index);
+//        submitView = courseWorkInformationView.findViewById(R.id.item_submit);
+//        courseWorkNameView = courseWorkInformationView.findViewById(R.id.item_course_work_name);
+//        deadlineView = courseWorkInformationView.findViewById(R.id.item_deadline);
 
-        checkResultLayout = findViewById(R.id.check_result_layout);
-        checkResultView = findViewById(R.id.check_result);
+//        checkResultLayout = findViewById(R.id.check_result_layout);
+//        checkResultView = findViewById(R.id.check_result);
 
-        submitButton = findViewById(R.id.course_work_detail_button_submit);
-        saveButton = findViewById(R.id.course_work_detail_button_save);
-        space = findViewById(R.id.space);
+//        submitButton = findViewById(R.id.course_work_detail_button_submit);
+//        saveButton = findViewById(R.id.course_work_detail_button_save);
+//        space = findViewById(R.id.space);
 
-        indexView.setVisibility(View.GONE);
+//        indexView.setVisibility(View.GONE);
+//        if (courseWorkInfo.getOpen()) {
+//            if (courseWorkInfo.getHasDeadline() && courseWorkInfo.getDeadline() <= System.currentTimeMillis()) {
+//                submitView.setText("已关闭提交");
+//            } else {
+//                submitView.setText("已开放提交");
+//            }
+//        }
+//        courseWorkNameView.setSingleLine(false);
+//        courseWorkNameView.setText(courseWorkInfo.getCourseWorkName());
+//        deadlineView.setText(courseWorkInfo.getHasDeadline() ? IUtils.format("截止日期：{}",
+//                IUtils.DATE_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))) : "截止日期：无限期");
+
+        infoListView = findViewById(R.id.course_work_info_list);
+
+        QMUICommonListItemView courseWorkNameItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
+                "作业名称",
+                courseWorkInfo.getCourseWorkName(),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        String submitMsg;
         if (courseWorkInfo.getOpen()) {
             if (courseWorkInfo.getHasDeadline() && courseWorkInfo.getDeadline() <= System.currentTimeMillis()) {
-                submitView.setText("已关闭提交");
+                submitMsg = "已关闭提交";
             } else {
-                submitView.setText("已开放提交");
+                submitMsg = "已开放提交";
             }
+        } else {
+            submitMsg = "未开放提交";
         }
-        courseWorkNameView.setSingleLine(false);
-        courseWorkNameView.setText(courseWorkInfo.getCourseWorkName());
-        deadlineView.setText(courseWorkInfo.getHasDeadline() ? IUtils.format("截止日期：{}",
-                IUtils.DATE_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))) : "截止日期：无限期");
+
+        QMUICommonListItemView submitItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_state_24dp),
+                "提交状态",
+                submitMsg,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView deadlineItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "截止日期",
+                courseWorkInfo.getHasDeadline()
+                        ? IUtils.DATE_TIME_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))
+                        : "无限期",
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        checkResultItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_check_result_24dp),
+                "批改状态",
+                "",
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("作业基本信息")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(courseWorkNameItemView, null)
+                .addItemView(submitItemView, null)
+                .addItemView(deadlineItemView, null)
+                .addItemView(checkResultItemView, null)
+                .addTo(infoListView);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("作业题目详情")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addTo(infoListView);
 
         recyclerView = findViewById(R.id.question_list);
 
@@ -152,8 +234,8 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(this,R.color.colorBlack)));
+//        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
+//                1,ContextCompat.getColor(this,R.color.colorBlack)));
 
         submittedAnswerMap = new HashMap<>();
 
@@ -446,7 +528,7 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
     private void refresh() {
         if (userInfo.getUserType() == UserType.Teacher && alreadySubmitted()) {
-            setTitle(submittedCourseWorkInfo.getSubmitterInfo().getUsername());
+            topBar.setTitle(submittedCourseWorkInfo.getSubmitterInfo().getUsername());
         }
 
         // submittedAnswerMap
@@ -473,35 +555,34 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                     }
                 }
                 sb.append(count).append("/").append(total);
-                checkResultView.setText(sb.toString().trim());
+                checkResultItemView.setDetailText(sb.toString().trim());
             } else {
-                checkResultView.setText("[尚未全部批改]");
+                checkResultItemView.setDetailText("[尚未全部批改]");
             }
         } else {
-            checkResultView.setText("[尚未全部批改]");
+            checkResultItemView.setDetailText("[尚未全部批改]");
         }
         if (userInfo.getUserType() == UserType.Teacher) {
-            checkResultLayout.setVisibility(View.VISIBLE);
+            checkResultItemView.setVisibility(View.VISIBLE);
         } else {
             if (canSubmitAnswer()) {
                 if (alreadySubmitted()) {
                     if (submittedCourseWorkInfo.getFinished()) {
-                        checkResultLayout.setVisibility(View.VISIBLE);
+                        checkResultItemView.setVisibility(View.VISIBLE);
                     } else {
-                        checkResultLayout.setVisibility(View.GONE);
+                        checkResultItemView.setVisibility(View.GONE);
                     }
                 } else {
-                    checkResultLayout.setVisibility(View.GONE);
+                    checkResultItemView.setVisibility(View.GONE);
                 }
             } else {
-                checkResultLayout.setVisibility(View.VISIBLE);
+                checkResultItemView.setVisibility(View.VISIBLE);
             }
         }
 
         // button
         if (userInfo.getUserType() == UserType.Teacher) {
             saveButton.setVisibility(View.GONE);
-            space.setVisibility(View.GONE);
             if (allIsAutoCheck()) {
                 submitButton.setVisibility(View.GONE);
             } else {
@@ -623,8 +704,10 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     }
 
     private void finishInit() {
-        if (waitingDialog != null && counter.incrementAndGet() == 2) {
-            waitingDialog.dismiss();
+        if (counter.incrementAndGet() == 2) {
+            if (waitingDialog != null) {
+                waitingDialog.dismiss();
+            }
             refresh();
             if (userInfo.getUserType() == UserType.Student) {
                 if (!canSubmitAnswer()) {
@@ -662,7 +745,11 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
             return false;
         }
         if (courseWorkInfo.getOpen()) {
-            return System.currentTimeMillis() <= courseWorkInfo.getDeadline();
+            if (courseWorkInfo.getHasDeadline()) {
+                return System.currentTimeMillis() <= courseWorkInfo.getDeadline();
+            } else {
+                return true;
+            }
         } else {
             return false;
         }

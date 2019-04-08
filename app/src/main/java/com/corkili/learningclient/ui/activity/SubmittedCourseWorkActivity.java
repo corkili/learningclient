@@ -99,7 +99,7 @@ public class SubmittedCourseWorkActivity extends AppCompatActivity {
                 ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
                 "截止日期",
                 courseWorkInfo.getHasDeadline()
-                        ? IUtils.DATE_TIME_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))
+                        ? IUtils.DATE_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))
                         : "无限期",
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);

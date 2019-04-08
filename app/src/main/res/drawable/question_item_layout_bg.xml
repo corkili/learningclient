@@ -15,14 +15,18 @@
  limitations under the License.
 -->
 
-<resources>
-    <item name="topbar_right_refresh" type="id"/>
-    <item name="topbar_right_more" type="id"/>
-    <item name="topbar_right_save" type="id"/>
-    <item name="topbar_right_submit" type="id"/>
-    <item name="topbar_right_edit" type="id"/>
-    <item name="topbar_right_comment" type="id"/>
-    <item name="topbar_right_subscribe" type="id" />
-    <item name="topbar_right_add" type="id" />
-    <item name="topbar_right_delete" type="id" />
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <!-- rectangle 表示为矩形 -->
+
+    <!-- 填充的颜色 -->
+    <solid android:color="@color/colorWhite"/>
+
+    <stroke
+        android:color="@color/qmui_config_color_50_blue"
+        android:width="2dp" />
+
+    <!-- android:radius 圆角的半径 -->
+    <corners android:radius="20dp"/>
+
+</shape>
