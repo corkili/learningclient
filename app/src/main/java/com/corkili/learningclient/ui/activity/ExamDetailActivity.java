@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -51,6 +50,8 @@ import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapte
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
@@ -424,40 +425,43 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
         if (finished && !isSystemSubmit) {
             if (userInfo.getUserType() == UserType.Student) {
-                AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
-                confirmDialog.setTitle("确认保存？");
+                String message;
                 if (notDoQuestionIndexList.isEmpty()) {
-                    confirmDialog.setMessage("你已完成所有题目，确认保存（保存后不可修改）？");
+                    message = "你已完成所有题目，确认保存（保存后不可修改）？";
                 } else {
-                    confirmDialog.setMessage(IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
-                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", ")));
+                    message = IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
+                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", "));
                 }
-                confirmDialog.setPositiveButton("确认", (dialog, which) -> {
-                    if (alreadySubmitted()) {
-                        if (!submittedExamInfo.getFinished()) {
-                            SubmittedExamService.getInstance().updateSubmittedExam(handler,
-                                    submittedExamInfo.getSubmittedExamId(),
-                                    !submittedAnswerMap.equals(submittedExamInfo.getSubmittedAnswerMap()),
-                                    submittedAnswerMap, true, true);
-                        } else {
-                            Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Map<Integer, SubmittedAnswer> map = new HashMap<>();
-                        for (Entry<Integer, ExamSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
-                            map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
-                        }
-                        SubmittedExamService.getInstance().createSubmittedExam(handler,
-                                examInfo.getExamId(), true, map);
-                    }
-                });
-                confirmDialog.setNegativeButton("取消", ((dialog, which) -> {
-                    dialog.cancel();
-                    dialog.dismiss();
-                    saveButton.setEnabled(true);
-                    submitButton.setEnabled(true);
-                }));
-                confirmDialog.show();
+                new QMUIDialog.MessageDialogBuilder(this)
+                        .setTitle("确认提交")
+                        .setMessage(message)
+                        .addAction("取消", (dialog, index) -> {
+                            dialog.cancel();
+                            dialog.dismiss();
+                            saveButton.setEnabled(true);
+                            submitButton.setEnabled(true);
+                        })
+                        .addAction(0, "提交", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                            if (alreadySubmitted()) {
+                                if (!submittedExamInfo.getFinished()) {
+                                    SubmittedExamService.getInstance().updateSubmittedExam(handler,
+                                            submittedExamInfo.getSubmittedExamId(),
+                                            !submittedAnswerMap.equals(submittedExamInfo.getSubmittedAnswerMap()),
+                                            submittedAnswerMap, true, true);
+                                } else {
+                                    Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Map<Integer, SubmittedAnswer> map = new HashMap<>();
+                                for (Entry<Integer, ExamSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
+                                    map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
+                                }
+                                SubmittedExamService.getInstance().createSubmittedExam(handler,
+                                        examInfo.getExamId(), true, map);
+                            }
+                            dialog.dismiss();
+                        })
+                        .show();
             } else {
                 if (alreadySubmitted()) {
                     SubmittedExamService.getInstance().updateSubmittedExam(handler,

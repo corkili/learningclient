@@ -8,10 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
@@ -44,6 +42,8 @@ import com.corkili.learningclient.network.HttpUtils;
 import com.corkili.learningclient.service.ScormService;
 import com.corkili.learningclient.service.ServiceResult;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog.CustomDialogBuilder;
 import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import java.util.ArrayList;
@@ -377,40 +377,53 @@ public class ScormActivity extends AppCompatActivity {
 
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(ScormActivity.this);
-            alertDialog.setMessage(message)
-                    .setPositiveButton("确定", ((dialog, which) -> result.confirm()));
-            alertDialog.setCancelable(false);
-            alertDialog.create().show();
+            new QMUIDialog.MessageDialogBuilder(ScormActivity.this)
+                    .setTitle("来自网页的消息")
+                    .setMessage(message)
+                    .addAction(0, "确定", (dialog, index) -> {
+                        result.confirm();
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false)
+                    .show();
             return true;
         }
 
         @Override
         public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-            AlertDialog.Builder confirmDialog = new AlertDialog.Builder(ScormActivity.this);
-            confirmDialog.setMessage(message)
-                    .setPositiveButton("确定", ((dialog, which) -> result.confirm()))
-                    .setNegativeButton("取消", (((dialog, which) -> result.cancel())));
-            confirmDialog.setCancelable(false);
-            confirmDialog.create().show();
+            new QMUIDialog.MessageDialogBuilder(ScormActivity.this)
+                    .setTitle("来自网页的消息")
+                    .setMessage(message)
+                    .addAction("取消", ((dialog, index) -> {
+                        result.cancel();
+                        dialog.dismiss();
+                    }))
+                    .addAction(0, "确定", (dialog, index) -> {
+                        result.confirm();
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false)
+                    .show();
             return true;
         }
 
         @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-            final LayoutInflater inflater = LayoutInflater.from(ScormActivity.this);
-            final View dialogView = inflater.inflate(R.layout.dialog_message_and_editor, null);
-            dialogView.<TextView>findViewById(R.id.message).setText(message);
-            dialogView.<EditText>findViewById(R.id.editor).setText(defaultValue);
-            AlertDialog.Builder promptDialog = new AlertDialog.Builder(ScormActivity.this);
-            promptDialog.setView(dialogView)
-                    .setPositiveButton("确定", ((dialog, which) -> {
-                        String value = dialogView.<EditText>findViewById(R.id.editor).getText().toString().trim();
-                        result.confirm(value);
-                    }))
-                    .setNegativeButton("取消", (((dialog, which) -> result.cancel())));
-            promptDialog.setCancelable(false);
-            promptDialog.create().show();
+            QMUIDialog.CustomDialogBuilder builder = new CustomDialogBuilder(ScormActivity.this);
+            builder.setTitle("发表帖子");
+            builder.setLayout(R.layout.dialog_message_and_editor);
+            builder.addAction("取消", (dialog, index) -> {
+                result.cancel();
+                dialog.dismiss();
+            });
+            builder.addAction("确定", ((dialog, index) -> {
+                String value = dialog.<EditText>findViewById(R.id.editor).getText().toString().trim();
+                result.confirm(value);
+                dialog.dismiss();
+            }));
+            QMUIDialog dialog = builder.create();
+            dialog.<TextView>findViewById(R.id.message).setText(message);
+            dialog.show();
             return true;
         }
 
