@@ -136,26 +136,14 @@ public class CourseWorkActivity extends AppCompatActivity {
                 .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT);
         for (CourseWorkSimpleInfo courseWorkSimpleInfo : courseWorkSimpleInfos) {
             Drawable drawable;
-            if (userInfo.getUserType() == UserType.Teacher) {
-                if (courseWorkSimpleInfo.getOpen()) {
-                    if (courseWorkSimpleInfo.getHasDeadline() && courseWorkSimpleInfo.getDeadline() <= System.currentTimeMillis()) {
-                        drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_red_24dp);
-                    } else {
-                        drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_green_24dp);
-                    }
+            if (courseWorkSimpleInfo.getOpen()) {
+                if (courseWorkSimpleInfo.getHasDeadline() && courseWorkSimpleInfo.getDeadline() <= System.currentTimeMillis()) {
+                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_red_24dp);
                 } else {
-                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_black_24dp);
+                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_green_24dp);
                 }
             } else {
-                if (courseWorkSimpleInfo.getOpen()) {
-                    if (courseWorkSimpleInfo.getHasDeadline() && courseWorkSimpleInfo.getDeadline() <= System.currentTimeMillis()) {
-                        drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_red_24dp);
-                    } else {
-                        drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_green_24dp);
-                    }
-                } else {
-                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_black_24dp);
-                }
+                drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_black_24dp);
             }
             
             QMUICommonListItemView itemView = courseWorkListView.createItemView(
