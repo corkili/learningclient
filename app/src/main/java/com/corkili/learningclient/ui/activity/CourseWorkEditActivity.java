@@ -1,7 +1,6 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,6 +34,9 @@ import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,14 +57,12 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
     private CourseInfo courseInfo;
     private Calendar deadline;
 
+    private QMUITopBarLayout topBar;
     private EditText courseWorkNameEditor;
     private RadioGroup openSelector;
     private RadioGroup hasDdlSelector;
     private EditText deadlineEditor;
     private Button addWorkQuestionButton;
-    private Button saveButton;
-    private Button deleteButton;
-    private Button cancelButton;
     private View openLayout;
     private View deadlineLayout;
 
@@ -85,48 +85,32 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
             throw new RuntimeException("Intent param expected");
         }
 
-        courseWorkNameEditor = findViewById(R.id.course_work_edit_text_edit_name);
-        openSelector = findViewById(R.id.course_work_edit_radio_group_open);
-        hasDdlSelector = findViewById(R.id.course_work_edit_radio_group_has_ddl);
-        deadlineEditor = findViewById(R.id.course_work_edit_text_edit_deadline);
-        addWorkQuestionButton = findViewById(R.id.course_work_button_add_question);
-        saveButton = findViewById(R.id.course_work_edit_button_save);
-        deleteButton = findViewById(R.id.course_work_edit_button_delete);
-        cancelButton = findViewById(R.id.course_work_edit_button_cancel);
-        openLayout = findViewById(R.id.open_layout);
-        deadlineLayout = findViewById(R.id.deadline_layout);
+        topBar = findViewById(R.id.topbar);
 
-        deadline = Calendar.getInstance(Locale.CHINA);
-
-        hasDdlSelector.setOnCheckedChangeListener((group, checkedId) -> {
-            switch (checkedId) {
-                case R.id.has_ddl_yes:
-                    deadlineLayout.setVisibility(View.VISIBLE);
-                    deadlineEditor.setEnabled(true);
-                    break;
-                case R.id.has_ddl_no:
-                    deadlineLayout.setVisibility(View.GONE);
-                    deadlineEditor.setEnabled(false);
-                    break;
-            }
+        topBar.setTitle(isCreate ? "布置作业" : "修改作业");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            setResult(RESULT_CANCELED);
+            finish();
         });
 
-        deadlineEditor.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(CourseWorkEditActivity.this, (view, year, month, dayOfMonth) -> {
-                deadline.set(Calendar.YEAR, year);
-                deadline.set(Calendar.MONTH, month);
-                deadline.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                deadlineEditor.setText(IUtils.DATE_FORMATTER.format(deadline.getTime()));
-            }, deadline.get(Calendar.YEAR), deadline.get(Calendar.MONTH), deadline.get(Calendar.DAY_OF_MONTH));
-            datePickerDialog.show();
-        });
+        if (!isCreate) {
+            topBar.addRightImageButton(R.drawable.ic_remove_24dp, R.id.topbar_right_delete).setOnClickListener(v -> {
+                if (isCreate) {
+                    return;
+                }
+                new QMUIDialog.MessageDialogBuilder(this)
+                        .setTitle("删除作业")
+                        .setMessage("确定删除该作业？")
+                        .addAction("取消", (dialog, index) -> dialog.dismiss())
+                        .addAction(0, "删除", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                            CourseWorkService.getInstance().deleteCourseWork(handler, courseWorkInfo.getCourseWorkId());
+                            dialog.dismiss();
+                        })
+                        .show();
+            });
+        }
 
-        addWorkQuestionButton.setOnClickListener(v -> {
-            Intent intent = new Intent(CourseWorkEditActivity.this, QuestionSelectActivity.class);
-            startActivityForResult(intent, REQUEST_CODE_SELECT_QUESTION);
-        });
-
-        saveButton.setOnClickListener(v -> {
+        topBar.addRightImageButton(R.drawable.ic_save_24dp, R.id.topbar_right_save).setOnClickListener(v -> {
             boolean hasDeadline = hasDdlSelector.getCheckedRadioButtonId() == R.id.has_ddl_yes;
             if (hasDeadline) {
                 if (StringUtils.isBlank(deadlineEditor.getText().toString())) {
@@ -185,27 +169,42 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
             }
         });
 
-        deleteButton.setOnClickListener(v -> {
-            if (isCreate) {
-                return;
+        courseWorkNameEditor = findViewById(R.id.course_work_edit_text_edit_name);
+        openSelector = findViewById(R.id.course_work_edit_radio_group_open);
+        hasDdlSelector = findViewById(R.id.course_work_edit_radio_group_has_ddl);
+        deadlineEditor = findViewById(R.id.course_work_edit_text_edit_deadline);
+        addWorkQuestionButton = findViewById(R.id.course_work_button_add_question);
+        openLayout = findViewById(R.id.open_layout);
+        deadlineLayout = findViewById(R.id.deadline_layout);
+
+        deadline = Calendar.getInstance(Locale.CHINA);
+
+        hasDdlSelector.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId) {
+                case R.id.has_ddl_yes:
+                    deadlineLayout.setVisibility(View.VISIBLE);
+                    deadlineEditor.setEnabled(true);
+                    break;
+                case R.id.has_ddl_no:
+                    deadlineLayout.setVisibility(View.GONE);
+                    deadlineEditor.setEnabled(false);
+                    break;
             }
-            AlertDialog.Builder confirmDeleteDialog =
-                    new AlertDialog.Builder(CourseWorkEditActivity.this);
-            confirmDeleteDialog.setTitle("删除作业");
-            confirmDeleteDialog.setMessage("确定删除该作业？");
-            confirmDeleteDialog.setPositiveButton("确定", (ed, which) -> {
-                CourseWorkService.getInstance().deleteCourseWork(handler, courseWorkInfo.getCourseWorkId());
-            });
-            confirmDeleteDialog.setNegativeButton("取消", (ed, which) -> {
-                ed.cancel();
-                ed.dismiss();
-            });
-            confirmDeleteDialog.show();
         });
 
-        cancelButton.setOnClickListener(v -> {
-            setResult(RESULT_CANCELED);
-            finish();
+        deadlineEditor.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(CourseWorkEditActivity.this, (view, year, month, dayOfMonth) -> {
+                deadline.set(Calendar.YEAR, year);
+                deadline.set(Calendar.MONTH, month);
+                deadline.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                deadlineEditor.setText(IUtils.DATE_FORMATTER.format(deadline.getTime()));
+            }, deadline.get(Calendar.YEAR), deadline.get(Calendar.MONTH), deadline.get(Calendar.DAY_OF_MONTH));
+            datePickerDialog.show();
+        });
+
+        addWorkQuestionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(CourseWorkEditActivity.this, QuestionSelectActivity.class);
+            startActivityForResult(intent, REQUEST_CODE_SELECT_QUESTION);
         });
 
         allQuestionInfo = new HashMap<>();
@@ -223,11 +222,9 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
         QuestionService.getInstance().findAllQuestion(handler, true, null, null);
 
         if (isCreate) {
-            deleteButton.setVisibility(View.GONE);
             openSelector.check(R.id.open_no);
             UIHelper.disableRadioGroup(openSelector);
             openLayout.setVisibility(View.GONE);
-            setTitle("创建作业");
         } else {
             courseWorkNameEditor.setText(courseWorkInfo.getCourseWorkName());
             openSelector.check(courseWorkInfo.getOpen() ? R.id.open_yes : R.id.open_no);
@@ -246,7 +243,6 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
                 addWorkQuestionButton.setEnabled(false);
                 addWorkQuestionButton.setVisibility(View.GONE);
             }
-            setTitle("编辑作业");
         }
 
     }
@@ -327,6 +323,12 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
     }
 
     @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode != RESULT_OK) {
             return;
@@ -350,28 +352,25 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
         if (courseWorkInfo.getOpen()) {
             return false;
         }
-        AlertDialog.Builder confirmDeleteDialog =
-                new AlertDialog.Builder(CourseWorkEditActivity.this);
-        confirmDeleteDialog.setTitle("删除试题");
-        confirmDeleteDialog.setMessage("确定删除该试题？");
-        confirmDeleteDialog.setPositiveButton("确定", (ed, which) -> {
-            int needRemoveIndex = -1;
-            for (int i = 0; i < questionInfos.size(); i++) {
-                QuestionInfo questionInfo = questionInfos.get(i);
-                if (questionInfo.getQuestionId() == viewHolder.getQuestionInfo().getQuestionId()) {
-                    needRemoveIndex = i;
-                }
-            }
-            if (needRemoveIndex >= 0) {
-                questionInfos.remove(needRemoveIndex);
-                recyclerViewAdapter.notifyDataSetChanged();
-            }
-        });
-        confirmDeleteDialog.setNegativeButton("取消", (ed, which) -> {
-            ed.cancel();
-            ed.dismiss();
-        });
-        confirmDeleteDialog.show();
+        new QMUIDialog.MessageDialogBuilder(this)
+                .setTitle("删除试题")
+                .setMessage("确定删除该试题？")
+                .addAction("取消", (dialog, index) -> dialog.dismiss())
+                .addAction(0, "删除", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                    int needRemoveIndex = -1;
+                    for (int i = 0; i < questionInfos.size(); i++) {
+                        QuestionInfo questionInfo = questionInfos.get(i);
+                        if (questionInfo.getQuestionId() == viewHolder.getQuestionInfo().getQuestionId()) {
+                            needRemoveIndex = i;
+                        }
+                    }
+                    if (needRemoveIndex >= 0) {
+                        questionInfos.remove(needRemoveIndex);
+                        recyclerViewAdapter.notifyDataSetChanged();
+                    }
+                    dialog.dismiss();
+                })
+                .show();
         return true;
     }
 }

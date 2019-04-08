@@ -23,4 +23,5 @@
     <item name="topbar_right_comment" type="id"/>
     <item name="topbar_right_subscribe" type="id" />
     <item name="topbar_right_add" type="id" />
+    <item name="topbar_right_delete" type="id" />
 </resources>
