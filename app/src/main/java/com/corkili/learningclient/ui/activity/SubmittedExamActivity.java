@@ -59,7 +59,7 @@ public class SubmittedExamActivity extends AppCompatActivity {
 
         topBar = findViewById(R.id.topbar);
 
-        topBar.setTitle("作业提交列表");
+        topBar.setTitle("考试提交列表");
 
         topBar.addLeftBackImageButton().setOnClickListener(v -> finish());
 
