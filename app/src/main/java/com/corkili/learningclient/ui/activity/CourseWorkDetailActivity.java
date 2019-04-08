@@ -349,8 +349,7 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                 ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(courseWorkQuestionInfo.getQuestionId());
                 CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
                 if (viewHolder != null && courseWorkSubmittedAnswer != null
-                        && !viewHolder.getQuestionInfo().getAutoCheck()
-                        && courseWorkSubmittedAnswer.getCheckStatus() < 0) {
+                        && !viewHolder.getQuestionInfo().getAutoCheck()) {
                     QuestionInfo questionInfo = viewHolder.getQuestionInfo();
                     if (questionInfo.getQuestionType() == QuestionType.SingleFilling
                             || questionInfo.getQuestionType() == QuestionType.Essay) {

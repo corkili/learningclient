@@ -359,8 +359,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
                 ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(examQuestionInfo.getQuestionId());
                 ExamSubmittedAnswer examSubmittedAnswer = submittedAnswerMap.get(examQuestionInfo.getIndex());
                 if (viewHolder != null && examSubmittedAnswer != null
-                        && !viewHolder.getQuestionInfo().getAutoCheck()
-                        && examSubmittedAnswer.getScore() < 0) {
+                        && !viewHolder.getQuestionInfo().getAutoCheck()) {
                     QuestionInfo questionInfo = viewHolder.getQuestionInfo();
                     if (questionInfo.getQuestionType() == QuestionType.SingleFilling
                             || questionInfo.getQuestionType() == QuestionType.Essay) {
