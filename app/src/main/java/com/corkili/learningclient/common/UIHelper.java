@@ -33,6 +33,8 @@ public class UIHelper {
                     .setTipWord("请稍后")
                     .create();
         }
+        loadingDialog.setCancelable(false);
+        loadingDialog.setCanceledOnTouchOutside(false);
         if (!loadingDialog.isShowing()) {
             loadingDialog.show();
         }
@@ -51,6 +53,8 @@ public class UIHelper {
         }
         new MessageDialogBuilder(context)
                 .setMessage(message)
+                .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
                 .addAction("确定", (dialog, index) -> dialog.dismiss()).show();
     }
 
