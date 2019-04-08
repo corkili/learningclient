@@ -11,16 +11,16 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Response.QuestionFindAllResponse;
 import com.corkili.learningclient.service.QuestionService;
@@ -31,6 +31,8 @@ import com.corkili.learningclient.ui.activity.TeacherMainActivity;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.QuestionRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +43,15 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     public static final int REQUEST_CODE_UPDATE_OR_DELETE_QUESTION = 0xF2;
 
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
     private FloatingActionButton addQuestionFab;
+    private TextView tipView;
 
     private QuestionRecyclerViewAdapter recyclerViewAdapter;
 
     private List<QuestionInfo> questionInfos;
+
+    private boolean shouldFinishRefresh;
 
     public QuestionFragment() {
     }
@@ -68,6 +73,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_question, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_question_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_question_swipe_refresh_layout);
         addQuestionFab = view.findViewById(R.id.fab_add_question);
@@ -79,6 +85,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
                 1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
+        shouldFinishRefresh = false;
         return view;
     }
 
@@ -86,7 +93,23 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout.setOnRefreshListener(this::refreshQuestionInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshQuestionInfos();
+            }
+        });
 
         addQuestionFab.setOnClickListener(view -> {
             Intent intent = new Intent(getActivity(), QuestionEditActivity.class);
@@ -100,6 +123,14 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         }
 
         refreshQuestionInfos();
+    }
+
+    private void updateTipView() {
+        if (questionInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshQuestionInfos() {
@@ -118,13 +149,18 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
 
     private void handleFindAllQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             questionInfos.clear();
             questionInfos.addAll(serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList());
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
         }
+        if (shouldFinishRefresh) {
+            shouldFinishRefresh = false;
+            swipeRefreshLayout.finishRefresh();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载试题信息失败");
+        }
+        updateTipView();
     }
 
     @Override
@@ -154,6 +190,7 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             questionInfos.add(questionInfo);
             recyclerViewAdapter.notifyDataSetChanged();
         }
+        updateTipView();
     }
 
     @Override

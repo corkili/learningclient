@@ -21,12 +21,11 @@
 
         <TextView
             android:id="@+id/text_view_rating"
+            style="@style/QDCommonTitle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:text="评分"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:gravity="center" />
 
         <RatingBar
             android:id="@+id/rating_bar_comment"
@@ -58,16 +57,16 @@
 
         <TextView
             android:id="@+id/text_view_comment"
+            style="@style/QDCommonTitle"
             android:text="评论"
             android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/text_edit_comment"
-            android:ems="10"
+            style="@style/CommonEditText"
+            android:hint="输入帖子评论"
             android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

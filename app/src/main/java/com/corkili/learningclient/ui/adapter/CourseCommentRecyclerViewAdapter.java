@@ -38,10 +38,10 @@ public class CourseCommentRecyclerViewAdapter extends RecyclerView.Adapter<Cours
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = courseCommentInfos.get(position);
-        holder.usernameView.setText(holder.mItem.getCommentAuthorInfo().getUsername());
+        holder.usernameView.setText(IUtils.format("@{}", holder.mItem.getCommentAuthorInfo().getUsername()));
         holder.ratingView.setRating(ProtoUtils.getCommentTypeRating(holder.mItem.getCommentType()));
         holder.contentView.setText(holder.mItem.getContent());
-        holder.commentTimeView.setText(IUtils.format("评论时间：{}",
+        holder.commentTimeView.setText(IUtils.format("{}",
                 IUtils.DATE_TIME_FORMATTER.format(new Date(holder.mItem.getCreateTime()))));
     }
 

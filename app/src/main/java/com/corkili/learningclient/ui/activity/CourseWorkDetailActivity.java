@@ -6,21 +6,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.tu.loadingdialog.LoadingDailog;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
 import com.corkili.learningclient.common.QuestionCheckStatus;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkQuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSubmittedAnswer;
@@ -48,7 +46,12 @@ import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapte
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ChoiceView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.FillingView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,20 +68,15 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         SubmittedQuestionRecyclerViewAdapter.OnItemInteractionListener,
         SubmittedQuestionRecyclerViewAdapter.SubmitDataBus {
 
-    private View courseWorkInformationView;
-    private TextView indexView;
-    private TextView submitView;
-    private TextView courseWorkNameView;
-    private TextView deadlineView;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView infoListView;
+    private QMUICommonListItemView checkResultItemView;
 
     private RecyclerView recyclerView;
     private SubmittedQuestionRecyclerViewAdapter recyclerViewAdapter;
 
-    private View checkResultLayout;
-    private TextView checkResultView;
     private Button submitButton;
     private Button saveButton;
-    private View space;
 
     private List<QuestionInfo> questionInfos;
 
@@ -86,7 +84,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     private CourseWorkInfo courseWorkInfo;
     private long submittedCourseWorkId;
 
-    private LoadingDailog waitingDialog;
     private AtomicInteger counter;
     private boolean isSystemSubmit;
 
@@ -98,7 +95,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_work_detail);
 
-        Intent intent = getIntent();
         userInfo = (UserInfo) getIntent().getSerializableExtra(IntentParam.USER_INFO);
         courseWorkInfo = (CourseWorkInfo) getIntent().getSerializableExtra(IntentParam.COURSE_WORK_INFO);
         submittedCourseWorkId = getIntent().getLongExtra(IntentParam.SUBMITTED_COURSE_WORK_ID, -1);
@@ -107,41 +103,84 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
             throw new RuntimeException("Intent param expected");
         }
 
-        waitingDialog = new LoadingDailog.Builder(this)
-                .setMessage("请稍后...")
-                .setCancelable(false)
-                .setCancelOutside(false)
-                .create();
+        topBar = findViewById(R.id.topbar);
 
-        waitingDialog.show();
+        topBar.setTitle("作业详情");
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            if (userInfo.getUserType() == UserType.Teacher) {
+                Intent intent = new Intent();
+                intent.putExtra(IntentParam.SUBMITTED_COURSE_WORK_INFO, submittedCourseWorkInfo);
+                setResult(RESULT_OK, intent);
+            }
+            finish();
+        });
+
+        submitButton = topBar.addRightTextButton("提交", R.id.topbar_right_submit);
+        saveButton = topBar.addRightTextButton("暂存", R.id.topbar_right_save);
+
+        UIHelper.showLoadingDialog(this);
         counter = new AtomicInteger(0);
         isSystemSubmit = false;
 
-        courseWorkInformationView = findViewById(R.id.course_work_information);
-        indexView = courseWorkInformationView.findViewById(R.id.item_index);
-        submitView = courseWorkInformationView.findViewById(R.id.item_submit);
-        courseWorkNameView = courseWorkInformationView.findViewById(R.id.item_course_work_name);
-        deadlineView = courseWorkInformationView.findViewById(R.id.item_deadline);
+        infoListView = findViewById(R.id.course_work_info_list);
 
-        checkResultLayout = findViewById(R.id.check_result_layout);
-        checkResultView = findViewById(R.id.check_result);
+        QMUICommonListItemView courseWorkNameItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
+                "作业名称",
+                courseWorkInfo.getCourseWorkName(),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
 
-        submitButton = findViewById(R.id.course_work_detail_button_submit);
-        saveButton = findViewById(R.id.course_work_detail_button_save);
-        space = findViewById(R.id.space);
-
-        indexView.setVisibility(View.GONE);
+        String submitMsg;
         if (courseWorkInfo.getOpen()) {
             if (courseWorkInfo.getHasDeadline() && courseWorkInfo.getDeadline() <= System.currentTimeMillis()) {
-                submitView.setText("已关闭提交");
+                submitMsg = "已关闭提交";
             } else {
-                submitView.setText("已开放提交");
+                submitMsg = "已开放提交";
             }
+        } else {
+            submitMsg = "未开放提交";
         }
-        courseWorkNameView.setSingleLine(false);
-        courseWorkNameView.setText(courseWorkInfo.getCourseWorkName());
-        deadlineView.setText(courseWorkInfo.getHasDeadline() ? IUtils.format("截止日期：{}",
-                IUtils.DATE_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))) : "截止日期：无限期");
+
+        QMUICommonListItemView submitItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_state_24dp),
+                "提交状态",
+                submitMsg,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView deadlineItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "截止日期",
+                courseWorkInfo.getHasDeadline()
+                        ? IUtils.DATE_TIME_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))
+                        : "无限期",
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        checkResultItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_check_result_24dp),
+                "批改状态",
+                "",
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("作业基本信息")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(courseWorkNameItemView, null)
+                .addItemView(submitItemView, null)
+                .addItemView(deadlineItemView, null)
+                .addItemView(checkResultItemView, null)
+                .addTo(infoListView);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("作业题目详情")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addTo(infoListView);
 
         recyclerView = findViewById(R.id.question_list);
 
@@ -152,8 +191,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(this,R.color.colorBlack)));
 
         submittedAnswerMap = new HashMap<>();
 
@@ -304,8 +341,7 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                 ViewHolder viewHolder = recyclerViewAdapter.getViewHolder(courseWorkQuestionInfo.getQuestionId());
                 CourseWorkSubmittedAnswer courseWorkSubmittedAnswer = submittedAnswerMap.get(courseWorkQuestionInfo.getIndex());
                 if (viewHolder != null && courseWorkSubmittedAnswer != null
-                        && !viewHolder.getQuestionInfo().getAutoCheck()
-                        && courseWorkSubmittedAnswer.getCheckStatus() < 0) {
+                        && !viewHolder.getQuestionInfo().getAutoCheck()) {
                     QuestionInfo questionInfo = viewHolder.getQuestionInfo();
                     if (questionInfo.getQuestionType() == QuestionType.SingleFilling
                             || questionInfo.getQuestionType() == QuestionType.Essay) {
@@ -368,40 +404,43 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
         if (finished && !isSystemSubmit) {
             if (userInfo.getUserType() == UserType.Student) {
-                AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
-                confirmDialog.setTitle("确认保存？");
+                String message;
                 if (notDoQuestionIndexList.isEmpty()) {
-                    confirmDialog.setMessage("你已完成所有题目，确认保存（保存后不可修改）？");
+                    message = "你已完成所有题目，确认保存（保存后不可修改）？";
                 } else {
-                    confirmDialog.setMessage(IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
-                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", ")));
+                    message = IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
+                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", "));
                 }
-                confirmDialog.setPositiveButton("确认", (dialog, which) -> {
-                    if (alreadySubmitted()) {
-                        if (!submittedCourseWorkInfo.getFinished()) {
-                            SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
-                                    submittedCourseWorkInfo.getSubmittedCourseWorkId(),
-                                    !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
-                                    submittedAnswerMap, true, true);
-                        } else {
-                            Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Map<Integer, SubmittedAnswer> map = new HashMap<>();
-                        for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
-                            map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
-                        }
-                        SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
-                                courseWorkInfo.getCourseWorkId(), true, map);
-                    }
-                });
-                confirmDialog.setNegativeButton("取消", ((dialog, which) -> {
-                    dialog.cancel();
-                    dialog.dismiss();
-                    saveButton.setEnabled(true);
-                    submitButton.setEnabled(true);
-                }));
-                confirmDialog.show();
+                new QMUIDialog.MessageDialogBuilder(this)
+                        .setTitle("确认提交")
+                        .setMessage(message)
+                        .addAction("取消", (dialog, index) -> {
+                            dialog.cancel();
+                            dialog.dismiss();
+                            saveButton.setEnabled(true);
+                            submitButton.setEnabled(true);
+                        })
+                        .addAction(0, "提交", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                            if (alreadySubmitted()) {
+                                if (!submittedCourseWorkInfo.getFinished()) {
+                                    SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
+                                            submittedCourseWorkInfo.getSubmittedCourseWorkId(),
+                                            !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
+                                            submittedAnswerMap, true, true);
+                                } else {
+                                    UIHelper.toast(this, "无法修改");
+                                }
+                            } else {
+                                Map<Integer, SubmittedAnswer> map = new HashMap<>();
+                                for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
+                                    map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
+                                }
+                                SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
+                                        courseWorkInfo.getCourseWorkId(), true, map);
+                            }
+                            dialog.dismiss();
+                        })
+                        .show();
             } else {
                 if (alreadySubmitted()) {
                     SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
@@ -421,7 +460,7 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                             !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
                             submittedAnswerMap, isSystemSubmit, isSystemSubmit);
                 } else {
-                    Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "无法修改");
                 }
             } else {
                 Map<Integer, SubmittedAnswer> map = new HashMap<>();
@@ -446,7 +485,7 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
     private void refresh() {
         if (userInfo.getUserType() == UserType.Teacher && alreadySubmitted()) {
-            setTitle(submittedCourseWorkInfo.getSubmitterInfo().getUsername());
+            topBar.setTitle(submittedCourseWorkInfo.getSubmitterInfo().getUsername());
         }
 
         // submittedAnswerMap
@@ -473,35 +512,34 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
                     }
                 }
                 sb.append(count).append("/").append(total);
-                checkResultView.setText(sb.toString().trim());
+                checkResultItemView.setDetailText(sb.toString().trim());
             } else {
-                checkResultView.setText("[尚未全部批改]");
+                checkResultItemView.setDetailText("[尚未全部批改]");
             }
         } else {
-            checkResultView.setText("[尚未全部批改]");
+            checkResultItemView.setDetailText("[尚未全部批改]");
         }
         if (userInfo.getUserType() == UserType.Teacher) {
-            checkResultLayout.setVisibility(View.VISIBLE);
+            checkResultItemView.setVisibility(View.VISIBLE);
         } else {
             if (canSubmitAnswer()) {
                 if (alreadySubmitted()) {
                     if (submittedCourseWorkInfo.getFinished()) {
-                        checkResultLayout.setVisibility(View.VISIBLE);
+                        checkResultItemView.setVisibility(View.VISIBLE);
                     } else {
-                        checkResultLayout.setVisibility(View.GONE);
+                        checkResultItemView.setVisibility(View.GONE);
                     }
                 } else {
-                    checkResultLayout.setVisibility(View.GONE);
+                    checkResultItemView.setVisibility(View.GONE);
                 }
             } else {
-                checkResultLayout.setVisibility(View.VISIBLE);
+                checkResultItemView.setVisibility(View.VISIBLE);
             }
         }
 
         // button
         if (userInfo.getUserType() == UserType.Teacher) {
             saveButton.setVisibility(View.GONE);
-            space.setVisibility(View.GONE);
             if (allIsAutoCheck()) {
                 submitButton.setVisibility(View.GONE);
             } else {
@@ -560,11 +598,11 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
     private void handleGetSubmittedCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             submittedCourseWorkInfo = serviceResult.extra(SubmittedCourseWorkGetResponse.class).getSubmittedCourseWorkInfo();
             finishInit();
         } else {
+            UIHelper.toast(this, serviceResult, raw -> "获取作业信息失败");
             if (serviceResult.extra(Boolean.class)) {
                 setResult(RESULT_CANCELED);
                 CourseWorkDetailActivity.this.finish();
@@ -582,49 +620,48 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
     private void handleCreateSubmittedCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         submitButton.setEnabled(true);
         saveButton.setEnabled(true);
         if (serviceResult.isSuccess()) {
             submittedCourseWorkInfo = serviceResult.extra(SubmittedCourseWorkCreateResponse.class).getSubmittedCourseWorkInfo();
             refresh();
         }
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "提交/暂存成功" : "提交/暂存作业失败");
     }
 
     private void handleUpdateSubmittedCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         submitButton.setEnabled(true);
         saveButton.setEnabled(true);
         if (serviceResult.isSuccess()) {
             submittedCourseWorkInfo = serviceResult.extra(SubmittedCourseWorkUpdateResponse.class).getSubmittedCourseWorkInfo();
             refresh();
         }
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "提交/暂存成功" : "提交/暂存作业失败");
     }
 
     private void handleGetQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess() || courseWorkInfo.getCourseWorkQuestionInfoCount() <= 0) {
             questionInfos.clear();
             questionInfos.addAll(serviceResult.extra(QuestionGetResponse.class).getQuestionInfoList());
             if (questionInfos.size() != courseWorkInfo.getCourseWorkQuestionInfoCount()) {
-                Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, serviceResult, raw -> "加载试题信息失败");
                 setResult(RESULT_CANCELED);
                 CourseWorkDetailActivity.this.finish();
             } else {
                 finishInit();
             }
         } else {
-            Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, serviceResult, raw -> "加载试题信息失败");
             setResult(RESULT_CANCELED);
             CourseWorkDetailActivity.this.finish();
         }
     }
 
     private void finishInit() {
-        if (waitingDialog != null && counter.incrementAndGet() == 2) {
-            waitingDialog.dismiss();
+        if (counter.incrementAndGet() == 2) {
+            UIHelper.dismissLoadingDialog();
             refresh();
             if (userInfo.getUserType() == UserType.Student) {
                 if (!canSubmitAnswer()) {
@@ -662,7 +699,11 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
             return false;
         }
         if (courseWorkInfo.getOpen()) {
-            return System.currentTimeMillis() <= courseWorkInfo.getDeadline();
+            if (courseWorkInfo.getHasDeadline()) {
+                return System.currentTimeMillis() <= courseWorkInfo.getDeadline();
+            } else {
+                return true;
+            }
         } else {
             return false;
         }

@@ -6,63 +6,57 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.ViewGroup;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseSubscriptionInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseSubscriptionFindAllResponse;
 import com.corkili.learningclient.service.CourseSubscriptionService;
 import com.corkili.learningclient.service.ServiceResult;
-import com.corkili.learningclient.ui.adapter.TeacherCourseSubscriptionRecyclerViewAdapter;
-import com.corkili.learningclient.ui.adapter.TeacherCourseSubscriptionRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView.Section;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class TeacherCourseSubscriptionActivity extends AppCompatActivity
-        implements TeacherCourseSubscriptionRecyclerViewAdapter.OnItemInteractionListener {
+public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
 
     private static final String SUBSCRIPTION_NUMBER_TEXT_FORMAT = "当前共有{}位订阅者";
 
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private TextView subscriptionNumberTextView;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView courseSubscriberListView;
 
     private CourseInfo courseInfo;
     private List<CourseSubscriptionInfo> courseSubscriptionInfos;
-
-    private TeacherCourseSubscriptionRecyclerViewAdapter recyclerViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_course_subscription);
+
         courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
         if (courseInfo == null) {
             throw new RuntimeException("Intent param lost");
         }
-        recyclerView = findViewById(R.id.activity_teacher_course_subscription_list);
-        swipeRefreshLayout = findViewById(R.id.activity_teacher_course_subscription_swipe_refresh_layout);
-        subscriptionNumberTextView = findViewById(R.id.text_view_current_subscription_number);
+
+        topBar = findViewById(R.id.topbar);
+        topBar.setTitle("订阅列表");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> TeacherCourseSubscriptionActivity.this.finish());
+        topBar.addRightImageButton(R.drawable.ic_refresh_24dp, R.id.topbar_right_refresh)
+                .setOnClickListener(v -> refreshCourseSubscriptionInfos());
+
+        courseSubscriberListView = findViewById(R.id.course_subscriber_list);
+
         courseSubscriptionInfos = new ArrayList<>();
-        subscriptionNumberTextView.setText(IUtils.format(SUBSCRIPTION_NUMBER_TEXT_FORMAT, courseSubscriptionInfos.size()));
-        recyclerViewAdapter = new TeacherCourseSubscriptionRecyclerViewAdapter(this, courseSubscriptionInfos, this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(this,R.color.colorBlack)));
-        swipeRefreshLayout.setOnRefreshListener(this::refreshCourseSubscriptionInfos);
         refreshCourseSubscriptionInfos();
     }
 
@@ -75,27 +69,47 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == CourseSubscriptionService.FIND_ALL_COURSE_SUBSCRIPTION_MSG) {
-                handleFindAllCourseCommentMsg(msg);
+                handleFindAllCourseSubscriptionMsg(msg);
             }
         }
     };
 
-    private void handleFindAllCourseCommentMsg(Message msg) {
+    private void handleFindAllCourseSubscriptionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseSubscriptionInfos.clear();
             courseSubscriptionInfos.addAll(serviceResult.extra(CourseSubscriptionFindAllResponse.class).getCourseSubscriptionInfoList());
-            swipeRefreshLayout.setRefreshing(false);
-            subscriptionNumberTextView.setText(IUtils.format(SUBSCRIPTION_NUMBER_TEXT_FORMAT, courseSubscriptionInfos.size()));
-            recyclerViewAdapter.notifyDataSetChanged();
+            courseSubscriberListView.removeAllViews();
+            int size = QMUIDisplayHelper.dp2px(this, 24);
+            Section section = QMUIGroupListView.newSection(this)
+                    .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT);
+            for (CourseSubscriptionInfo courseSubscriptionInfo : courseSubscriptionInfos) {
+                QMUICommonListItemView itemView = courseSubscriberListView.createItemView(
+                        ContextCompat.getDrawable(this, R.drawable.ic_user_24dp),
+                        courseSubscriptionInfo.getSubscriberInfo().getUsername(),
+                        IUtils.format("订阅时间:{}", IUtils.DATE_TIME_FORMATTER.format(
+                                new Date(courseSubscriptionInfo.getCreateTime()))),
+                        QMUICommonListItemView.VERTICAL,
+                        QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+                section.addItemView(itemView, v -> onItemClick(courseSubscriptionInfo));
+            }
+            String title;
+            if (!courseSubscriptionInfos.isEmpty()) {
+                title = IUtils.format(SUBSCRIPTION_NUMBER_TEXT_FORMAT, courseSubscriptionInfos.size());
+                section.setDescription("点击订阅者可以发送消息哦~");
+            } else {
+                title = "当前没有订阅者";
+            }
+            section.setTitle(title);
+            section.addTo(courseSubscriberListView);
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载课程订阅信息失败");
         }
     }
 
-    @Override
-    public void onItemClick(ViewHolder viewHolder) {
+    private void onItemClick(CourseSubscriptionInfo courseSubscriptionInfo) {
         Intent intent = new Intent(TeacherCourseSubscriptionActivity.this, MessageActivity.class);
-        intent.putExtra(IntentParam.USER_INFO, viewHolder.getCourseSubscriptionInfo().getSubscriberInfo());
+        intent.putExtra(IntentParam.USER_INFO, courseSubscriptionInfo.getSubscriberInfo());
         intent.putExtra(IntentParam.SELF_USER_INFO, courseInfo.getTeacherInfo());
         intent.putExtra(IntentParam.COUNT, 0);
         startActivity(intent);

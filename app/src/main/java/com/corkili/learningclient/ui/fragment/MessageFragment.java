@@ -9,17 +9,16 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.MessageInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Response.MessageFindAllResponse;
@@ -28,7 +27,8 @@ import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.activity.MessageActivity;
 import com.corkili.learningclient.ui.adapter.MessageFragmentRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.MessageFragmentRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,10 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
     public static final int REQUEST_CODE_MESSAGE_ACTIVITY = 0xF1;
 
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
+
+    private boolean shouldFinishRefresh = false;
 
     private MessageFragmentRecyclerViewAdapter recyclerViewAdapter;
 
@@ -72,6 +75,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_message, container, false);
+        tipView = view.findViewById(R.id.tip);
         recyclerView = view.findViewById(R.id.fragment_message_list);
         swipeRefreshLayout = view.findViewById(R.id.fragment_message_swipe_refresh_layout);
         messageInfos = new HashMap<>();
@@ -81,17 +85,41 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
+//        recyclerView.addItemDecoration(new MyRecyclerViewDivider(getActivity(), LinearLayoutManager.HORIZONTAL,
+//                1,ContextCompat.getColor(getActivity(),R.color.colorBlack)));
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        swipeRefreshLayout.setOnRefreshListener(this::refreshMessageInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshMessageInfos();
+            }
+        });
 
         refreshMessageInfos();
+    }
+
+    private void updateTipView() {
+        if (messageInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshMessageInfos() {
@@ -113,7 +141,6 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
 
     private void handleFindAllMessageMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             messageInfos.clear();
             userInfos.clear();
@@ -146,9 +173,15 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
                     }
                 });
             }
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载消息失败");
         }
+        if (shouldFinishRefresh) {
+            shouldFinishRefresh = false;
+            swipeRefreshLayout.finishRefresh();
+        }
+        updateTipView();
     }
 
     @Override
@@ -173,6 +206,7 @@ public class MessageFragment extends Fragment implements MessageFragmentRecycler
             messageInfos.put(userInfo.getUserId(), messageInfoList);
             recyclerViewAdapter.notifyDataSetChanged();
         }
+        updateTipView();
     }
 
     @Override

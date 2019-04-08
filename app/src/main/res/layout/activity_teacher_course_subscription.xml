@@ -1,38 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_teacher_course_subscription_swipe_refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.TeacherCourseSubscriptionActivity">
+    tools:context=".ui.activity.TeacherCourseManageActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/qmui_config_color_background"
+        android:layout_marginTop="?attr/qmui_topbar_height"
+        android:fitsSystemWindows="true">
 
-        <TextView
-            android:id="@+id/text_view_current_subscription_number"
+        <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+            android:id="@+id/course_subscriber_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:text="当前共有X位订阅者"
-            android:layout_margin="@dimen/text_margin"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="wrap_content"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/activity_teacher_course_subscription_list"
-            android:name="com.corkili.learningclient.ui.fragment.TeacherCourseFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            tools:context=".ui.activity.TeacherCourseSubscriptionActivity"
-            tools:listitem="@layout/activity_teacher_course_subscription_list_item"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            app:layout_constraintTop_toBottomOf="@id/text_view_current_subscription_number" />
+    </ScrollView>
 
-    </android.support.constraint.ConstraintLayout>
+    <com.qmuiteam.qmui.widget.QMUITopBarLayout
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"/>
 
-</android.support.v4.widget.SwipeRefreshLayout>
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>
 

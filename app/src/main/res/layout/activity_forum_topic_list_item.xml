@@ -8,45 +8,44 @@
 
     <TextView
         android:id="@+id/comment_index"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
+        android:textColor="@color/qmui_config_color_gray_1"
         android:text="comment_index"
-        android:textSize="18sp"
-        android:textStyle="bold"
         android:maxEms="8"
         android:singleLine="true"
         android:ellipsize="marquee"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/comment_content"/>
 
     <TextView
         android:id="@+id/comment_user_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
+        android:textColor="@color/qmui_config_color_gray_2"
         android:text="comment_user_name"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:maxEms="8"
         android:singleLine="true"
         android:ellipsize="marquee"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/comment_content"
         app:layout_constraintTop_toBottomOf="@id/comment_index"/>
 
     <TextView
         android:id="@+id/comment_content"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="comment_content"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:singleLine="false"
         android:scrollHorizontally="false"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@id/comment_user_name"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -55,10 +54,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItemSmall"
         android:text="comment_time"
-        android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintRight_toLeftOf="@id/comment_reply"
         app:layout_constraintTop_toBottomOf="@id/comment_user_name" />
 
@@ -67,26 +64,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="回复(0)"
         android:textSize="18sp"
         android:textStyle="italic"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/app_color_theme_2"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/comment_user_name" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/comment_reply_layout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/topic_reply_left_margin"
         android:layout_marginStart="@dimen/topic_reply_left_margin"
         app:layout_constraintTop_toBottomOf="@id/comment_reply"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:visibility="visible">
 
         <View
             android:id="@+id/comment_line1"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="4dp"
             android:background="@color/colorBlack"
@@ -94,21 +93,31 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"/>
 
+        <TextView
+            android:id="@+id/reply_tip"
+            style="@style/QDCommonDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="暂无回复"
+            android:visibility="gone"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/comment_line1"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/comment_reply_list"
             android:name="com.corkili.learningclient.ui.fragment.TeacherCourseFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            app:layout_constraintTop_toBottomOf="@id/comment_line1"
+            app:layout_constraintTop_toBottomOf="@id/reply_tip"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            tools:context=".ui.activity.ForumTopicActivity"
             tools:listitem="@layout/comment_reply_list_item" />
 
         <View
             android:id="@+id/comment_line2"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="4dp"
             android:background="@color/colorBlack"
@@ -118,23 +127,28 @@
 
         <EditText
             android:id="@+id/comment_reply_editor"
-            android:layout_width="match_parent"
+            style="@style/CommonEditText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="输入回复内容"
             android:inputType="textMultiLine"
             android:singleLine="false"
             android:scrollHorizontally="false"
-            app:layout_constraintTop_toBottomOf="@id/comment_line2" />
+            app:layout_constraintTop_toBottomOf="@id/comment_line2"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/add_comment_reply"
+            app:layout_constraintBottom_toBottomOf="parent"/>
         
-        <Button
+        <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
             android:id="@+id/add_comment_reply"
+            style="@style/QDRoundButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="发表"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/comment_reply_editor"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintLeft_toRightOf="@id/comment_reply_editor"
+            app:layout_constraintTop_toBottomOf="@id/comment_line2"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 

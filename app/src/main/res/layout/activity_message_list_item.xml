@@ -3,86 +3,118 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="20dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="20dp">
 
-    <TextView
-        android:id="@+id/item_time_left"
-        android:layout_width="wrap_content"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/left_layout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_time_left"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:background="@drawable/message_item_layout_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintRight_toLeftOf="@id/right_layout">
 
-    <TextView
-        android:id="@+id/item_username_left"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_username_left"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:maxEms="8"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/item_time_left" />
+        <TextView
+            android:id="@+id/item_username_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItemSmall"
+            android:text="item_username_left"
+            android:textColor="@color/qmui_config_color_gray_2"
+            android:maxEms="8"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
-    <TextView
-        android:id="@+id/item_content_left"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/item_content_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItem"
+            android:text="item_content_left"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_username_left"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <TextView
+            android:id="@+id/item_time_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItemSmall"
+            android:text="item_time_left"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_content_left"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/right_layout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_content_left"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:maxEms="16"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/item_username_left" />
+        android:background="@drawable/message_item_layout_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/left_layout"
+        app:layout_constraintRight_toRightOf="parent">
 
-    <TextView
-        android:id="@+id/item_time_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_time_right"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/item_username_right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItemSmall"
+            android:text="item_username_right"
+            android:textColor="@color/qmui_config_color_gray_2"
+            android:maxEms="8"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
-    <TextView
-        android:id="@+id/item_username_right"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_username_right"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:maxEms="8"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/item_time_right" />
+        <TextView
+            android:id="@+id/item_content_right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItem"
+            android:text="item_content_right"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_username_right"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
-    <TextView
-        android:id="@+id/item_content_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="item_content_right"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:maxEms="16"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/item_username_right" />
+        <TextView
+            android:id="@+id/item_time_right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="@style/QDTextAppearanceListItemSmall"
+            android:text="item_time_right"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_content_right"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

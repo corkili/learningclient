@@ -14,12 +14,14 @@ import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.ui.fragment.MessageFragment;
 import com.corkili.learningclient.ui.fragment.StudentCourseFragment;
 import com.corkili.learningclient.ui.fragment.UserFragment;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 
 public class StudentMainActivity extends AppCompatActivity
         implements UserFragment.OnUserInfoChangeListener, MessageFragment.DataBus, StudentCourseFragment.DataBus {
 
     private UserInfo userInfo;
 
+    private QMUITopBarLayout topBar;
     private UserFragment userFragment;
     private MessageFragment messageFragment;
     private StudentCourseFragment courseFragment;
@@ -33,19 +35,25 @@ public class StudentMainActivity extends AppCompatActivity
         Intent intent = getIntent();
         userInfo = (UserInfo) intent.getSerializableExtra(IntentParam.USER_INFO);
 
+        topBar = findViewById(R.id.topbar);
+
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_course:
+                    topBar.setTitle("课程列表");
                     loadCourseFragment();
                     return true;
                 case R.id.navigation_subscription:
+                    topBar.setTitle("订阅列表");
                     loadSubscriptionFragment();
                     return true;
                 case R.id.navigation_message_manager:
+                    topBar.setTitle("我的消息");
                     loadMessageFragment();
                     return true;
                 case R.id.navigation_user_info:
+                    topBar.setTitle("个人信息");
                     loadUserFragment();
                     return true;
             }

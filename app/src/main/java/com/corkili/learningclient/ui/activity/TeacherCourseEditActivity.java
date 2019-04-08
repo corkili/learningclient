@@ -6,25 +6,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseCreateResponse;
 import com.corkili.learningclient.generate.protobuf.Response.CourseUpdateResponse;
 import com.corkili.learningclient.service.CourseService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class TeacherCourseEditActivity extends AppCompatActivity {
 
+    private QMUITopBarLayout topBar;
     private EditText courseNameEditText;
     private EditText tagsEditText;
     private RadioGroup openRadioGroup;
@@ -36,17 +37,23 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_course_edit);
+
         isCreate = getIntent().getBooleanExtra(IntentParam.IS_CREATE, true);
-        if (isCreate) {
-            setTitle("创建课程");
-        } else {
-            setTitle("编辑课程");
-        }
+
+        topBar = findViewById(R.id.topbar);
         courseNameEditText = findViewById(R.id.course_edit_text_edit_course_name);
         tagsEditText = findViewById(R.id.course_edit_text_edit_tags);
         openRadioGroup = findViewById(R.id.course_edit_radio_group_open);
         descriptionEditText = findViewById(R.id.course_edit_text_edit_description);
+
+        if (isCreate) {
+            topBar.setTitle("创建课程");
+        } else {
+            topBar.setTitle("编辑课程");
+        }
+
         CourseInfo courseInfo = (CourseInfo) getIntent().getSerializableExtra(IntentParam.COURSE_INFO);
+
         if (!isCreate) {
             if (courseInfo == null) {
                 throw new RuntimeException("expected courseInfo");
@@ -60,10 +67,8 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
             }
             descriptionEditText.setText(courseInfo.getDescription());
         }
-        Button okButton = findViewById(R.id.course_edit_button_ok);
-        Button cancelButton = findViewById(R.id.course_edit_button_cancel);
 
-        okButton.setOnClickListener(v -> {
+        topBar.addRightTextButton("保存", R.id.topbar_right_save).setOnClickListener(v -> {
             String courseName = courseNameEditText.getText().toString().trim();
             List<String> tags = IUtils.string2List(tagsEditText.getText().toString().trim(), Pattern.compile(";"));
             boolean open = openRadioGroup.getCheckedRadioButtonId() == R.id.open_yes;
@@ -89,7 +94,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
             }
         });
 
-        cancelButton.setOnClickListener(v -> {
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
             setResult(RESULT_CANCELED);
             TeacherCourseEditActivity.this.finish();
         });
@@ -109,7 +114,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
 
     private void handleCreateCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "创建课程成功" : "创建课程失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseCreateResponse.class).getCourseInfo());
@@ -120,7 +125,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
 
     private void handleUpdateCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新课程成功" : "更新课程失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseUpdateResponse.class).getCourseInfo());

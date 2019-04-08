@@ -1,35 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activity.ExamActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/activity_exam_swipe_refresh_layout">
+        android:layout_marginTop="?attr/qmui_topbar_height"
+        android:fitsSystemWindows="true">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/activity_exam_list"
-            android:name="com.corkili.learningclient.ui.fragment.TeacherCourseFragment"
+        <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+            android:id="@+id/exam_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            tools:context=".ui.activity.ExamActivity"
-            tools:listitem="@layout/activity_exam_list_item" />
+            android:layout_height="wrap_content"/>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </ScrollView>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_add_exam"
-        android:layout_width="wrap_content"
+    <com.qmuiteam.qmui.widget.QMUITopBarLayout
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="16dp"
-        app:pressedTranslationZ="12dp"
-        app:srcCompat="@drawable/ic_add_white" />
+        android:fitsSystemWindows="true"/>
 
-</android.support.constraint.ConstraintLayout>
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>

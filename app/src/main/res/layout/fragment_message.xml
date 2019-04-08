@@ -5,7 +5,16 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <TextView
+        android:id="@+id/tip"
+        style="@style/QDCommonDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="@dimen/text_margin"
+        android:text="没有消息哦~" />
+
+    <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_message_swipe_refresh_layout">
@@ -19,7 +28,7 @@
             tools:context=".ui.fragment.MessageFragment"
             tools:listitem="@layout/fragment_message_list_item" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 
 </android.support.constraint.ConstraintLayout>
 

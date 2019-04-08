@@ -1,7 +1,6 @@
 package com.corkili.learningclient.ui.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,36 +9,38 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserUpdateInfoResponse;
 import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.service.UserService;
 import com.corkili.learningclient.ui.activity.LoginActivity;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 public class UserFragment extends Fragment {
 
-    private static final String TAG = "UserFragment";
-
     private OnUserInfoChangeListener onUserInfoChangeListener;
 
-    private TextView usernameTextView;
-    private EditText usernameEditText;
-    private EditText phoneEditText;
-    private EditText userTypeEditText;
-    private Button modifyPasswordButton;
-    private Button logoutButton;
+    private QMUICommonListItemView usernameItem;
+    private QMUICommonListItemView phoneItem;
+    private QMUICommonListItemView userTypeItem;
+    private QMUICommonListItemView passwordItem;
+    private QMUICommonListItemView logoutItem;
+
+    private QMUIGroupListView userInfoListView;
 
     private UserInfo userInfo;
 
@@ -81,13 +82,62 @@ public class UserFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_user, container, false);
-        usernameTextView = view.findViewById(R.id.user_fragment_text_view_username);
-        usernameEditText = view.findViewById(R.id.user_fragment_text_edit_username);
-        phoneEditText = view.findViewById(R.id.user_fragment_text_edit_phone);
-        userTypeEditText = view.findViewById(R.id.user_fragment_text_edit_user_type);
-        modifyPasswordButton = view.findViewById(R.id.user_fragment_button_modify_password);
-        logoutButton = view.findViewById(R.id.user_fragment_button_logout);
+        userInfoListView = view.findViewById(R.id.user_info_list);
+
+        usernameItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_user_24dp),
+                "用户名",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+
+        phoneItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_24dp),
+                "手机号",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        userTypeItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_usertype_24dp),
+                "类型",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        passwordItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_password_24dp),
+                "修改密码",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+
+        logoutItem = userInfoListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_logout_24dp),
+                "退出登录",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+
+        int size = QMUIDisplayHelper.dp2px(getContext(), 24);
+
+        QMUIGroupListView.newSection(getContext())
+                .setTitle("基本信息")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(usernameItem, null)
+                .addItemView(phoneItem, null)
+                .addItemView(userTypeItem, null)
+                .addTo(userInfoListView);
+
+        QMUIGroupListView.newSection(getContext())
+                .setTitle("账号操作")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(passwordItem, null)
+                .addItemView(logoutItem, null)
+                .addTo(userInfoListView);
+
         return view;
     }
 
@@ -95,99 +145,89 @@ public class UserFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        usernameEditText.setText(userInfo.getUsername());
-        phoneEditText.setText(userInfo.getPhone());
+        usernameItem.setDetailText(userInfo.getUsername());
+        phoneItem.setDetailText(userInfo.getPhone());
 
         if (userInfo.getUserType() == UserType.Teacher) {
-            userTypeEditText.setText("老师");
+            userTypeItem.setDetailText("老师");
         } else {
-            userTypeEditText.setText("学生");
+            userTypeItem.setDetailText("学生");
         }
 
-        usernameTextView.setOnClickListener(view -> {
-            if (view.getId() != usernameTextView.getId()) {
-                return;
-            }
-            showModifyUsernameDialog();
-        });
+        usernameItem.setOnClickListener(view -> showModifyUsernameDialog());
 
-        modifyPasswordButton.setOnClickListener(view -> {
-            if (view.getId() != modifyPasswordButton.getId()) {
-                return;
-            }
-            showModifyPasswordDialog();
-        });
+        passwordItem.setOnClickListener(view -> showModifyPasswordDialog());
 
-        logoutButton.setOnClickListener(view -> {
-            if (view.getId() != logoutButton.getId()) {
-                return;
-            }
-            showLogoutDialog();
-        });
+        logoutItem.setOnClickListener(view -> showLogoutDialog());
     }
 
     private void showModifyUsernameDialog() {
-        final EditText editText = new EditText(getActivity());
-        AlertDialog.Builder inputDialog =
-                new AlertDialog.Builder(getActivity());
-        inputDialog.setTitle("修改用户名").setView(editText);
-        inputDialog
-                .setPositiveButton("确定", (dialog, which) -> {
-                    String username = editText.getText().toString();
-                    UserService.getInstance().modifyUsername(handler,
-                            userInfo.getPhone(), userInfo.getUserType(), username);
+        final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(getActivity());
+        builder.setTitle("修改用户名")
+                .setPlaceholder("请输入新的用户名")
+                .setInputType(InputType.TYPE_CLASS_TEXT)
+                .addAction("取消", (dialog, index) -> dialog.dismiss())
+                .addAction("确定", (dialog, index) -> {
+                    CharSequence username = builder.getEditText().getText();
+                    if (username != null && username.length() > 0 && !username.toString().equals(userInfo.getUsername())) {
+                        UserService.getInstance().modifyUsername(handler,
+                                userInfo.getPhone(), userInfo.getUserType(), username.toString());
+                    }
+                    dialog.dismiss();
                 })
-                .setNegativeButton("取消", ((dialog, which) -> dialog.cancel()))
                 .show();
     }
 
     private void showModifyPasswordDialog() {
-        final EditText editText = new EditText(getActivity());
-        editText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        AlertDialog.Builder inputDialog =
-                new AlertDialog.Builder(getActivity());
-        inputDialog.setTitle("修改密码").setView(editText);
-        inputDialog
-                .setPositiveButton("确定", (dialog, which) -> {
-                    String password = editText.getText().toString();
-                    UserService.getInstance().modifyPassword(handler,
-                            userInfo.getPhone(), userInfo.getUserType(), password);
+        final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(getActivity());
+        builder.setTitle("修改密码")
+                .setPlaceholder("请输入新密码")
+                .setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
+                .addAction("取消", (dialog, index) -> dialog.dismiss())
+                .addAction("确定", (dialog, index) -> {
+                    CharSequence password = builder.getEditText().getText();
+                    if (password != null && password.length() > 0) {
+                        UserService.getInstance().modifyPassword(handler,
+                                userInfo.getPhone(), userInfo.getUserType(), password.toString());
+                    }
+                    dialog.dismiss();
                 })
-                .setNegativeButton("取消", ((dialog, which) -> dialog.cancel()))
                 .show();
     }
 
     private void showLogoutDialog() {
-        AlertDialog.Builder inputDialog =
-                new AlertDialog.Builder(getActivity());
-        inputDialog.setTitle("注销").setMessage("是否确定注销");
-        inputDialog
-                .setPositiveButton("确定", (dialog, which) -> UserService.getInstance().logout(handler))
-                .setNegativeButton("取消", ((dialog, which) -> dialog.cancel()))
+        new QMUIDialog.MessageDialogBuilder(getActivity())
+                .setTitle("注销")
+                .setMessage("确定退出登录吗？")
+                .addAction("取消", (dialog, index) -> dialog.dismiss())
+                .addAction(0, "注销", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                    UserService.getInstance().logout(handler);
+                    dialog.dismiss();
+                })
                 .show();
     }
 
     private void handleModifyUsernameMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(getActivity(), serviceResult, raw -> serviceResult.isSuccess() ? "修改用户名成功" : "修改用户名失败");
         if (serviceResult.isSuccess()) {
             UserUpdateInfoResponse response = serviceResult.extra(UserUpdateInfoResponse.class);
             refreshUserInfo(response.getUserInfo());
-            usernameEditText.setText(userInfo.getUsername());
+            usernameItem.setDetailText(userInfo.getUsername());
         }
     }
 
     private void handleModifyPasswordMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(getActivity(), serviceResult, raw -> serviceResult.isSuccess() ? "修改用户名成功" : "修改用户名失败");
     }
 
     private void handleLogoutMsg(Message msg) {
-        ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
-        getActivity().finish();
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     private void refreshUserInfo(UserInfo newUserInfo) {

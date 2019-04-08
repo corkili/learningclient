@@ -8,13 +8,12 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
@@ -31,6 +30,9 @@ import com.corkili.learningclient.generate.protobuf.Response.QuestionImportRespo
 import com.corkili.learningclient.generate.protobuf.Response.QuestionUpdateResponse;
 import com.corkili.learningclient.service.QuestionService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +48,8 @@ public class QuestionEditActivity extends AppCompatActivity {
     private QuestionInfo questionInfo;
     private boolean editMode;
 
+    private QMUITopBarLayout topBar;
+
     private EditText questionEditor;
     private RadioGroup questionTypeSelector;
     private RadioGroup autoCheckSelector;
@@ -53,21 +57,19 @@ public class QuestionEditActivity extends AppCompatActivity {
     private View multipleFillingAttachLayout;
     private View choiceAttachLayout;
     private View essayAttachLayout;
-    private Button positiveButton;
-    private Button negativeButton;
     private List<View> infoViewList;
     private View answerInfoLayout;
 
     // single_filling
     private LinearLayout singleFillingAnswerLayout;
     private SingleFillingItemView singleFillingRequiredAnswerView;
-    private Button addSingleFillingAnswerButton;
+    private QMUIRoundButton addSingleFillingAnswerButton;
     private List<SingleFillingItemView> singleFillingAnswerViewList;
 
     // multiple_filling
     private LinearLayout multipleFillingAnswerLayout;
     private MultipleFillingItemView multipleFillingRequiredAnswerView;
-    private Button addMultipleFillingAnswerButton;
+    private QMUIRoundButton addMultipleFillingAnswerButton;
     private List<MultipleFillingItemView> multipleFillingAnswerViewList;
 
     // choice
@@ -77,7 +79,7 @@ public class QuestionEditActivity extends AppCompatActivity {
     private LinearLayout choiceAnswerLayout;
     private ChoiceItemView choiceRequiredAnswerView1;
     private ChoiceItemView choiceRequiredAnswerView2;
-    private Button addChoiceAnswerButton;
+    private QMUIRoundButton addChoiceAnswerButton;
     private List<ChoiceItemView> choiceAnswerViewList;
 
     // essay
@@ -94,13 +96,15 @@ public class QuestionEditActivity extends AppCompatActivity {
             throw new RuntimeException("Intent param expected");
         }
 
-        if (isCreate) {
-            setTitle("导入试题");
-        } else {
-            setTitle("试题详情");
-        }
+        editMode = true;
 
-        editMode = !isCreate;
+        topBar = findViewById(R.id.topbar);
+
+        if (isCreate) {
+            topBar.setTitle("导入试题");
+        } else {
+            topBar.setTitle("试题详情");
+        }
 
         questionEditor = findViewById(R.id.question_edit_text_edit_question);
         questionTypeSelector = findViewById(R.id.question_edit_radio_group_question_type);
@@ -109,8 +113,6 @@ public class QuestionEditActivity extends AppCompatActivity {
         multipleFillingAttachLayout = findViewById(R.id.attach_multiple_filling_layout);
         choiceAttachLayout = findViewById(R.id.attach_choice_layout);
         essayAttachLayout = findViewById(R.id.attach_essay_layout);
-        positiveButton = findViewById(R.id.question_edit_button_positive);
-        negativeButton = findViewById(R.id.question_edit_button_negative);
 
         infoViewList = new ArrayList<>();
         infoViewList.add(findViewById(R.id.single_filling_info_layout));
@@ -170,57 +172,21 @@ public class QuestionEditActivity extends AppCompatActivity {
             }
         });
 
-        positiveButton.setOnClickListener(v -> {
-            if (editMode) {
-                Answer answer =  getAnswer();
-                String question = questionEditor.getText().toString().trim();
-                QuestionType questionType = getSelectedQuestionType();
-                Boolean autoCheck = getSelectedAutoCheck();
-                Map<Integer, String> choices = getChoices();
-                if (answer == null) {
-                    return;
-                }
-                if (isCreate) {
-                    QuestionService.getInstance().createQuestion(handler, question, questionType,
-                            autoCheck, choices, answer);
-                } else {
-                    if (question.equals(questionInfo.getQuestion())) {
-                        question = null;
-                    }
-                    if (autoCheck == questionInfo.getAutoCheck()) {
-                        autoCheck = null;
-                    }
-                    boolean updateChoices = false;
-                    if (choices != null && !choices.equals(questionInfo.getChoicesMap())) {
-                        updateChoices = true;
-                    }
-                    if (answer.equals(questionInfo.getAnswer())) {
-                        answer = null;
-                    }
-                    QuestionService.getInstance().updateQuestion(handler, questionInfo.getQuestionId(),
-                            questionType, question, autoCheck, updateChoices, choices, answer);
-                }
-            } else {
-                if (!isCreate && !editMode) {
-                    switchEditMode();
-                }
-            }
-        });
+        if (isCreate) {
+            topBar.addRightTextButton("保存", R.id.topbar_right_save).setOnClickListener(v -> save());
+        }
 
-        negativeButton.setOnClickListener(v -> {
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
             if (editMode) {
                 if (isCreate) {
                     setResult(RESULT_CANCELED);
                     QuestionEditActivity.this.finish();
                 } else {
-                    if (editMode) {
-                        switchEditMode();
-                    }
+                    switchEditMode();
                 }
             } else {
-                if (!isCreate) {
-                    QuestionService.getInstance().deleteQuestion(handler, questionInfo.getQuestionId());
-                }
+                setResult(RESULT_CANCELED);
+                QuestionEditActivity.this.finish();
             }
         });
 
@@ -230,6 +196,7 @@ public class QuestionEditActivity extends AppCompatActivity {
         addSingleFillingAnswerButton = findViewById(R.id.add_a_single_filling_answer);
         singleFillingAnswerViewList = new ArrayList<>();
 
+        singleFillingRequiredAnswerView.deleteView.setVisibility(View.INVISIBLE);
         singleFillingRequiredAnswerView.deleteView.setEnabled(false);
 
         addSingleFillingAnswerButton.setOnClickListener(v -> {
@@ -241,7 +208,6 @@ public class QuestionEditActivity extends AppCompatActivity {
                     addSingleFillingAnswerButton.setEnabled(false);
                     singleFillingAnswerViewList.remove(itemView);
                     singleFillingAnswerLayout.removeView(view);
-//                    Toast.makeText(this, String.valueOf(singleFillingAnswerViewList.size()), Toast.LENGTH_SHORT).show();
                 } finally {
                     addSingleFillingAnswerButton.setEnabled(true);
                 }
@@ -258,6 +224,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
         multipleFillingRequiredAnswerView.indexView.setEnabled(false);
         multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setEnabled(false);
+        multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.INVISIBLE);
         multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton
                 .setOnClickListener(v -> {
                     View view = LayoutInflater.from(QuestionEditActivity.this)
@@ -268,7 +235,6 @@ public class QuestionEditActivity extends AppCompatActivity {
                             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setEnabled(false);
                             multipleFillingRequiredAnswerView.multipleFillingAnswerFillingViewList.remove(itemView);
                             multipleFillingRequiredAnswerView.multipleFillingAnswerItemLayout.removeView(view);
-//                            Toast.makeText(this, String.valueOf(singleFillingAnswerViewList.size()), Toast.LENGTH_SHORT).show();
                         } finally {
                             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
                         }
@@ -294,6 +260,7 @@ public class QuestionEditActivity extends AppCompatActivity {
             });
 
             itemView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setEnabled(false);
+            itemView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.INVISIBLE);
 
             itemView.addFillingAnswerInCurrentFillingButton.setOnClickListener(b -> {
                 View innerView = LayoutInflater.from(QuestionEditActivity.this)
@@ -304,7 +271,6 @@ public class QuestionEditActivity extends AppCompatActivity {
                         itemView.addFillingAnswerInCurrentFillingButton.setEnabled(false);
                         itemView.multipleFillingAnswerFillingViewList.remove(innerItemView);
                         itemView.multipleFillingAnswerItemLayout.removeView(innerView);
-//                            Toast.makeText(this, String.valueOf(singleFillingAnswerViewList.size()), Toast.LENGTH_SHORT).show();
                     } finally {
                         itemView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
                     }
@@ -331,6 +297,8 @@ public class QuestionEditActivity extends AppCompatActivity {
 
         choiceRequiredAnswerView1.deleteView.setEnabled(false);
         choiceRequiredAnswerView2.deleteView.setEnabled(false);
+        choiceRequiredAnswerView1.deleteView.setVisibility(View.INVISIBLE);
+        choiceRequiredAnswerView2.deleteView.setVisibility(View.INVISIBLE);
 
         choiceRequiredAnswerView1.isCorrectChoiceView.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -481,14 +449,14 @@ public class QuestionEditActivity extends AppCompatActivity {
             choiceRequiredAnswerView1.deleteView.setVisibility(View.GONE);
             choiceRequiredAnswerView1.isCorrectChoiceView.setEnabled(false);
             if (!choiceRequiredAnswerView1.isCorrectChoiceView.isChecked()) {
-                choiceRequiredAnswerView1.isCorrectChoiceView.setVisibility(View.GONE);
+                choiceRequiredAnswerView1.isCorrectChoiceView.setVisibility(View.INVISIBLE);
             }
             choiceRequiredAnswerView2.editor.setEnabled(false);
             choiceRequiredAnswerView2.deleteView.setEnabled(false);
             choiceRequiredAnswerView2.deleteView.setVisibility(View.GONE);
             choiceRequiredAnswerView2.isCorrectChoiceView.setEnabled(false);
             if (!choiceRequiredAnswerView2.isCorrectChoiceView.isChecked()) {
-                choiceRequiredAnswerView2.isCorrectChoiceView.setVisibility(View.GONE);
+                choiceRequiredAnswerView2.isCorrectChoiceView.setVisibility(View.INVISIBLE);
             }
             addChoiceAnswerButton.setEnabled(false);
             addChoiceAnswerButton.setVisibility(View.GONE);
@@ -498,29 +466,58 @@ public class QuestionEditActivity extends AppCompatActivity {
                 itemView.deleteView.setVisibility(View.GONE);
                 itemView.isCorrectChoiceView.setEnabled(false);
                 if (!itemView.isCorrectChoiceView.isChecked()) {
-                    itemView.isCorrectChoiceView.setVisibility(View.GONE);
+                    itemView.isCorrectChoiceView.setVisibility(View.INVISIBLE);
                 }
             }
             UIHelper.disableRadioGroup(choiceAllSelectRadioGroup);
 
             essayAnswerEditor.setEnabled(false);
-            
-            positiveButton.setText("编辑");
-            negativeButton.setText("删除");
-            setTitle("试题详情");
+
+            topBar.setTitle("试题详情");
+
+            topBar.removeAllRightViews();
+            topBar.addRightImageButton(R.drawable.ic_more_24dp, R.id.topbar_right_more).setOnClickListener(v -> {
+                new QMUIBottomSheet.BottomListSheetBuilder(QuestionEditActivity.this)
+                        .addItem("编辑")
+                        .addItem("删除")
+                        .setOnSheetItemClickListener((dialog, itemView, position, tag) -> {
+                            if (position == 0) {
+                                if (!isCreate && !editMode) {
+                                    switchEditMode();
+                                }
+                            } else if (position == 1) {
+                                if (!isCreate) {
+                                    QuestionService.getInstance().deleteQuestion(handler, questionInfo.getQuestionId());
+                                }
+                            }
+                            dialog.dismiss();
+                        })
+                        .build()
+                        .show();
+            });
 
 //            clear();
 //            initIfIsUpdate();
         } else {
             editMode = true;
             questionEditor.setEnabled(true);
-            UIHelper.enableRadioGroup(autoCheckSelector);
+            switch (getSelectedQuestionType()) {
+                case SingleFilling:
+                case MultipleFilling:
+                    UIHelper.enableRadioGroup(autoCheckSelector);
+                    break;
+                case SingleChoice:
+                case MultipleChoice:
+                case Essay:
+                    UIHelper.disableRadioGroup(autoCheckSelector);
+                    break;
+            }
             for (View view : infoViewList) {
                 view.setVisibility(View.VISIBLE);
             }
             answerInfoLayout.setVisibility(View.GONE);
 
-            singleFillingRequiredAnswerView.deleteView.setVisibility(View.VISIBLE);
+            singleFillingRequiredAnswerView.deleteView.setVisibility(View.INVISIBLE);
             singleFillingRequiredAnswerView.editor.setEnabled(true);
             addSingleFillingAnswerButton.setEnabled(true);
             addSingleFillingAnswerButton.setVisibility(View.VISIBLE);
@@ -532,7 +529,7 @@ public class QuestionEditActivity extends AppCompatActivity {
             multipleFillingRequiredAnswerView.indexView.setEnabled(true);
             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setVisibility(View.VISIBLE);
-            multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.VISIBLE);
+            multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.INVISIBLE);
             multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView.editor.setEnabled(true);
             for (SingleFillingItemView itemView : multipleFillingRequiredAnswerView.multipleFillingAnswerFillingViewList) {
                 itemView.deleteView.setVisibility(View.VISIBLE);
@@ -544,7 +541,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                 multipleFillingItemView.indexView.setEnabled(true);
                 multipleFillingItemView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
                 multipleFillingItemView.addFillingAnswerInCurrentFillingButton.setVisibility(View.VISIBLE);
-                multipleFillingItemView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.VISIBLE);
+                multipleFillingItemView.multipleFillingRequiredAnswerRequiredFillingView.deleteView.setVisibility(View.INVISIBLE);
                 multipleFillingItemView.multipleFillingRequiredAnswerRequiredFillingView.editor.setEnabled(true);
                 for (SingleFillingItemView itemView : multipleFillingItemView.multipleFillingAnswerFillingViewList) {
                     itemView.deleteView.setVisibility(View.VISIBLE);
@@ -554,14 +551,14 @@ public class QuestionEditActivity extends AppCompatActivity {
 
             choiceRequiredAnswerView1.editor.setEnabled(true);
             choiceRequiredAnswerView1.deleteView.setEnabled(true);
-            choiceRequiredAnswerView1.deleteView.setVisibility(View.VISIBLE);
+            choiceRequiredAnswerView1.deleteView.setVisibility(View.INVISIBLE);
             choiceRequiredAnswerView1.isCorrectChoiceView.setEnabled(true);
             if (!choiceRequiredAnswerView1.isCorrectChoiceView.isChecked()) {
                 choiceRequiredAnswerView1.isCorrectChoiceView.setVisibility(View.VISIBLE);
             }
             choiceRequiredAnswerView2.editor.setEnabled(true);
             choiceRequiredAnswerView2.deleteView.setEnabled(true);
-            choiceRequiredAnswerView2.deleteView.setVisibility(View.VISIBLE);
+            choiceRequiredAnswerView2.deleteView.setVisibility(View.INVISIBLE);
             choiceRequiredAnswerView2.isCorrectChoiceView.setEnabled(true);
             if (!choiceRequiredAnswerView2.isCorrectChoiceView.isChecked()) {
                 choiceRequiredAnswerView2.isCorrectChoiceView.setVisibility(View.VISIBLE);
@@ -580,10 +577,43 @@ public class QuestionEditActivity extends AppCompatActivity {
             UIHelper.enableRadioGroup(choiceAllSelectRadioGroup);
 
             essayAnswerEditor.setEnabled(true);
-            
-            positiveButton.setText("保存");
-            negativeButton.setText("取消");
-            setTitle("编辑试题");
+
+            topBar.setTitle("编辑试题");
+
+            topBar.removeAllRightViews();
+            topBar.addRightTextButton("保存", R.id.topbar_right_save).setOnClickListener(v -> save());
+
+        }
+    }
+
+    private void save() {
+        Answer answer =  getAnswer();
+        String question = questionEditor.getText().toString().trim();
+        QuestionType questionType = getSelectedQuestionType();
+        Boolean autoCheck = getSelectedAutoCheck();
+        Map<Integer, String> choices = getChoices();
+        if (answer == null) {
+            return;
+        }
+        if (isCreate) {
+            QuestionService.getInstance().createQuestion(handler, question, questionType,
+                    autoCheck, choices, answer);
+        } else {
+            if (question.equals(questionInfo.getQuestion())) {
+                question = null;
+            }
+            if (autoCheck == questionInfo.getAutoCheck()) {
+                autoCheck = null;
+            }
+            boolean updateChoices = false;
+            if (choices != null && !choices.equals(questionInfo.getChoicesMap())) {
+                updateChoices = true;
+            }
+            if (answer.equals(questionInfo.getAnswer())) {
+                answer = null;
+            }
+            QuestionService.getInstance().updateQuestion(handler, questionInfo.getQuestionId(),
+                    questionType, question, autoCheck, updateChoices, choices, answer);
         }
     }
 
@@ -751,14 +781,14 @@ public class QuestionEditActivity extends AppCompatActivity {
             List<String> answerList = new ArrayList<>();
             tmp = singleFillingRequiredAnswerView.editor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             answerList.add(tmp);
             for (SingleFillingItemView singleFillingItemView : singleFillingAnswerViewList) {
                 tmp = singleFillingItemView.editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
@@ -774,14 +804,14 @@ public class QuestionEditActivity extends AppCompatActivity {
             tmp = multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView
                     .editor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             answerList.add(tmp);
             for (SingleFillingItemView singleFillingItemView : multipleFillingRequiredAnswerView.multipleFillingAnswerFillingViewList) {
                 tmp = singleFillingItemView.editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
@@ -793,14 +823,14 @@ public class QuestionEditActivity extends AppCompatActivity {
                 tmp = itemView.multipleFillingRequiredAnswerRequiredFillingView
                         .editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
                 for (SingleFillingItemView singleFillingItemView : itemView.multipleFillingAnswerFillingViewList) {
                     tmp = singleFillingItemView.editor.getText().toString().trim();
                     if (StringUtils.isBlank(tmp)) {
-                        Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                        UIHelper.toast(this, "答案内容不能为空");
                         return null;
                     }
                     answerList.add(tmp);
@@ -825,7 +855,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                 }
             }
             if (correctChoice == 0) {
-                Toast.makeText(this, "单选题必须提供一个正确选项", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "单选题必须提供一个正确选项");
                 return null;
             }
             SingleChoiceAnswer singleChoiceAnswer = SingleChoiceAnswer
@@ -847,7 +877,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                 }
             }
             if (choiceList.isEmpty()) {
-                Toast.makeText(this, "多选题必须提供至少一个正确选项", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "多选题必须提供至少一个正确选项");
                 return null;
             }
             MultipleChoiceAnswer multipleChoiceAnswer = MultipleChoiceAnswer.newBuilder()
@@ -858,13 +888,13 @@ public class QuestionEditActivity extends AppCompatActivity {
         } else if (questionType == QuestionType.Essay) {
             tmp = essayAnswerEditor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             EssayAnswer essayAnswer = EssayAnswer.newBuilder().setText(tmp).build();
             return Answer.newBuilder().setEssayAnswer(essayAnswer).build();
         } else {
-            Toast.makeText(this, "系统错误：未正确设置答案", Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, "系统错误：未正确设置答案");
             return null;
         }
     }
@@ -885,7 +915,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleCreateQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "导入试题成功" : "导入试题失败");
         if (serviceResult.isSuccess()) {
             QuestionInfo questionInfo = serviceResult.extra(QuestionImportResponse.class).getQuestionInfo();
             if (questionInfo != null) {
@@ -899,7 +929,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleUpdateQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新试题成功" : "更新试题失败");
         if (serviceResult.isSuccess()) {
             QuestionInfo questionInfo = serviceResult.extra(QuestionUpdateResponse.class).getQuestionInfo();
             if (questionInfo != null) {
@@ -915,7 +945,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleDeleteQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除试题成功" : "该试题已被作业/考试引用，无法删除");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.DELETE_QUESTION, true);
@@ -940,7 +970,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private class SingleFillingItemView {
         private View mView;
-        private TextView deleteView;
+        private ImageView deleteView;
         private EditText editor;
 
         SingleFillingItemView(View view) {
@@ -971,7 +1001,7 @@ public class QuestionEditActivity extends AppCompatActivity {
         private LinearLayout multipleFillingAnswerItemLayout;
         private SingleFillingItemView multipleFillingRequiredAnswerRequiredFillingView;
         private List<SingleFillingItemView> multipleFillingAnswerFillingViewList;
-        private Button addFillingAnswerInCurrentFillingButton;
+        private QMUIRoundButton addFillingAnswerInCurrentFillingButton;
 
         MultipleFillingItemView(View view) {
             this.mView = view;
@@ -1001,7 +1031,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private class ChoiceItemView {
         private View mView;
-        private TextView deleteView;
+        private ImageView deleteView;
         private EditText editor;
         private CheckBox isCorrectChoiceView;
 

@@ -2,21 +2,19 @@ package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.Toast;
+import android.view.ViewGroup;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
@@ -26,31 +24,33 @@ import com.corkili.learningclient.generate.protobuf.Response.CourseWorkFindAllRe
 import com.corkili.learningclient.generate.protobuf.Response.CourseWorkGetResponse;
 import com.corkili.learningclient.service.CourseWorkService;
 import com.corkili.learningclient.service.ServiceResult;
-import com.corkili.learningclient.ui.adapter.CourseWorkRecyclerViewAdapter;
-import com.corkili.learningclient.ui.adapter.CourseWorkRecyclerViewAdapter.ViewHolder;
-import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet.BottomListSheetBuilder;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView.Section;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CourseWorkActivity extends AppCompatActivity implements CourseWorkRecyclerViewAdapter.OnItemInteractionListener {
+public class CourseWorkActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_CREATE_COURSE_WORK = 0xF1;
     private static final int REQUEST_CODE_EDIT_COURSE_WORK = 0xF2;
 
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton addCourseWorkFab;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView courseWorkListView;
 
     private CourseInfo courseInfo;
     private UserInfo userInfo;
 
     private List<CourseWorkSimpleInfo> courseWorkSimpleInfos;
     private Map<Long, CourseWorkInfo> courseWorkInfoCache;
-
-    private CourseWorkRecyclerViewAdapter recyclerViewAdapter;
 
     private boolean startEditActivity;
     private boolean startDetailActivity;
@@ -66,27 +66,27 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
         if (userInfo == null || courseInfo == null) {
             throw new RuntimeException("Intent param lost");
         }
+
+        topBar = findViewById(R.id.topbar);
+        topBar.setTitle(userInfo.getUserType() == UserType.Teacher ? "作业管理" : "我的作业");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> CourseWorkActivity.this.finish());
+        topBar.addRightImageButton(R.drawable.ic_refresh_24dp, R.id.topbar_right_refresh)
+                .setOnClickListener(v -> refreshCourseWorkSimpleInfos());
+        if (userInfo.getUserType() == UserType.Teacher) {
+            topBar.addRightImageButton(R.drawable.ic_add_24dp, R.id.topbar_right_add)
+                    .setOnClickListener(v -> enterAddCourseWorkActivity());
+        }
+
         startEditActivity = false;
         startDetailActivity = false;
         startSubmitActivity = false;
-        recyclerView = findViewById(R.id.activity_course_work_list);
-        swipeRefreshLayout = findViewById(R.id.activity_course_work_swipe_refresh_layout);
-        addCourseWorkFab = findViewById(R.id.fab_add_course_work);
-        if (userInfo.getUserType() == UserType.Teacher) {
-            addCourseWorkFab.setOnClickListener(v -> enterAddCourseWorkActivity());
-        } else {
-            addCourseWorkFab.setVisibility(View.GONE);
-        }
+        
+        courseWorkListView = findViewById(R.id.course_work_list);
         courseWorkSimpleInfos = new ArrayList<>();
         courseWorkInfoCache = new ConcurrentHashMap<>();
-        recyclerViewAdapter = new CourseWorkRecyclerViewAdapter(this, courseWorkSimpleInfos, this, userInfo);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-                1,ContextCompat.getColor(this,R.color.colorBlack)));
-        swipeRefreshLayout.setOnRefreshListener(this::refreshCourseWorkSimpleInfos);
+
+        refreshListView();
+
         refreshCourseWorkSimpleInfos();
     }
 
@@ -128,6 +128,81 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
             startActivity(intent);
         }
     }
+    
+    private void refreshListView() {
+        courseWorkListView.removeAllViews();
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+        Section section = QMUIGroupListView.newSection(this)
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT);
+        for (CourseWorkSimpleInfo courseWorkSimpleInfo : courseWorkSimpleInfos) {
+            Drawable drawable;
+            if (courseWorkSimpleInfo.getOpen()) {
+                if (courseWorkSimpleInfo.getHasDeadline() && courseWorkSimpleInfo.getDeadline() <= System.currentTimeMillis()) {
+                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_red_24dp);
+                } else {
+                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_green_24dp);
+                }
+            } else {
+                drawable = ContextCompat.getDrawable(this, R.drawable.ic_submit_black_24dp);
+            }
+            
+            QMUICommonListItemView itemView = courseWorkListView.createItemView(
+                    drawable,
+                    courseWorkSimpleInfo.getCourseWorkName(),
+                    courseWorkSimpleInfo.getHasDeadline()
+                            ? IUtils.DATE_FORMATTER.format(new Date(courseWorkSimpleInfo.getDeadline()))
+                            : "无限期",
+                    QMUICommonListItemView.HORIZONTAL,
+                    QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+
+            section.addItemView(itemView, v -> onItemClick(courseWorkSimpleInfo));
+        }
+        String title;
+        if (courseWorkSimpleInfos.isEmpty()) {
+            title = "当前没有作业";
+        } else {
+            title = IUtils.format("共有{}个作业", courseWorkSimpleInfos.size());
+        }
+        section.setTitle(title);
+        section.addTo(courseWorkListView);
+    }
+
+    private void onItemClick(CourseWorkSimpleInfo courseWorkSimpleInfo) {
+        CourseWorkInfo courseWorkInfo = courseWorkInfoCache.get(courseWorkSimpleInfo.getCourseWorkId());
+        if (userInfo.getUserType() == UserType.Teacher) {
+            BottomListSheetBuilder builder = new QMUIBottomSheet.BottomListSheetBuilder(this)
+                    .addItem("编辑作业");
+            if (courseWorkSimpleInfo.getOpen()) {
+                builder.addItem("查看已提交作业");
+            }
+            builder.setOnSheetItemClickListener((dialog, itemView, position, tag) -> {
+                dialog.dismiss();
+                if (position == 0) {
+                    if (courseWorkInfo != null) {
+                        enterEditCourseWorkActivity(courseWorkInfo);
+                    } else {
+                        startEditActivity = true;
+                        CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+                    }
+                } else if (position == 1) {
+                    if (courseWorkInfo != null) {
+                        enterSubmittedCourseWorkActivity(courseWorkInfo);
+                    } else {
+                        startSubmitActivity = true;
+                        CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+                    }
+                }
+            });
+            builder.build().show();
+        } else {
+            if (courseWorkInfo != null) {
+                enterCourseWorkDetailActivity(courseWorkInfo);
+            } else {
+                startDetailActivity = true;
+                CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+            }
+        }
+    }
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -143,7 +218,6 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
 
     private void handleFindAllCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseWorkSimpleInfos.clear();
             courseWorkInfoCache.clear();
@@ -156,14 +230,14 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
                     }
                 }
             }
-            swipeRefreshLayout.setRefreshing(false);
-            recyclerViewAdapter.notifyDataSetChanged();
+            refreshListView();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载作业信息失败");
         }
     }
 
     private void handleGetCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             CourseWorkInfo courseWorkInfo = serviceResult.extra(CourseWorkGetResponse.class).getCourseWorkInfo();
             courseWorkInfoCache.put(courseWorkInfo.getCourseWorkId(), courseWorkInfo);
@@ -175,7 +249,7 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
             }
             if (needReplaceIndex >= 0) {
                 courseWorkSimpleInfos.set(needReplaceIndex, ProtoUtils.simplifyCourseWorkInfo(courseWorkInfo));
-                recyclerViewAdapter.notifyItemChanged(needReplaceIndex);
+                refreshListView();
             }
             if (startEditActivity) {
                 startEditActivity = false;
@@ -189,6 +263,8 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
                 startSubmitActivity = false;
                 enterSubmittedCourseWorkActivity(courseWorkInfo);
             }
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "获取作业信息失败");
         }
     }
 
@@ -207,7 +283,7 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
         if (requestCode == REQUEST_CODE_CREATE_COURSE_WORK) {
             courseWorkSimpleInfos.add(ProtoUtils.simplifyCourseWorkInfo(courseWorkInfo));
             courseWorkInfoCache.put(courseWorkInfo.getCourseWorkId(), courseWorkInfo);
-            recyclerViewAdapter.notifyDataSetChanged();
+            refreshListView();
         } else if (requestCode == REQUEST_CODE_EDIT_COURSE_WORK){
             boolean deleteCourseWork = data.getBooleanExtra(IntentParam.DELETE_COURSE_WORK, false);
             int needModifyIndex = -1;
@@ -221,47 +297,14 @@ public class CourseWorkActivity extends AppCompatActivity implements CourseWorkR
                 if (deleteCourseWork) {
                     courseWorkSimpleInfos.remove(needModifyIndex);
                     courseWorkInfoCache.remove(courseWorkInfo.getCourseWorkId());
-                    recyclerViewAdapter.notifyDataSetChanged();
+                    refreshListView();
                 } else {
                     courseWorkSimpleInfos.set(needModifyIndex, ProtoUtils.simplifyCourseWorkInfo(courseWorkInfo));
                     courseWorkInfoCache.put(courseWorkInfo.getCourseWorkId(), courseWorkInfo);
-                    recyclerViewAdapter.notifyItemChanged(needModifyIndex);
+                    refreshListView();
                 }
             }
         }
     }
 
-    @Override
-    public void onItemClick(ViewHolder viewHolder) {
-        final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
-        CourseWorkInfo courseWorkInfo = courseWorkInfoCache.get(courseWorkSimpleInfo.getCourseWorkId());
-        if (courseWorkInfo != null) {
-            if (userInfo.getUserType() == UserType.Teacher) {
-                enterEditCourseWorkActivity(courseWorkInfo);
-            } else {
-                enterCourseWorkDetailActivity(courseWorkInfo);
-            }
-        } else {
-            if (userInfo.getUserType() == UserType.Teacher) {
-                startEditActivity = true;
-            } else {
-                startDetailActivity = true;
-            }
-            CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
-        }
-    }
-
-    @Override
-    public void onSubmitViewClick(ViewHolder viewHolder) {
-        if (userInfo.getUserType() == UserType.Teacher) {
-            final CourseWorkSimpleInfo courseWorkSimpleInfo = viewHolder.getCourseWorkSimpleInfo();
-            CourseWorkInfo courseWorkInfo = courseWorkInfoCache.get(courseWorkSimpleInfo.getCourseWorkId());
-            if (courseWorkInfo != null) {
-                enterSubmittedCourseWorkActivity(courseWorkInfo);
-            } else {
-                startSubmitActivity = true;
-                CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
-            }
-        }
-    }
 }

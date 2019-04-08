@@ -1,172 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ui.activity.LoginActivity">
 
-    <LinearLayout
-        android:id="@+id/phone_layout"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/qmui_topbar_height"
+        android:fitsSystemWindows="true">
 
-        <TextView
-            android:id="@+id/text_view_phone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手机号"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/text_edit_phone"
-            android:hint="请输入手机号"
-            android:text="18681255793"
-            android:ems="10"
-            android:inputType="phone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/password_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/phone_layout" >
-
-        <TextView
-            android:id="@+id/text_view_password"
-            android:text="密&#12288;码"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <EditText
-            android:id="@+id/text_edit_password"
-            android:hint="请输入密码"
-            android:text="123456"
-            android:ems="10"
-            android:inputType="textPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/user_type_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/password_layout" >
-
-        <TextView
-            android:id="@+id/text_view_user_type"
-            android:text="类&#12288;型"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <RadioGroup
-            android:id="@+id/radio_group_user_type"
+        <LinearLayout
+            android:id="@+id/phone_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp" >
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true">
 
-            <RadioButton
-                android:id="@+id/user_type_teacher"
+            <TextView
+                android:id="@+id/text_view_phone"
+                style="@style/QDCommonTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:text="老师"
-                android:textSize="24sp"
-                android:checked="true" />
+                android:text="手机号"
+                android:gravity="center" />
 
-            <RadioButton
-                android:id="@+id/user_type_student"
+            <EditText
+                android:id="@+id/text_edit_phone"
+                style="@style/CommonEditText"
+                android:hint="请输入手机号"
+                android:inputType="phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/password_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/phone_layout" >
+
+            <TextView
+                android:id="@+id/text_view_password"
+                style="@style/QDCommonTitle"
+                android:text="密&#12288;码"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <EditText
+                android:id="@+id/text_edit_password"
+                style="@style/CommonEditText"
+                android:hint="请输入密码"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/user_type_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/password_layout" >
+
+            <TextView
+                android:id="@+id/text_view_user_type"
+                style="@style/QDCommonTitle"
+                android:text="类&#12288;型"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <RadioGroup
+                android:id="@+id/radio_group_user_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp" >
+
+                <RadioButton
+                    android:id="@+id/user_type_teacher"
+                    style="@style/QDCommonTitle"
+                    android:layout_weight="0.5"
+                    android:text="老师"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/user_type_student"
+                    style="@style/QDCommonTitle"
+                    android:layout_weight="0.5"
+                    android:text="学生" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/user_type_layout" >
+
+            <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:id="@+id/button_login"
+                style="@style/QDRoundButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:text="学生"
-                android:textSize="24sp" />
-        </RadioGroup>
+                android:text="登录"
+                android:layout_weight="0.45" />
 
-    </LinearLayout>
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1" />
 
-    <LinearLayout
-        android:id="@+id/button_layout"
+            <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:id="@+id/button_to_register"
+                style="@style/QDRoundButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="注册"
+                android:layout_weight="0.45" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <com.qmuiteam.qmui.widget.QMUITopBarLayout
+        android:id="@+id/topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/user_type_layout"
-        android:gravity="center" >
+        android:fitsSystemWindows="true"/>
 
-
-        <Button
-            android:id="@+id/button_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="登录"
-            android:textSize="24sp"
-            android:layout_marginStart="@dimen/login_activity_button_margin"
-            android:layout_marginLeft="@dimen/login_activity_button_margin"
-            android:layout_marginEnd="@dimen/login_activity_button_margin"
-            android:layout_marginRight="@dimen/login_activity_button_margin" />
-
-        <Button
-            android:id="@+id/button_to_register"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="新用户注册"
-            android:textSize="24sp"
-            android:layout_marginStart="@dimen/login_activity_button_margin"
-            android:layout_marginLeft="@dimen/login_activity_button_margin"
-            android:layout_marginEnd="@dimen/login_activity_button_margin"
-            android:layout_marginRight="@dimen/login_activity_button_margin" />
-
-    </LinearLayout>
-
-</RelativeLayout>
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>

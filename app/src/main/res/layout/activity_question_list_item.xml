@@ -3,17 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/question_item_layout_bg"
+    android:layout_marginBottom="24dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginTop="24dp">
 
     <TextView
         android:id="@+id/question_index"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="question_index"
-        android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,10 +25,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="question_type"
-        android:textSize="18sp"
-        android:textStyle="bold"
         android:ellipsize="marquee"
         android:singleLine="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -36,10 +37,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="question_simple_description"
-        android:textSize="20sp"
-        android:textStyle="bold"
         android:ellipsize="end"
         android:singleLine="false"
         android:maxLines="2"
@@ -53,10 +52,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="@style/QDTextAppearanceListItem"
         android:text="question_score"
-        android:textSize="16sp"
-        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/question_simple_description"
         app:layout_constraintRight_toRightOf="parent"/>
@@ -84,10 +81,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="问题："
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" />
@@ -97,10 +92,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="question_description"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toRightOf="@id/question_description_text"
             app:layout_constraintTop_toBottomOf="@id/question_description_text"
@@ -111,10 +104,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="答案："
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/question_description" />
@@ -124,10 +115,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="question_answer"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toRightOf="@id/question_description_text"
             app:layout_constraintTop_toBottomOf="@id/answer_text"
@@ -138,10 +127,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="作答："
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/question_answer" />
@@ -158,11 +145,10 @@
 
             <EditText
                 android:id="@+id/essay_answer"
+                style="@style/CommonEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="请输入答案"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 android:singleLine="false" />
 
         </LinearLayout>
@@ -172,10 +158,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="我的答案："
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/submit_answer" />
@@ -185,10 +169,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="my_answer"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toRightOf="@id/question_description_text"
             app:layout_constraintTop_toBottomOf="@id/my_answer_text"
@@ -199,10 +181,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="@style/QDTextAppearanceListItem"
             android:text="批改（滑动选择分数）："
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:singleLine="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/my_answer" />
@@ -219,16 +199,16 @@
 
         </LinearLayout>
 
-        <View
-            android:id="@+id/line2"
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/colorBlack"
-            app:layout_constraintTop_toBottomOf="@id/check_answer_layout"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+        <!--<View-->
+            <!--android:id="@+id/line2"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="3dp"-->
+            <!--android:layout_marginTop="4dp"-->
+            <!--android:background="@color/colorBlack"-->
+            <!--app:layout_constraintTop_toBottomOf="@id/check_answer_layout"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintBottom_toBottomOf="parent" />-->
 
     </android.support.constraint.ConstraintLayout>
 

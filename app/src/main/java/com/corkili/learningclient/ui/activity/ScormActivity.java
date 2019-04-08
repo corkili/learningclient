@@ -8,10 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
@@ -20,17 +18,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.tu.loadingdialog.LoadingDialog;
-import com.android.tu.loadingdialog.LoadingDialog.Builder;
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
@@ -38,11 +33,16 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.DeliveryContentInfo;
 import com.corkili.learningclient.generate.protobuf.Info.NavigationEventType;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
+import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.CourseCatalogQueryResponse;
 import com.corkili.learningclient.generate.protobuf.Response.NavigationProcessResponse;
 import com.corkili.learningclient.network.HttpUtils;
 import com.corkili.learningclient.service.ScormService;
 import com.corkili.learningclient.service.ServiceResult;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog.CustomDialogBuilder;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,15 +52,16 @@ public class ScormActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_CHOOSE_ITEM = 0xF1;
 
+    private QMUITopBarLayout topBar;
     private FrameLayout scormViewLayout;
     private WebView scormView;
     private ProgressBar scormLoadProgressBar;
     private TextView tipView;
-    private Button chooseButton;
-    private Button previousButton;
-    private Button nextButton;
-    private Button suspendAndResumeButton;
-    private Button startAndExitButton;
+    private QMUIRoundButton chooseButton;
+    private QMUIRoundButton previousButton;
+    private QMUIRoundButton nextButton;
+    private QMUIRoundButton suspendAndResumeButton;
+    private QMUIRoundButton startAndExitButton;
 
     private List<WebView> openWebViewList;
 
@@ -76,9 +77,7 @@ public class ScormActivity extends AppCompatActivity {
     private boolean isSuspend;
 
     private boolean shouldFinish;
-
-    private LoadingDialog waitingDialog;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +89,16 @@ public class ScormActivity extends AppCompatActivity {
 
         if (userInfo == null || courseInfo == null) {
             throw new RuntimeException("expected intent param");
+        }
+
+        topBar = findViewById(R.id.topbar);
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> finishActivity());
+
+        if (userInfo.getUserType() == UserType.Teacher) {
+            topBar.setTitle("课件预览");
+        } else {
+            topBar.setTitle("课件学习");
         }
 
         scormViewLayout = findViewById(R.id.scorm_view_layout);
@@ -113,21 +122,21 @@ public class ScormActivity extends AppCompatActivity {
 
         previousButton.setOnClickListener(v -> {
             if (alreadyStart && !isSuspend) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 triggerNavigationEvent(NavigationEventType.Previous);
             }
         });
 
         nextButton.setOnClickListener(v -> {
             if (alreadyStart && !isSuspend) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 triggerNavigationEvent(NavigationEventType.Continue);
             }
         });
 
         suspendAndResumeButton.setOnClickListener(v -> {
             if (alreadyStart) {
-                waitingDialog.show();
+                UIHelper.showLoadingDialog(ScormActivity.this);
                 if (!isSuspend) {
                     triggerNavigationEvent(NavigationEventType.SuspendAll);
                 } else {
@@ -137,7 +146,7 @@ public class ScormActivity extends AppCompatActivity {
         });
 
         startAndExitButton.setOnClickListener(v -> {
-            waitingDialog.show();
+            UIHelper.showLoadingDialog(ScormActivity.this);
             if (!alreadyStart) {
                 // start
                 if (currentLevel1Item == null) {
@@ -156,13 +165,7 @@ public class ScormActivity extends AppCompatActivity {
         currentLevel1Item = null;
         level1ItemInfoList = new ArrayList<>();
 
-        waitingDialog = new Builder(this)
-                .setMessage("正在加载...")
-                .setCancelable(false)
-                .setCancelOutside(false)
-                .create();
-
-        waitingDialog.show();
+        UIHelper.showLoadingDialog(ScormActivity.this);
 
         loadCourseCatalog();
     }
@@ -222,11 +225,16 @@ public class ScormActivity extends AppCompatActivity {
             suspendAndResumeButton.setText("暂停");
         }
 
+        boolean alreadySetTitle = false;
         if (currentDeliveryContentInfo != null) {
             scormView.setVisibility(View.VISIBLE);
             tipView.setVisibility(View.GONE);
+            String title = getTitleForItemInLastLevel(currentDeliveryContentInfo.getItemId());
+            if (title != null) {
+                alreadySetTitle = true;
+                topBar.setTitle(title);
+            }
             String url = HttpUtils.getLaunchContentObjectUrl(courseInfo.getCoursewareId(), currentDeliveryContentInfo.getItemId());
-            Log.i("ScromActivity", "refreshView: " + url);
             for (WebView webView : openWebViewList) {
                 webView.setVisibility(View.GONE);
                 webView.destroy();
@@ -236,6 +244,13 @@ public class ScormActivity extends AppCompatActivity {
         } else {
             scormView.setVisibility(View.GONE);
             tipView.setVisibility(View.VISIBLE);
+        }
+        if (!alreadySetTitle) {
+            if (userInfo.getUserType() == UserType.Teacher) {
+                topBar.setTitle("课件预览");
+            } else {
+                topBar.setTitle("课件学习");
+            }
         }
     }
 
@@ -302,6 +317,23 @@ public class ScormActivity extends AppCompatActivity {
         }
     }
 
+    private String getTitleForItemInLastLevel(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        if (courseCatalogInfo != null) {
+            CourseCatalogItemInfoList courseCatalogItemInfoList = courseCatalogInfo.getItemsMap().get(courseCatalogInfo.getMaxLevel());
+            if (courseCatalogItemInfoList != null) {
+                for (CourseCatalogItemInfo courseCatalogItemInfo : courseCatalogItemInfoList.getCourseCatalogItemInfoList()) {
+                    if (itemId.equals(courseCatalogItemInfo.getItemId())) {
+                        return courseCatalogItemInfo.getItemTitle();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -334,46 +366,54 @@ public class ScormActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onReceivedTitle(WebView view, String title) {
-            ScormActivity.this.setTitle(title);
-        }
-
-        @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(ScormActivity.this);
-            alertDialog.setMessage(message)
-                    .setPositiveButton("确定", ((dialog, which) -> result.confirm()));
-            alertDialog.setCancelable(false);
-            alertDialog.create().show();
+            new QMUIDialog.MessageDialogBuilder(ScormActivity.this)
+                    .setTitle("来自网页的消息")
+                    .setMessage(message)
+                    .addAction(0, "确定", (dialog, index) -> {
+                        result.confirm();
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false)
+                    .show();
             return true;
         }
 
         @Override
         public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-            AlertDialog.Builder confirmDialog = new AlertDialog.Builder(ScormActivity.this);
-            confirmDialog.setMessage(message)
-                    .setPositiveButton("确定", ((dialog, which) -> result.confirm()))
-                    .setNegativeButton("取消", (((dialog, which) -> result.cancel())));
-            confirmDialog.setCancelable(false);
-            confirmDialog.create().show();
+            new QMUIDialog.MessageDialogBuilder(ScormActivity.this)
+                    .setTitle("来自网页的消息")
+                    .setMessage(message)
+                    .addAction("取消", ((dialog, index) -> {
+                        result.cancel();
+                        dialog.dismiss();
+                    }))
+                    .addAction(0, "确定", (dialog, index) -> {
+                        result.confirm();
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false)
+                    .show();
             return true;
         }
 
         @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-            final LayoutInflater inflater = LayoutInflater.from(ScormActivity.this);
-            final View dialogView = inflater.inflate(R.layout.dialog_message_and_editor, null);
-            dialogView.<TextView>findViewById(R.id.message).setText(message);
-            dialogView.<EditText>findViewById(R.id.editor).setText(defaultValue);
-            AlertDialog.Builder promptDialog = new AlertDialog.Builder(ScormActivity.this);
-            promptDialog.setView(dialogView)
-                    .setPositiveButton("确定", ((dialog, which) -> {
-                        String value = dialogView.<EditText>findViewById(R.id.editor).getText().toString().trim();
-                        result.confirm(value);
-                    }))
-                    .setNegativeButton("取消", (((dialog, which) -> result.cancel())));
-            promptDialog.setCancelable(false);
-            promptDialog.create().show();
+            QMUIDialog.CustomDialogBuilder builder = new CustomDialogBuilder(ScormActivity.this);
+            builder.setTitle("发表帖子");
+            builder.setLayout(R.layout.dialog_message_and_editor);
+            builder.addAction("取消", (dialog, index) -> {
+                result.cancel();
+                dialog.dismiss();
+            });
+            builder.addAction("确定", ((dialog, index) -> {
+                String value = dialog.<EditText>findViewById(R.id.editor).getText().toString().trim();
+                result.confirm(value);
+                dialog.dismiss();
+            }));
+            QMUIDialog dialog = builder.create();
+            dialog.<TextView>findViewById(R.id.message).setText(message);
+            dialog.show();
             return true;
         }
 
@@ -434,7 +474,6 @@ public class ScormActivity extends AppCompatActivity {
 
     private void handleQueryCatalogMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(ScormActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseCatalogInfo = serviceResult.extra(CourseCatalogQueryResponse.class).getCourseCatalogInfo();
             level1ItemInfoList = new ArrayList<>(courseCatalogInfo
@@ -442,15 +481,16 @@ public class ScormActivity extends AppCompatActivity {
                     .getCourseCatalogItemInfoList());
             Collections.sort(level1ItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
             if (level1ItemInfoList.isEmpty()) {
-                Toast.makeText(this, "无内容可以学习", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "无内容可以学习");
                 finish();
                 return;
             }
             setState(false, false);
             refreshView();
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
         } else {
-            waitingDialog.dismiss();
+            UIHelper.toast(this, serviceResult, raw -> "无内容可以学习");
+            UIHelper.dismissLoadingDialog();
             finishActivity();
         }
     }
@@ -460,33 +500,33 @@ public class ScormActivity extends AppCompatActivity {
         boolean isSuccess = serviceResult.isSuccess();
         NavigationProcessResponse response = serviceResult.extra(NavigationProcessResponse.class);
         if (response == null) {
-            waitingDialog.dismiss();
-            Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+            UIHelper.dismissLoadingDialog();
+            UIHelper.toast(this, serviceResult, raw -> "处理导航请求失败");
             return;
         }
         boolean hasDeliveryContentInfo = response.getHasDeliveryContentInfo();
         DeliveryContentInfo deliveryContentInfo = response.getDeliveryContentInfo();
         if (response.getNavigationEventType() == NavigationEventType.Start) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "[开始] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[开始] 无法加载学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.ResumeAll) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "[恢复] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[恢复] 无法加载学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Continue) {
             if (isSuccess && hasDeliveryContentInfo) {
-                waitingDialog.dismiss();
+                UIHelper.dismissLoadingDialog();
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
@@ -495,13 +535,13 @@ public class ScormActivity extends AppCompatActivity {
                 if (nextLevel1Item()) {
                     triggerNavigationEvent(NavigationEventType.Continue);
                 } else {
-                    waitingDialog.dismiss();
-                    Toast.makeText(this, "[向后] 已到达最后一个学习活动", Toast.LENGTH_LONG).show();
+                    UIHelper.dismissLoadingDialog();
+                    UIHelper.toast(this, "[向后] 禁止向后导航/需先完成当前学习内容/已无学习内容");
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Previous) {
             if (isSuccess && hasDeliveryContentInfo) {
-                waitingDialog.dismiss();
+                UIHelper.dismissLoadingDialog();
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
                 refreshView();
@@ -510,12 +550,12 @@ public class ScormActivity extends AppCompatActivity {
                 if (previousLevel1Item()) {
                     triggerNavigationEvent(NavigationEventType.Previous);
                 } else {
-                    waitingDialog.dismiss();
-                    Toast.makeText(this, "[向前] 已到达第一个活动", Toast.LENGTH_LONG).show();
+                    UIHelper.dismissLoadingDialog();
+                    UIHelper.toast(this, "[向前] 禁止向前导航/需先完成当前学习内容/已无学习内容");
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Choose) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess && hasDeliveryContentInfo) {
                 currentDeliveryContentInfo = deliveryContentInfo;
                 setState(true, false);
@@ -523,25 +563,25 @@ public class ScormActivity extends AppCompatActivity {
             } else {
                 currentLevel1Item = currentLevel1ItemBeforeChoose;
                 currentLevel1ItemBeforeChoose = null;
-                Toast.makeText(this, "[跳转] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[跳转] 禁止跳转/需先完成当前学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.SuspendAll) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess) {
                 currentDeliveryContentInfo = null;
                 setState(true, true);
                 refreshView();
             } else {
-                Toast.makeText(this, "无法暂停", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "无法暂停");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.UnqualifiedExit) {
-            waitingDialog.dismiss();
+            UIHelper.dismissLoadingDialog();
             if (isSuccess) {
                 currentDeliveryContentInfo = null;
                 setState(false, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "停止失败", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "无法停止");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.ExitAll) {
             if (shouldFinish) {
@@ -562,7 +602,12 @@ public class ScormActivity extends AppCompatActivity {
         }
         if (requestCode == REQUEST_CODE_CHOOSE_ITEM) {
             if (courseCatalogItemInfo == null) {
-                Toast.makeText(this, "未选择任何活动", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "未选择任何活动");
+                return;
+            }
+            if (currentDeliveryContentInfo != null && currentDeliveryContentInfo.getItemId() != null
+                    && currentDeliveryContentInfo.getItemId().equals(courseCatalogItemInfo.getItemId())) {
+                UIHelper.toast(this, "选择了当前的活动，不进行跳转");
                 return;
             }
             currentLevel1ItemBeforeChoose = currentLevel1Item;

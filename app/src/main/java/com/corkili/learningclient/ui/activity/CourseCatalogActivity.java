@@ -4,15 +4,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.CourseCatalogItemBean;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
 import com.corkili.learningclient.ui.adapter.CourseCatalogTreeListViewAdapter;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.zhy.tree.bean.Node;
 import com.zhy.tree.bean.TreeListViewAdapter;
 
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CourseCatalogActivity extends AppCompatActivity implements TreeListViewAdapter.OnTreeNodeClickListener {
 
+    private QMUITopBarLayout topBar;
     private ListView catalogListView;
     private TreeListViewAdapter mAdapter;
 
@@ -41,11 +43,18 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
         courseCatalogInfo = (CourseCatalogInfo) getIntent().getSerializableExtra(IntentParam.COURSE_CATALOG_INFO);
 
         if (courseCatalogInfo == null) {
-            Toast.makeText(this, "没有可选择的学习内容", Toast.LENGTH_LONG).show();
+            UIHelper.toast(this, "没有可选择的学习内容");
             setResult(RESULT_CANCELED);
             finish();
             return;
         }
+
+        topBar = findViewById(R.id.topbar);
+        topBar.setTitle("选择要跳转到的活动");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            setResult(RESULT_CANCELED);
+            finish();
+        });
 
         catalogListView = findViewById(R.id.catalog_item_list);
 
@@ -56,7 +65,9 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
             mAdapter.setOnTreeNodeClickListener(this);
             catalogListView.setAdapter(mAdapter);
         } catch (Exception e) {
-            Toast.makeText(this, "加载好像遇到点问题哦~", Toast.LENGTH_LONG).show();
+            UIHelper.toast(this, "没有可选择的学习内容");
+            setResult(RESULT_CANCELED);
+            finish();
         }
 
     }

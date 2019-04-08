@@ -1,26 +1,25 @@
 package com.corkili.learningclient.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
-import com.corkili.learningclient.generate.protobuf.Info.ForumTopicInfo;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
+import com.corkili.learningclient.generate.protobuf.Info.ForumTopicInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Response.ForumTopicCreateResponse;
 import com.corkili.learningclient.generate.protobuf.Response.ForumTopicDeleteResponse;
@@ -31,15 +30,23 @@ import com.corkili.learningclient.service.ServiceResult;
 import com.corkili.learningclient.ui.adapter.ForumRecyclerViewAdapter;
 import com.corkili.learningclient.ui.adapter.ForumRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog.CustomDialogBuilder;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout.OnPullListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ForumActivity extends AppCompatActivity implements ForumRecyclerViewAdapter.OnItemInteractionListener {
 
+    private QMUITopBarLayout topBar;
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton addTopicFab;
+    private QMUIPullRefreshLayout swipeRefreshLayout;
+    private TextView tipView;
 
     private CourseInfo courseInfo;
     private UserInfo userInfo;
@@ -47,6 +54,8 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
     private List<ForumTopicInfo> forumTopicInfos;
 
     private ForumRecyclerViewAdapter recyclerViewAdapter;
+
+    private boolean shouldFinishRefresh;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -58,20 +67,50 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
         if (userInfo == null || courseInfo == null) {
             throw new RuntimeException("Intent param lost");
         }
+
+        topBar = findViewById(R.id.topbar);
+
+        topBar.setTitle("课程论坛");
+        topBar.addLeftBackImageButton().setOnClickListener(v -> ForumActivity.this.finish());
+        topBar.addRightImageButton(R.drawable.ic_edit_24dp, R.id.topbar_right_edit).setOnClickListener(v -> showAddTopicDialog());
+
+        tipView = findViewById(R.id.tip);
         recyclerView = findViewById(R.id.activity_forum_topic_list);
         swipeRefreshLayout = findViewById(R.id.activity_forum_topic_swipe_refresh_layout);
-        addTopicFab = findViewById(R.id.fab_add_topic);
-        addTopicFab.setOnClickListener(v -> showAddTopicDialog());
         forumTopicInfos = new ArrayList<>();
-        recyclerViewAdapter = new ForumRecyclerViewAdapter(this, forumTopicInfos, this);
+        recyclerViewAdapter = new ForumRecyclerViewAdapter(this, forumTopicInfos, userInfo, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(recyclerView.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
                 1,ContextCompat.getColor(this,R.color.colorBlack)));
-        swipeRefreshLayout.setOnRefreshListener(this::refreshForumTopicInfos);
+        swipeRefreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                shouldFinishRefresh = true;
+                refreshForumTopicInfos();
+            }
+        });
         refreshForumTopicInfos();
+    }
+
+    private void updateTipView() {
+        if (forumTopicInfos.isEmpty()) {
+            tipView.setVisibility(View.VISIBLE);
+        } else {
+            tipView.setVisibility(View.GONE);
+        }
     }
 
     private void refreshForumTopicInfos() {
@@ -79,25 +118,19 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
     }
 
     private void showAddTopicDialog() {
-        AlertDialog.Builder addTopicDialog =
-                new AlertDialog.Builder(ForumActivity.this);
-        final View dialogView = LayoutInflater.from(ForumActivity.this)
-                .inflate(R.layout.dialog_add_topic,null);
-        addTopicDialog.setTitle("发表帖子");
-        addTopicDialog.setView(dialogView);
-        addTopicDialog.setPositiveButton("确定",
-                (dialog, which) -> {
-                    EditText titleEditView = dialogView.findViewById(R.id.text_edit_title);
-                    EditText descriptionEditView = dialogView.findViewById(R.id.text_edit_description);
-                    ForumService.getInstance().createForumTopic(handler,
-                            titleEditView.getText().toString().trim(),
-                            descriptionEditView.getText().toString().trim(), courseInfo.getCourseId());
-                })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    dialog.cancel();
-                    dialog.dismiss();
-                });
-        addTopicDialog.show();
+        QMUIDialog.CustomDialogBuilder builder = new CustomDialogBuilder(this);
+        builder.setTitle("发表帖子");
+        builder.setLayout(R.layout.dialog_add_topic);
+        builder.addAction("取消", (dialog, index) -> dialog.dismiss());
+        builder.addAction("确定", ((dialog, index) -> {
+            dialog.dismiss();
+            EditText titleEditView = dialog.findViewById(R.id.text_edit_title);
+            EditText descriptionEditView = dialog.findViewById(R.id.text_edit_description);
+            ForumService.getInstance().createForumTopic(handler,
+                    titleEditView.getText().toString().trim(),
+                    descriptionEditView.getText().toString().trim(), courseInfo.getCourseId());
+        }));
+        builder.show();
     }
 
     @SuppressLint("HandlerLeak")
@@ -118,18 +151,23 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
 
     private void handleFindAllForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             forumTopicInfos.clear();
             forumTopicInfos.addAll(serviceResult.extra(ForumTopicFindAllResponse.class).getForumTopicInfoList());
-            swipeRefreshLayout.setRefreshing(false);
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载帖子失败");
         }
+        if (shouldFinishRefresh) {
+            shouldFinishRefresh = false;
+            swipeRefreshLayout.finishRefresh();
+        }
+        updateTipView();
     }
 
     private void handleCreateForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "发表帖子成功" : "发表帖子失败");
         if (serviceResult.isSuccess()) {
             ForumTopicInfo forumTopicInfo = serviceResult.extra(ForumTopicCreateResponse.class).getForumTopicInfo();
             if (forumTopicInfo != null) {
@@ -137,11 +175,12 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     private void handleUpdateForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "修改帖子成功" : "修改帖子失败");
         if (serviceResult.isSuccess()) {
             ForumTopicInfo forumTopicInfo = serviceResult.extra(ForumTopicUpdateResponse.class).getForumTopicInfo();
             int needReplaceIndex = -1;
@@ -156,11 +195,12 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     private void handleDeleteForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除帖子成功" : "删除帖子失败");
         if (serviceResult.isSuccess()) {
             long forumTopicId = serviceResult.extra(ForumTopicDeleteResponse.class).getForumTopicId();
             int needDeleteIndex = -1;
@@ -175,6 +215,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        updateTipView();
     }
 
     @Override
@@ -193,52 +234,41 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
         if (forumTopicInfo.getAuthorId() != userInfo.getUserId()) {
             return false;
         }
-        final AlertDialog.Builder dialog =
-                new AlertDialog.Builder(ForumActivity.this);
-        dialog.setTitle("请选择操作");
 
-        dialog.setPositiveButton("编辑", (d, w) -> {
-            d.dismiss();
-            AlertDialog.Builder editTopicDialog =
-                    new AlertDialog.Builder(ForumActivity.this);
-            final View dialogView = LayoutInflater.from(ForumActivity.this)
-                    .inflate(R.layout.dialog_add_topic,null);
-            dialogView.<EditText>findViewById(R.id.text_edit_title).setText(forumTopicInfo.getTitle());
-            dialogView.findViewById(R.id.text_edit_title).setEnabled(false);
-            dialogView.<EditText>findViewById(R.id.text_edit_description).setText(forumTopicInfo.getDescription());
-            editTopicDialog.setTitle("修改帖子");
-            editTopicDialog.setView(dialogView);
-            editTopicDialog.setPositiveButton("确定", (ed, which) -> {
-                EditText descriptionView = dialogView.findViewById(R.id.text_edit_description);
-                String description = descriptionView.getText().toString().trim();
-                if (!description.equals(forumTopicInfo.getDescription())) {
-                    ForumService.getInstance().updateForumTopic(handler, forumTopicInfo.getForumTopicId(), description);
-                }
-            });
-            editTopicDialog.setNegativeButton("取消", (ed, which) -> {
-                ed.cancel();
-                ed.dismiss();
-            });
-            editTopicDialog.show();
-        });
-
-        dialog.setNegativeButton("删除", (d, w) -> {
-            d.dismiss();
-            AlertDialog.Builder confirmDeleteDialog =
-                    new AlertDialog.Builder(ForumActivity.this);
-            confirmDeleteDialog.setTitle("删除帖子");
-            confirmDeleteDialog.setMessage("确定删除该帖子？");
-            confirmDeleteDialog.setPositiveButton("确定", (ed, which) -> {
-                ForumService.getInstance().deleteForumTopic(handler, forumTopicInfo.getForumTopicId());
-            });
-            confirmDeleteDialog.setNegativeButton("取消", (ed, which) -> {
-                ed.cancel();
-                ed.dismiss();
-            });
-            confirmDeleteDialog.show();
-        });
-
-        dialog.show();
+        new QMUIBottomSheet.BottomListSheetBuilder(this)
+                .addItem("修改描述")
+                .addItem("删除帖子")
+                .setOnSheetItemClickListener((dialog, itemView, position, tag) -> {
+                    dialog.dismiss();
+                    if (position == 0) {
+                        final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(this);
+                        builder.setTitle("修改帖子描述")
+                                .setPlaceholder("输入帖子描述")
+                                .setDefaultText(forumTopicInfo.getDescription())
+                                .setInputType(InputType.TYPE_CLASS_TEXT)
+                                .addAction("取消", (d, index) -> d.dismiss())
+                                .addAction("确定", (d, index) -> {
+                                    d.dismiss();
+                                    CharSequence description = builder.getEditText().getText();
+                                    if (description != null && !description.toString().equals(forumTopicInfo.getDescription())) {
+                                        ForumService.getInstance().updateForumTopic(handler, forumTopicInfo.getForumTopicId(), description.toString());
+                                    }
+                                })
+                                .show();
+                    } else if (position == 1) {
+                        new QMUIDialog.MessageDialogBuilder(this)
+                                .setTitle("删除帖子")
+                                .setMessage(IUtils.format("确定删除帖子-[{}]？", forumTopicInfo.getTitle()))
+                                .addAction("取消", (d, index) -> d.dismiss())
+                                .addAction(0, "删除", QMUIDialogAction.ACTION_PROP_NEGATIVE, (d, index) -> {
+                                    d.dismiss();
+                                    ForumService.getInstance().deleteForumTopic(handler, forumTopicInfo.getForumTopicId());
+                                })
+                                .show();
+                    }
+                })
+                .build()
+                .show();
 
         return true;
     }

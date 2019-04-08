@@ -43,13 +43,13 @@ public class StudentCourseRecyclerViewAdapter extends RecyclerView.Adapter<Stude
         holder.indexView.setText(String.valueOf(position + 1));
         holder.courseNameView.setText(holder.mItem.getCourseName());
         if (holder.mItem.getOpen()) {
-            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_yes_bk_green));
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_open_24dp));
         } else {
-            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_no_bk_red));
+            holder.openView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_close_24dp));
         }
-        holder.tagsView.setText(IUtils.list2String(holder.mItem.getTagList(), ";"));
+        holder.tagsView.setText(IUtils.format("#{}#", IUtils.list2String(holder.mItem.getTagList(), ";")));
         holder.descriptionView.setText(holder.mItem.getDescription());
-        holder.teacherView.setText(IUtils.format("[老师]{}", holder.mItem.getTeacherInfo().getUsername()));
+        holder.teacherView.setText(IUtils.format("@[老师]{}", holder.mItem.getTeacherInfo().getUsername()));
         holder.mView.setOnClickListener(v -> {
             if (this.mListener != null) {
                 this.mListener.onItemClick(holder);

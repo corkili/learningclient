@@ -14,10 +14,9 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            style="@style/QDCommonDescription"
             android:text="请输入问答题参考答案，问答题不能进行自动批改，若无参考答案，请填“无”："
             android:gravity="fill_horizontal"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -34,6 +33,7 @@
 
         <EditText
             android:id="@+id/essay_answer_editor"
+            style="@style/CommonEditText"
             android:ems="10"
             android:hint="请输入参考答案"
             android:inputType="textMultiLine"
@@ -42,9 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_marginLeft="10dp" />
 
     </LinearLayout>
 

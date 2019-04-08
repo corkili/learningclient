@@ -6,7 +6,16 @@
     android:layout_width="match_parent"
     tools:context=".ui.fragment.QuestionFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <TextView
+        android:id="@+id/tip"
+        style="@style/QDCommonDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="@dimen/text_margin"
+        android:text="没有导入任何试题~" />
+
+    <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_question_swipe_refresh_layout">
@@ -20,7 +29,7 @@
             tools:context=".ui.fragment.QuestionFragment"
             tools:listitem="@layout/fragment_question_list_item" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_question"
@@ -30,6 +39,8 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_margin="16dp"
         app:pressedTranslationZ="12dp"
+        app:backgroundTint="@color/app_color_blue_2"
+        app:rippleColor="@color/app_color_blue_2_pressed"
         app:srcCompat="@drawable/ic_add_white" />
 
 </android.support.constraint.ConstraintLayout>
