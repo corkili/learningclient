@@ -1,9 +1,9 @@
 package com.corkili.learningclient.common;
 
 import android.content.Context;
-import android.os.Handler;
 import android.widget.RadioGroup;
 
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog.MessageDialogBuilder;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,40 +45,14 @@ public class UIHelper {
         }
     }
 
-    public static void showSuccessTip(Context context, Handler handler, String message) {
-        if (context == null || handler == null || StringUtils.isBlank(message)) {
+    public static void showFailTip(Context context, String message) {
+        if (context == null || StringUtils.isBlank(message)) {
             return;
         }
-        QMUITipDialog tipDialog = new QMUITipDialog.Builder(context)
-                .setIconType(QMUITipDialog.Builder.ICON_TYPE_SUCCESS)
-                .setTipWord(message)
-                .create();
-        tipDialog.show();
-        handler.postDelayed(tipDialog::dismiss, 1000);
+        new MessageDialogBuilder(context)
+                .setMessage(message)
+                .addAction("确定", (dialog, index) -> dialog.dismiss()).show();
     }
 
-    public static void showFailTip(Context context, Handler handler, String message) {
-        if (context == null || handler == null || StringUtils.isBlank(message)) {
-            return;
-        }
-        QMUITipDialog tipDialog = new QMUITipDialog.Builder(context)
-                .setIconType(QMUITipDialog.Builder.ICON_TYPE_FAIL)
-                .setTipWord(message)
-                .create();
-        tipDialog.show();
-        handler.postDelayed(tipDialog::dismiss, 1500);
-    }
-
-    public static void showInfoTip(Context context, Handler handler, String message) {
-        if (context == null || handler == null || StringUtils.isBlank(message)) {
-            return;
-        }
-        QMUITipDialog tipDialog = new QMUITipDialog.Builder(context)
-                .setIconType(QMUITipDialog.Builder.ICON_TYPE_INFO)
-                .setTipWord(message)
-                .create();
-        tipDialog.show();
-        handler.postDelayed(tipDialog::dismiss, 1000);
-    }
 
 }
