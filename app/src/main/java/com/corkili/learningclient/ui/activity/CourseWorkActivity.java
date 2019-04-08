@@ -84,6 +84,9 @@ public class CourseWorkActivity extends AppCompatActivity {
         courseWorkListView = findViewById(R.id.course_work_list);
         courseWorkSimpleInfos = new ArrayList<>();
         courseWorkInfoCache = new ConcurrentHashMap<>();
+
+        refreshListView();
+
         refreshCourseWorkSimpleInfos();
     }
 
