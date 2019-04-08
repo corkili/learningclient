@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -50,6 +49,8 @@ import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapte
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ViewHolder;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
@@ -73,20 +74,11 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     private QMUICommonListItemView checkResultItemView;
 
 
-//    private View courseWorkInformationView;
-//    private TextView indexView;
-//    private TextView submitView;
-//    private TextView courseWorkNameView;
-//    private TextView deadlineView;
-
     private RecyclerView recyclerView;
     private SubmittedQuestionRecyclerViewAdapter recyclerViewAdapter;
 
-//    private View checkResultLayout;
-//    private TextView checkResultView;
     private Button submitButton;
     private Button saveButton;
-//    private View space;
 
     private List<QuestionInfo> questionInfos;
 
@@ -139,32 +131,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         waitingDialog.show();
         counter = new AtomicInteger(0);
         isSystemSubmit = false;
-
-//        courseWorkInformationView = findViewById(R.id.course_work_information);
-//        indexView = courseWorkInformationView.findViewById(R.id.item_index);
-//        submitView = courseWorkInformationView.findViewById(R.id.item_submit);
-//        courseWorkNameView = courseWorkInformationView.findViewById(R.id.item_course_work_name);
-//        deadlineView = courseWorkInformationView.findViewById(R.id.item_deadline);
-
-//        checkResultLayout = findViewById(R.id.check_result_layout);
-//        checkResultView = findViewById(R.id.check_result);
-
-//        submitButton = findViewById(R.id.course_work_detail_button_submit);
-//        saveButton = findViewById(R.id.course_work_detail_button_save);
-//        space = findViewById(R.id.space);
-
-//        indexView.setVisibility(View.GONE);
-//        if (courseWorkInfo.getOpen()) {
-//            if (courseWorkInfo.getHasDeadline() && courseWorkInfo.getDeadline() <= System.currentTimeMillis()) {
-//                submitView.setText("已关闭提交");
-//            } else {
-//                submitView.setText("已开放提交");
-//            }
-//        }
-//        courseWorkNameView.setSingleLine(false);
-//        courseWorkNameView.setText(courseWorkInfo.getCourseWorkName());
-//        deadlineView.setText(courseWorkInfo.getHasDeadline() ? IUtils.format("截止日期：{}",
-//                IUtils.DATE_FORMATTER.format(new Date(courseWorkInfo.getDeadline()))) : "截止日期：无限期");
 
         infoListView = findViewById(R.id.course_work_info_list);
 
@@ -234,8 +200,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-//        recyclerView.addItemDecoration(new MyRecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL,
-//                1,ContextCompat.getColor(this,R.color.colorBlack)));
 
         submittedAnswerMap = new HashMap<>();
 
@@ -450,40 +414,43 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
 
         if (finished && !isSystemSubmit) {
             if (userInfo.getUserType() == UserType.Student) {
-                AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
-                confirmDialog.setTitle("确认保存？");
+                String message;
                 if (notDoQuestionIndexList.isEmpty()) {
-                    confirmDialog.setMessage("你已完成所有题目，确认保存（保存后不可修改）？");
+                    message = "你已完成所有题目，确认保存（保存后不可修改）？";
                 } else {
-                    confirmDialog.setMessage(IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
-                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", ")));
+                    message = IUtils.format("你有{}个题目（{}）尚未完成，确认保存（保存后不可修改）？",
+                            notDoQuestionIndexList.size(), IUtils.list2String(notDoQuestionIndexList, ", "));
                 }
-                confirmDialog.setPositiveButton("确认", (dialog, which) -> {
-                    if (alreadySubmitted()) {
-                        if (!submittedCourseWorkInfo.getFinished()) {
-                            SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
-                                    submittedCourseWorkInfo.getSubmittedCourseWorkId(),
-                                    !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
-                                    submittedAnswerMap, true, true);
-                        } else {
-                            Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Map<Integer, SubmittedAnswer> map = new HashMap<>();
-                        for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
-                            map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
-                        }
-                        SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
-                                courseWorkInfo.getCourseWorkId(), true, map);
-                    }
-                });
-                confirmDialog.setNegativeButton("取消", ((dialog, which) -> {
-                    dialog.cancel();
-                    dialog.dismiss();
-                    saveButton.setEnabled(true);
-                    submitButton.setEnabled(true);
-                }));
-                confirmDialog.show();
+                new QMUIDialog.MessageDialogBuilder(this)
+                        .setTitle("确认提交")
+                        .setMessage(message)
+                        .addAction("取消", (dialog, index) -> {
+                            dialog.cancel();
+                            dialog.dismiss();
+                            saveButton.setEnabled(true);
+                            submitButton.setEnabled(true);
+                        })
+                        .addAction(0, "提交", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                            if (alreadySubmitted()) {
+                                if (!submittedCourseWorkInfo.getFinished()) {
+                                    SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
+                                            submittedCourseWorkInfo.getSubmittedCourseWorkId(),
+                                            !submittedAnswerMap.equals(submittedCourseWorkInfo.getSubmittedAnswerMap()),
+                                            submittedAnswerMap, true, true);
+                                } else {
+                                    Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Map<Integer, SubmittedAnswer> map = new HashMap<>();
+                                for (Entry<Integer, CourseWorkSubmittedAnswer> entry : submittedAnswerMap.entrySet()) {
+                                    map.put(entry.getKey(), entry.getValue().getSubmittedAnswer());
+                                }
+                                SubmittedCourseWorkService.getInstance().createSubmittedCourseWork(handler,
+                                        courseWorkInfo.getCourseWorkId(), true, map);
+                            }
+                            dialog.dismiss();
+                        })
+                        .show();
             } else {
                 if (alreadySubmitted()) {
                     SubmittedCourseWorkService.getInstance().updateSubmittedCourseWork(handler,
