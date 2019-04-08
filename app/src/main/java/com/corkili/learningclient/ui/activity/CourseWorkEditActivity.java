@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -37,6 +36,7 @@ import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
+import com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,7 +62,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
     private RadioGroup openSelector;
     private RadioGroup hasDdlSelector;
     private EditText deadlineEditor;
-    private Button addWorkQuestionButton;
+    private QMUIRoundButton addWorkQuestionButton;
     private View openLayout;
     private View deadlineLayout;
 
