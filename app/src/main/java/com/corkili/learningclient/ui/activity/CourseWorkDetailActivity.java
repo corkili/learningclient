@@ -73,7 +73,6 @@ public class CourseWorkDetailActivity extends AppCompatActivity implements
     private QMUIGroupListView infoListView;
     private QMUICommonListItemView checkResultItemView;
 
-
     private RecyclerView recyclerView;
     private SubmittedQuestionRecyclerViewAdapter recyclerViewAdapter;
 

@@ -11,8 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.tu.loadingdialog.LoadingDailog;
@@ -49,6 +49,10 @@ import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapte
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.FillingView;
 import com.corkili.learningclient.ui.adapter.SubmittedQuestionRecyclerViewAdapter.ViewHolder;
 import com.corkili.learningclient.ui.other.MyRecyclerViewDivider;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
+import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,21 +70,15 @@ public class ExamDetailActivity extends AppCompatActivity implements
         SubmittedQuestionRecyclerViewAdapter.ScoreDataBus,
         SubmittedQuestionRecyclerViewAdapter.SubmitDataBus {
 
-    private View examInformationView;
-    private TextView indexView;
-    private TextView submitView;
-    private TextView examNameView;
-    private TextView startTimeView;
-    private TextView endTimeView;
+    private QMUITopBarLayout topBar;
+    private QMUIGroupListView infoListView;
+    private QMUICommonListItemView checkResultItemView;
 
     private RecyclerView recyclerView;
     private SubmittedQuestionRecyclerViewAdapter recyclerViewAdapter;
 
-    private View checkResultLayout;
-    private TextView checkResultView;
     private Button submitButton;
     private Button saveButton;
-    private View space;
 
     private List<QuestionInfo> questionInfos;
 
@@ -108,6 +106,22 @@ public class ExamDetailActivity extends AppCompatActivity implements
             throw new RuntimeException("Intent param expected");
         }
 
+        topBar = findViewById(R.id.topbar);
+
+        topBar.setTitle("考试详情");
+
+        topBar.addLeftBackImageButton().setOnClickListener(v -> {
+            if (userInfo.getUserType() == UserType.Teacher) {
+                Intent intent = new Intent();
+                intent.putExtra(IntentParam.SUBMITTED_COURSE_WORK_INFO, submittedExamInfo);
+                setResult(RESULT_OK, intent);
+            }
+            finish();
+        });
+
+        submitButton = topBar.addRightTextButton("提交", R.id.topbar_right_submit);
+        saveButton = topBar.addRightTextButton("暂存", R.id.topbar_right_save);
+
         waitingDialog = new LoadingDailog.Builder(this)
                 .setMessage("请稍后...")
                 .setCancelable(false)
@@ -118,34 +132,70 @@ public class ExamDetailActivity extends AppCompatActivity implements
         counter = new AtomicInteger(0);
         isSystemSubmit = false;
 
-        examInformationView = findViewById(R.id.exam_information);
-        indexView = examInformationView.findViewById(R.id.item_index);
-        submitView = examInformationView.findViewById(R.id.item_submit);
-        examNameView = examInformationView.findViewById(R.id.item_exam_name);
-        startTimeView = examInformationView.findViewById(R.id.item_start_time);
-        endTimeView = examInformationView.findViewById(R.id.item_end_time);
+        infoListView = findViewById(R.id.exam_info_list);
 
-        checkResultLayout = findViewById(R.id.check_result_layout);
-        checkResultView = findViewById(R.id.check_result);
+        QMUICommonListItemView examNameItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
+                "考试名称",
+                examInfo.getExamName(),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
 
-        submitButton = findViewById(R.id.exam_detail_button_submit);
-        saveButton = findViewById(R.id.exam_detail_button_save);
-        space = findViewById(R.id.space);
-
-        indexView.setVisibility(View.GONE);
+        String submitMsg;
         if (examInfo.getStartTime() <= System.currentTimeMillis()) {
             if (examInfo.getEndTime() <= System.currentTimeMillis()) {
-                submitView.setText("已关闭提交");
+                submitMsg = "已关闭提交";
             } else {
-                submitView.setText("已开放提交");
+                submitMsg = "已开放提交";
             }
+        } else {
+            submitMsg = "未开放提交";
         }
-        examNameView.setSingleLine(false);
-        examNameView.setText(examInfo.getExamName());
-        startTimeView.setText(IUtils.format("开始时间：{}", IUtils.DATE_TIME_FORMATTER
-                .format(new Date(examInfo.getStartTime()))));
-        endTimeView.setText(IUtils.format("结束时间：{}", IUtils.DATE_TIME_FORMATTER
-                .format(new Date(examInfo.getEndTime()))));
+
+        QMUICommonListItemView submitItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_state_24dp),
+                "提交状态",
+                submitMsg,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView startTimeItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "开始时间",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(examInfo.getStartTime())),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        QMUICommonListItemView endTimeItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_timer_24dp),
+                "结束时间",
+                IUtils.DATE_TIME_FORMATTER.format(new Date(examInfo.getEndTime())),
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        checkResultItemView = infoListView.createItemView(
+                ContextCompat.getDrawable(this, R.drawable.ic_check_result_24dp),
+                "批改状态",
+                "",
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+
+        int size = QMUIDisplayHelper.dp2px(this, 24);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("考试基本信息")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addItemView(examNameItemView, null)
+                .addItemView(submitItemView, null)
+                .addItemView(startTimeItemView, null)
+                .addItemView(endTimeItemView, null)
+                .addItemView(checkResultItemView, null)
+                .addTo(infoListView);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("考试题目详情")
+                .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .addTo(infoListView);
 
         recyclerView = findViewById(R.id.question_list);
 
@@ -453,7 +503,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
     private void refresh() {
         if (userInfo.getUserType() == UserType.Teacher && alreadySubmitted()) {
-            setTitle(submittedExamInfo.getSubmitterInfo().getUsername());
+            topBar.setTitle(submittedExamInfo.getSubmitterInfo().getUsername());
         }
 
         // submittedAnswerMap
@@ -491,32 +541,31 @@ public class ExamDetailActivity extends AppCompatActivity implements
                 sb.append("[尚未全部批改] 得分/总分：");
             }
             sb.append(count).append("/").append(total);
-            checkResultView.setText(sb.toString().trim());
+            checkResultItemView.setDetailText(sb.toString().trim());
         } else {
-            checkResultView.setText("[尚未全部批改]");
+            checkResultItemView.setDetailText("[尚未全部批改]");
         }
         if (userInfo.getUserType() == UserType.Teacher) {
-            checkResultLayout.setVisibility(View.VISIBLE);
+            checkResultItemView.setVisibility(View.VISIBLE);
         } else {
             if (canSubmitAnswer()) {
                 if (alreadySubmitted()) {
                     if (submittedExamInfo.getFinished()) {
-                        checkResultLayout.setVisibility(View.VISIBLE);
+                        checkResultItemView.setVisibility(View.VISIBLE);
                     } else {
-                        checkResultLayout.setVisibility(View.GONE);
+                        checkResultItemView.setVisibility(View.GONE);
                     }
                 } else {
-                    checkResultLayout.setVisibility(View.GONE);
+                    checkResultItemView.setVisibility(View.GONE);
                 }
             } else {
-                checkResultLayout.setVisibility(View.VISIBLE);
+                checkResultItemView.setVisibility(View.VISIBLE);
             }
         }
 
         // button
         if (userInfo.getUserType() == UserType.Teacher) {
             saveButton.setVisibility(View.GONE);
-            space.setVisibility(View.GONE);
             if (allIsAutoCheck()) {
                 submitButton.setVisibility(View.GONE);
             } else {

@@ -70,7 +70,7 @@ public class SubmittedExamActivity extends AppCompatActivity {
         
         submittedExamSimpleInfos = new ArrayList<>();
 
-        QMUICommonListItemView courseWorkNameItemView = submitListView.createItemView(
+        QMUICommonListItemView examNameItemView = submitListView.createItemView(
                 ContextCompat.getDrawable(this, R.drawable.ic_coursework_24dp),
                 "考试名称",
                 examInfo.getExamName(),
@@ -114,7 +114,7 @@ public class SubmittedExamActivity extends AppCompatActivity {
         QMUIGroupListView.newSection(this)
                 .setTitle("考试基本信息")
                 .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
-                .addItemView(courseWorkNameItemView, null)
+                .addItemView(examNameItemView, null)
                 .addItemView(submitItemView, null)
                 .addItemView(startTimeItemView, null)
                 .addItemView(endTimeItemView, null)
