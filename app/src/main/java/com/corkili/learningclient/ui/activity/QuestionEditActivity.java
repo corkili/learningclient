@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
@@ -236,7 +235,6 @@ public class QuestionEditActivity extends AppCompatActivity {
                             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setEnabled(false);
                             multipleFillingRequiredAnswerView.multipleFillingAnswerFillingViewList.remove(itemView);
                             multipleFillingRequiredAnswerView.multipleFillingAnswerItemLayout.removeView(view);
-//                            Toast.makeText(this, String.valueOf(singleFillingAnswerViewList.size()), Toast.LENGTH_SHORT).show();
                         } finally {
                             multipleFillingRequiredAnswerView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
                         }
@@ -273,7 +271,6 @@ public class QuestionEditActivity extends AppCompatActivity {
                         itemView.addFillingAnswerInCurrentFillingButton.setEnabled(false);
                         itemView.multipleFillingAnswerFillingViewList.remove(innerItemView);
                         itemView.multipleFillingAnswerItemLayout.removeView(innerView);
-//                            Toast.makeText(this, String.valueOf(singleFillingAnswerViewList.size()), Toast.LENGTH_SHORT).show();
                     } finally {
                         itemView.addFillingAnswerInCurrentFillingButton.setEnabled(true);
                     }
@@ -784,14 +781,14 @@ public class QuestionEditActivity extends AppCompatActivity {
             List<String> answerList = new ArrayList<>();
             tmp = singleFillingRequiredAnswerView.editor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             answerList.add(tmp);
             for (SingleFillingItemView singleFillingItemView : singleFillingAnswerViewList) {
                 tmp = singleFillingItemView.editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
@@ -807,14 +804,14 @@ public class QuestionEditActivity extends AppCompatActivity {
             tmp = multipleFillingRequiredAnswerView.multipleFillingRequiredAnswerRequiredFillingView
                     .editor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             answerList.add(tmp);
             for (SingleFillingItemView singleFillingItemView : multipleFillingRequiredAnswerView.multipleFillingAnswerFillingViewList) {
                 tmp = singleFillingItemView.editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
@@ -826,14 +823,14 @@ public class QuestionEditActivity extends AppCompatActivity {
                 tmp = itemView.multipleFillingRequiredAnswerRequiredFillingView
                         .editor.getText().toString().trim();
                 if (StringUtils.isBlank(tmp)) {
-                    Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "答案内容不能为空");
                     return null;
                 }
                 answerList.add(tmp);
                 for (SingleFillingItemView singleFillingItemView : itemView.multipleFillingAnswerFillingViewList) {
                     tmp = singleFillingItemView.editor.getText().toString().trim();
                     if (StringUtils.isBlank(tmp)) {
-                        Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                        UIHelper.toast(this, "答案内容不能为空");
                         return null;
                     }
                     answerList.add(tmp);
@@ -858,7 +855,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                 }
             }
             if (correctChoice == 0) {
-                Toast.makeText(this, "单选题必须提供一个正确选项", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "单选题必须提供一个正确选项");
                 return null;
             }
             SingleChoiceAnswer singleChoiceAnswer = SingleChoiceAnswer
@@ -880,7 +877,7 @@ public class QuestionEditActivity extends AppCompatActivity {
                 }
             }
             if (choiceList.isEmpty()) {
-                Toast.makeText(this, "多选题必须提供至少一个正确选项", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "多选题必须提供至少一个正确选项");
                 return null;
             }
             MultipleChoiceAnswer multipleChoiceAnswer = MultipleChoiceAnswer.newBuilder()
@@ -891,13 +888,13 @@ public class QuestionEditActivity extends AppCompatActivity {
         } else if (questionType == QuestionType.Essay) {
             tmp = essayAnswerEditor.getText().toString().trim();
             if (StringUtils.isBlank(tmp)) {
-                Toast.makeText(this, "答案内容不能为空", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "答案内容不能为空");
                 return null;
             }
             EssayAnswer essayAnswer = EssayAnswer.newBuilder().setText(tmp).build();
             return Answer.newBuilder().setEssayAnswer(essayAnswer).build();
         } else {
-            Toast.makeText(this, "系统错误：未正确设置答案", Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, "系统错误：未正确设置答案");
             return null;
         }
     }
@@ -918,7 +915,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleCreateQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "导入试题成功" : "导入试题失败");
         if (serviceResult.isSuccess()) {
             QuestionInfo questionInfo = serviceResult.extra(QuestionImportResponse.class).getQuestionInfo();
             if (questionInfo != null) {
@@ -932,7 +929,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleUpdateQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新试题成功" : "更新试题失败");
         if (serviceResult.isSuccess()) {
             QuestionInfo questionInfo = serviceResult.extra(QuestionUpdateResponse.class).getQuestionInfo();
             if (questionInfo != null) {
@@ -948,7 +945,7 @@ public class QuestionEditActivity extends AppCompatActivity {
 
     private void handleDeleteQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除试题成功" : "该试题已被作业/考试引用，无法删除");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.DELETE_QUESTION, true);

@@ -14,10 +14,10 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserUpdateInfoResponse;
@@ -209,7 +209,7 @@ public class UserFragment extends Fragment {
 
     private void handleModifyUsernameMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(getActivity(), serviceResult, raw -> serviceResult.isSuccess() ? "修改用户名成功" : "修改用户名失败");
         if (serviceResult.isSuccess()) {
             UserUpdateInfoResponse response = serviceResult.extra(UserUpdateInfoResponse.class);
             refreshUserInfo(response.getUserInfo());
@@ -219,15 +219,15 @@ public class UserFragment extends Fragment {
 
     private void handleModifyPasswordMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(getActivity(), serviceResult, raw -> serviceResult.isSuccess() ? "修改用户名成功" : "修改用户名失败");
     }
 
     private void handleLogoutMsg(Message msg) {
-        ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
-        getActivity().finish();
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     private void refreshUserInfo(UserInfo newUserInfo) {

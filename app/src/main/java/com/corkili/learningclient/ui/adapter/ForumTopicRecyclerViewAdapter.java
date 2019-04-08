@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.TopicCommentInfo;
 import com.corkili.learningclient.generate.protobuf.Info.TopicReplyInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
@@ -216,17 +216,18 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
 
         private void handleFindAllTopicReplyMsg(Message msg) {
             ServiceResult serviceResult = (ServiceResult) msg.obj;
-            Toast.makeText(context, serviceResult.msg(), Toast.LENGTH_SHORT).show();
             if (serviceResult.isSuccess()) {
                 topicReplyInfos.clear();
                 topicReplyInfos.addAll(serviceResult.extra(TopicReplyFindAllResponse.class).getTopicReplyInfoList());
                 onReplyInfoSetChange();
+            } else {
+                UIHelper.toast(context, serviceResult, raw -> "加载回复失败");
             }
         }
 
         private void handleCreateTopicReplyMsg(Message msg) {
             ServiceResult serviceResult = (ServiceResult) msg.obj;
-            Toast.makeText(context, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+            UIHelper.toast(context, serviceResult, raw -> serviceResult.isSuccess() ? "回复成功" : "回复失败");
             if (serviceResult.isSuccess()) {
                 replyEditView.setText("");
                 TopicReplyInfo topicReplyInfo = serviceResult.extra(TopicReplyCreateResponse.class).getTopicReplyInfo();
@@ -239,7 +240,7 @@ public class ForumTopicRecyclerViewAdapter extends RecyclerView.Adapter<ForumTop
 
         private void handleDeleteTopicReplyMsg(Message msg) {
             ServiceResult serviceResult = (ServiceResult) msg.obj;
-            Toast.makeText(context, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+            UIHelper.toast(context, serviceResult, raw -> serviceResult.isSuccess() ? "删除回复成功" : "删除回复失败");
             if (serviceResult.isSuccess()) {
                 long topicReplyId = serviceResult.extra(TopicReplyDeleteResponse.class).getTopicReplyId();
                 int needDeleteIndex = -1;

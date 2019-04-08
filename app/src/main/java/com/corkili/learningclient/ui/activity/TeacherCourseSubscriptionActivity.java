@@ -8,11 +8,11 @@ import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseSubscriptionInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseSubscriptionFindAllResponse;
@@ -69,14 +69,13 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == CourseSubscriptionService.FIND_ALL_COURSE_SUBSCRIPTION_MSG) {
-                handleFindAllCourseCommentMsg(msg);
+                handleFindAllCourseSubscriptionMsg(msg);
             }
         }
     };
 
-    private void handleFindAllCourseCommentMsg(Message msg) {
+    private void handleFindAllCourseSubscriptionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseSubscriptionInfos.clear();
             courseSubscriptionInfos.addAll(serviceResult.extra(CourseSubscriptionFindAllResponse.class).getCourseSubscriptionInfoList());
@@ -103,6 +102,8 @@ public class TeacherCourseSubscriptionActivity extends AppCompatActivity {
             }
             section.setTitle(title);
             section.addTo(courseSubscriberListView);
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载课程订阅信息失败");
         }
     }
 

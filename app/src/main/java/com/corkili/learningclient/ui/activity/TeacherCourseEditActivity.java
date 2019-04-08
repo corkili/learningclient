@@ -8,11 +8,11 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseCreateResponse;
 import com.corkili.learningclient.generate.protobuf.Response.CourseUpdateResponse;
@@ -114,7 +114,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
 
     private void handleCreateCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "创建课程成功" : "创建课程失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseCreateResponse.class).getCourseInfo());
@@ -125,7 +125,7 @@ public class TeacherCourseEditActivity extends AppCompatActivity {
 
     private void handleUpdateCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(TeacherCourseEditActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新课程成功" : "更新课程失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.COURSE_INFO, serviceResult.extra(CourseUpdateResponse.class).getCourseInfo());

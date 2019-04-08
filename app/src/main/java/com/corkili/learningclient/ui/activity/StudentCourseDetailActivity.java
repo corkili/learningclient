@@ -9,11 +9,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseSubscriptionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
@@ -292,7 +292,7 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
     private void handleCreateCourseSubscriptionMsg(Message msg) {
         subscriptionItem.setClickable(true);
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "订阅成功" : "订阅失败");
         if (serviceResult.isSuccess()) {
             courseSubscriptionInfo = serviceResult.extra(CourseSubscriptionCreateResponse.class)
                     .getCourseSubscriptionInfo();
@@ -303,7 +303,7 @@ public class StudentCourseDetailActivity extends AppCompatActivity {
     private void handleDeleteCourseSubscriptionMsg(Message msg) {
         subscriptionItem.setClickable(true);
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "取消订阅成功" : "取消订阅失败");
         if (serviceResult.isSuccess()) {
             courseSubscriptionInfo = null;
             refreshView();

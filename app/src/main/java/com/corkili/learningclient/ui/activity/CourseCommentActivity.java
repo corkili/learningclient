@@ -12,11 +12,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCommentType;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
@@ -146,11 +146,12 @@ public class CourseCommentActivity extends AppCompatActivity {
 
     private void handleFindAllCourseCommentMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseCommentInfos.clear();
             courseCommentInfos.addAll(serviceResult.extra(CourseCommentFindAllResponse.class).getCourseCommentInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载课程评论信息失败");
         }
         if (shouldFinishRefresh) {
             swipeRefreshLayout.finishRefresh();
@@ -160,7 +161,6 @@ public class CourseCommentActivity extends AppCompatActivity {
 
     private void handleCreateCourseCommentMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             CourseCommentInfo courseCommentInfo = serviceResult.extra(CourseCommentCreateResponse.class).getCourseCommentInfo();
             if (courseCommentInfo != null) {
@@ -168,6 +168,7 @@ public class CourseCommentActivity extends AppCompatActivity {
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         }
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "评论成功" : "发表课程评论失败");
         updateTipView();
     }
 

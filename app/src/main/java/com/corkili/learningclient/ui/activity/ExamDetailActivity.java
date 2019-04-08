@@ -12,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
@@ -442,7 +441,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
                                             !submittedAnswerMap.equals(submittedExamInfo.getSubmittedAnswerMap()),
                                             submittedAnswerMap, true, true);
                                 } else {
-                                    Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                                    UIHelper.toast(this, "无法修改");
                                 }
                             } else {
                                 Map<Integer, SubmittedAnswer> map = new HashMap<>();
@@ -474,7 +473,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
                             !submittedAnswerMap.equals(submittedExamInfo.getSubmittedAnswerMap()),
                             submittedAnswerMap, isSystemSubmit, isSystemSubmit);
                 } else {
-                    Toast.makeText(this, "无法修改", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "无法修改");
                 }
             } else {
                 Map<Integer, SubmittedAnswer> map = new HashMap<>();
@@ -620,11 +619,11 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
     private void handleGetSubmittedExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             submittedExamInfo = serviceResult.extra(SubmittedExamGetResponse.class).getSubmittedExamInfo();
             finishInit();
         } else {
+            UIHelper.toast(this, serviceResult, raw -> "获取作业信息失败");
             if (serviceResult.extra(Boolean.class)) {
                 ExamDetailActivity.this.finish();
             } else {
@@ -641,9 +640,9 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
     private void handleCreateSubmittedExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         submitButton.setEnabled(true);
         saveButton.setEnabled(true);
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "提交/暂存成功" : "提交/暂存失败");
         if (serviceResult.isSuccess()) {
             submittedExamInfo = serviceResult.extra(SubmittedExamCreateResponse.class).getSubmittedExamInfo();
             refresh();
@@ -652,7 +651,7 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
     private void handleUpdateSubmittedExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "提交/暂存成功" : "提交/暂存失败");
         submitButton.setEnabled(true);
         saveButton.setEnabled(true);
         if (serviceResult.isSuccess()) {
@@ -663,19 +662,18 @@ public class ExamDetailActivity extends AppCompatActivity implements
 
     private void handleGetQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess() || examInfo.getExamQuestionInfoCount() <= 0) {
             questionInfos.clear();
             questionInfos.addAll(serviceResult.extra(QuestionGetResponse.class).getQuestionInfoList());
             if (questionInfos.size() != examInfo.getExamQuestionInfoCount()) {
-                Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "加载试题信息失败");
                 setResult(RESULT_CANCELED);
                 ExamDetailActivity.this.finish();
             } else {
                 finishInit();
             }
         } else {
-            Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, "加载试题信息失败");
             setResult(RESULT_CANCELED);
             ExamDetailActivity.this.finish();
         }

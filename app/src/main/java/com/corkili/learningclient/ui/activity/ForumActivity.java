@@ -13,11 +13,11 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ForumTopicInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
@@ -151,11 +151,12 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
 
     private void handleFindAllForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             forumTopicInfos.clear();
             forumTopicInfos.addAll(serviceResult.extra(ForumTopicFindAllResponse.class).getForumTopicInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载帖子失败");
         }
         if (shouldFinishRefresh) {
             shouldFinishRefresh = false;
@@ -166,7 +167,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
 
     private void handleCreateForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "发表帖子成功" : "发表帖子失败");
         if (serviceResult.isSuccess()) {
             ForumTopicInfo forumTopicInfo = serviceResult.extra(ForumTopicCreateResponse.class).getForumTopicInfo();
             if (forumTopicInfo != null) {
@@ -179,7 +180,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
 
     private void handleUpdateForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "修改帖子成功" : "修改帖子失败");
         if (serviceResult.isSuccess()) {
             ForumTopicInfo forumTopicInfo = serviceResult.extra(ForumTopicUpdateResponse.class).getForumTopicInfo();
             int needReplaceIndex = -1;
@@ -199,7 +200,7 @@ public class ForumActivity extends AppCompatActivity implements ForumRecyclerVie
 
     private void handleDeleteForumTopicMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除帖子成功" : "删除帖子失败");
         if (serviceResult.isSuccess()) {
             long forumTopicId = serviceResult.extra(ForumTopicDeleteResponse.class).getForumTopicId();
             int needDeleteIndex = -1;

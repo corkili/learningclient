@@ -16,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
@@ -231,7 +230,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
         try {
             startActivityForResult(Intent.createChooser(intent, "选择SCORM课件ZIP包"), REQUEST_CODE_SELECT_FILE);
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "请安装一个文件浏览器.", Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, "请安装一个文件浏览器");
         }
     }
 
@@ -302,17 +301,17 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
                 String path = getPath(uri);
                 Log.e("Select-SCORM-ZIP", "选择的文件路径: " + path);
                 if (path == null) {
-                    Toast.makeText(this, "未选择文件", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "未选择文件");
                 } else {
                     if (!path.toLowerCase().endsWith(".zip")) {
-                        Toast.makeText(this, "请选择.zip类型的文件", Toast.LENGTH_SHORT).show();
+                        UIHelper.toast(this, "请选择.zip类型的文件");
                     } else {
                         UIHelper.showLoadingDialog(this);
                         ScormService.getInstance().updateScorm(handler, courseInfo.getCourseId(), false, new File(path));
                     }
                 }
             } catch (Exception e){
-                Toast.makeText(this, "未选择文件", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "未选择文件");
             }
         }
     }
@@ -366,7 +365,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
     private void handleUpdateScormMsg(Message msg) {
         UIHelper.dismissLoadingDialog();
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(TeacherCourseManageActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "上传课件成功" : "上传课件失败");
         if (serviceResult.isSuccess()) {
             CourseInfo courseInfo = serviceResult.extra(CoursewareUpdateResponse.class).getCourseInfo();
             if (courseInfo != null) {

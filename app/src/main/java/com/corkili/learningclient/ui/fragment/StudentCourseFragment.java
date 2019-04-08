@@ -15,10 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseSubscriptionInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
@@ -171,11 +171,12 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
 
     private void handleFindAllCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess() && !onlySubscribedCourse) {
             courseInfos.clear();
             courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载课程信息失败");
         }
         if (shouldFinishRefresh) {
             shouldFinishRefresh = false;
@@ -186,7 +187,6 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
 
     private void handleFindAllSubscribedCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseSubscriptionInfos.clear();
             courseSubscriptionInfos.addAll(serviceResult.extra(
@@ -198,6 +198,8 @@ public class StudentCourseFragment extends Fragment implements StudentCourseRecy
                 }
                 recyclerViewAdapter.notifyDataSetChanged();
             }
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载订阅课程信息失败");
         }
         if (shouldFinishRefresh) {
             shouldFinishRefresh = false;

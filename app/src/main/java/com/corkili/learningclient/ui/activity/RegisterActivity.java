@@ -8,9 +8,9 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserRegisterResponse;
 import com.corkili.learningclient.service.ServiceResult;
@@ -90,7 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void handleRegisterMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(RegisterActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "注册成功，请登录" : "注册失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             intent.putExtra("userInfo", serviceResult.extra(UserRegisterResponse.class).getUserInfo());

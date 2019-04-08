@@ -12,11 +12,11 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ForumTopicInfo;
 import com.corkili.learningclient.generate.protobuf.Info.TopicCommentInfo;
@@ -148,18 +148,19 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
 
     private void handleFindAllTopicCommentMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             topicCommentInfos.clear();
             topicCommentInfos.addAll(serviceResult.extra(TopicCommentFindAllResponse.class).getTopicCommentInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载帖子评论失败");
         }
         updateTipView();
     }
 
     private void handleCreateTopicCommentMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "发表帖子评论成功" : "发表帖子评论失败");
         if (serviceResult.isSuccess()) {
             TopicCommentInfo topicCommentInfo = serviceResult.extra(TopicCommentCreateResponse.class).getTopicCommentInfo();
             if (topicCommentInfo != null) {
@@ -172,7 +173,7 @@ public class ForumTopicActivity extends AppCompatActivity implements ForumTopicR
 
     private void handleDeleteTopicCommentMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除帖子评论成功" : "删除帖子评论失败");
         if (serviceResult.isSuccess()) {
             long topicCommentId = serviceResult.extra(TopicCommentDeleteResponse.class).getTopicCommentId();
             int needDeleteIndex = -1;

@@ -8,10 +8,10 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserType;
 import com.corkili.learningclient.generate.protobuf.Response.UserLoginResponse;
@@ -91,7 +91,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleLoginMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(LoginActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             UserInfo userInfo = serviceResult.extra(UserLoginResponse.class).getUserInfo();
             Intent intent = new Intent();
@@ -103,6 +102,8 @@ public class LoginActivity extends AppCompatActivity {
             intent.putExtra(IntentParam.USER_INFO, userInfo);
             startActivity(intent);
             LoginActivity.this.finish();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "用户名或密码错误");
         }
     }
 

@@ -9,12 +9,12 @@ import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkSimpleInfo;
@@ -218,7 +218,6 @@ public class CourseWorkActivity extends AppCompatActivity {
 
     private void handleFindAllCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseWorkSimpleInfos.clear();
             courseWorkInfoCache.clear();
@@ -232,12 +231,13 @@ public class CourseWorkActivity extends AppCompatActivity {
                 }
             }
             refreshListView();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载作业信息失败");
         }
     }
 
     private void handleGetCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             CourseWorkInfo courseWorkInfo = serviceResult.extra(CourseWorkGetResponse.class).getCourseWorkInfo();
             courseWorkInfoCache.put(courseWorkInfo.getCourseWorkId(), courseWorkInfo);
@@ -263,6 +263,8 @@ public class CourseWorkActivity extends AppCompatActivity {
                 startSubmitActivity = false;
                 enterSubmittedCourseWorkActivity(courseWorkInfo);
             }
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "获取作业信息失败");
         }
     }
 

@@ -14,7 +14,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
@@ -114,7 +113,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
             boolean hasDeadline = hasDdlSelector.getCheckedRadioButtonId() == R.id.has_ddl_yes;
             if (hasDeadline) {
                 if (StringUtils.isBlank(deadlineEditor.getText().toString())) {
-                    Toast.makeText(CourseWorkEditActivity.this, "请设置截止日期", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "请设置截止日期");
                     return;
                 }
                 Calendar today = Calendar.getInstance(Locale.CHINA);
@@ -123,7 +122,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
                 today.set(Calendar.SECOND, 59);
                 today.set(Calendar.MILLISECOND, 999);
                 if (deadline.before(today)) {
-                    Toast.makeText(CourseWorkEditActivity.this, "请设置今天及以后的日期", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "请设置今天及以后的日期");
                     return;
                 }
             }
@@ -265,7 +264,6 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
 
     private void handleFindAllQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             allQuestionInfo.clear();
             for (QuestionInfo questionInfo : serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList()) {
@@ -282,13 +280,14 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
                 }
                 recyclerViewAdapter.notifyDataSetChanged();
             }
-
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载试题信息失败");
         }
     }
 
     private void handleCreateCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "布置作业成功" : "创建作业失败");
         if (serviceResult.isSuccess()) {
             CourseWorkInfo courseWorkInfo = serviceResult.extra(CourseWorkCreateResponse.class).getCourseWorkInfo();
             Intent intent = new Intent();
@@ -300,7 +299,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
 
     private void handleUpdateCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新作业成功" : "更新作业失败");
         if (serviceResult.isSuccess()) {
             CourseWorkInfo courseWorkInfo = serviceResult.extra(CourseWorkUpdateResponse.class).getCourseWorkInfo();
             Intent intent = new Intent();
@@ -312,7 +311,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
 
     private void handleDeleteCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除作业成功" : "删除作业失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.COURSE_WORK_INFO, courseWorkInfo);
@@ -337,7 +336,7 @@ public class CourseWorkEditActivity extends AppCompatActivity implements Questio
             QuestionInfo questionInfo = (QuestionInfo) data.getSerializableExtra(IntentParam.QUESTION_INFO);
             for (QuestionInfo info : questionInfos) {
                 if (info.getQuestionId() == questionInfo.getQuestionId()) {
-                    Toast.makeText(this, "不能选择相同的试题", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "不能选择相同的试题");
                     return;
                 }
             }

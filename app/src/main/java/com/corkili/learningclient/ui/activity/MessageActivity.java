@@ -11,10 +11,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.MessageInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Response.MessageCreateResponse;
@@ -134,7 +134,6 @@ public class MessageActivity extends AppCompatActivity {
 
     private void handleFindAllMessageMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             messageInfos.clear();
             messageInfos.addAll(serviceResult.extra(MessageFindAllResponse.class).getMessageInfoList());
@@ -147,13 +146,14 @@ public class MessageActivity extends AppCompatActivity {
             });
             recyclerViewAdapter.notifyDataSetChanged();
             scrollToBottom();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载消息失败");
         }
         refreshButton.setEnabled(true);
     }
 
     private void handleCreateMessageMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             contentEditor.setText("");
             MessageInfo messageInfo = serviceResult.extra(MessageCreateResponse.class).getMessageInfo();
@@ -169,6 +169,8 @@ public class MessageActivity extends AppCompatActivity {
                 recyclerViewAdapter.notifyDataSetChanged();
                 scrollToBottom();
             }
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "发送消息失败");
         }
     }
 

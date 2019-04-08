@@ -9,12 +9,12 @@ import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamSimpleInfo;
@@ -218,18 +218,18 @@ public class ExamActivity extends AppCompatActivity {
 
     private void handleFindAllExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             examSimpleInfos.clear();
             examInfoCache.clear();
             examSimpleInfos.addAll(serviceResult.extra(ExamFindAllResponse.class).getExamSimpleInfoList());
             refreshListView();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载考试信息失败");
         }
     }
 
     private void handleGetExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             ExamInfo examInfo = serviceResult.extra(ExamGetResponse.class).getExamInfo();
             examInfoCache.put(examInfo.getExamId(), examInfo);
@@ -255,6 +255,8 @@ public class ExamActivity extends AppCompatActivity {
                 startSubmitActivity = false;
                 enterSubmittedExamActivity(examInfo);
             }
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "获取考试信息失败");
         }
     }
 

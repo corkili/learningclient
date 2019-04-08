@@ -9,12 +9,12 @@ import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.SubmittedCourseWorkInfo;
 import com.corkili.learningclient.generate.protobuf.Info.SubmittedCourseWorkSimpleInfo;
@@ -187,7 +187,6 @@ public class SubmittedCourseWorkActivity extends AppCompatActivity {
 
     private void handleFindAllSubmittedCourseWorkMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             submittedCourseWorkSimpleInfos.clear();
             for (SubmittedCourseWorkSimpleInfo submittedCourseWorkSimpleInfo : serviceResult.extra(SubmittedCourseWorkFindAllResponse.class).getSubmittedCourseWorkSimpleInfoList()) {
@@ -196,6 +195,8 @@ public class SubmittedCourseWorkActivity extends AppCompatActivity {
                 }
             }
             refreshListView();
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载已提交的作业失败");
         }
     }
 

@@ -17,10 +17,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.QuestionInfo;
 import com.corkili.learningclient.generate.protobuf.Response.QuestionFindAllResponse;
 import com.corkili.learningclient.service.QuestionService;
@@ -149,7 +149,6 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
 
     private void handleFindAllQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             questionInfos.clear();
             questionInfos.addAll(serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList());
@@ -158,6 +157,8 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
         if (shouldFinishRefresh) {
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载试题信息失败");
         }
         updateTipView();
     }

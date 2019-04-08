@@ -16,10 +16,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.UserInfo;
 import com.corkili.learningclient.generate.protobuf.Response.CourseFindAllResponse;
@@ -145,11 +145,12 @@ public class TeacherCourseFragment extends Fragment implements TeacherCourseRecy
 
     private void handleFindAllCourseMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(getActivity(), serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseInfos.clear();
             courseInfos.addAll(serviceResult.extra(CourseFindAllResponse.class).getCourseInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载课程信息失败");
         }
         if (shouldFinishRefresh) {
             swipeRefreshLayout.finishRefresh();

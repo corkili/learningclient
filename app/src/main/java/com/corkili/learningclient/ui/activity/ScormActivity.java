@@ -22,7 +22,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IntentParam;
@@ -475,7 +474,6 @@ public class ScormActivity extends AppCompatActivity {
 
     private void handleQueryCatalogMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(ScormActivity.this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             courseCatalogInfo = serviceResult.extra(CourseCatalogQueryResponse.class).getCourseCatalogInfo();
             level1ItemInfoList = new ArrayList<>(courseCatalogInfo
@@ -483,7 +481,7 @@ public class ScormActivity extends AppCompatActivity {
                     .getCourseCatalogItemInfoList());
             Collections.sort(level1ItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
             if (level1ItemInfoList.isEmpty()) {
-                Toast.makeText(this, "无内容可以学习", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "无内容可以学习");
                 finish();
                 return;
             }
@@ -491,6 +489,7 @@ public class ScormActivity extends AppCompatActivity {
             refreshView();
             UIHelper.dismissLoadingDialog();
         } else {
+            UIHelper.toast(this, serviceResult, raw -> "无内容可以学习");
             UIHelper.dismissLoadingDialog();
             finishActivity();
         }
@@ -502,7 +501,7 @@ public class ScormActivity extends AppCompatActivity {
         NavigationProcessResponse response = serviceResult.extra(NavigationProcessResponse.class);
         if (response == null) {
             UIHelper.dismissLoadingDialog();
-            Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+            UIHelper.toast(this, serviceResult, raw -> "处理导航请求失败");
             return;
         }
         boolean hasDeliveryContentInfo = response.getHasDeliveryContentInfo();
@@ -514,7 +513,7 @@ public class ScormActivity extends AppCompatActivity {
                 setState(true, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "[开始] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[开始] 无法加载学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.ResumeAll) {
             UIHelper.dismissLoadingDialog();
@@ -523,7 +522,7 @@ public class ScormActivity extends AppCompatActivity {
                 setState(true, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "[恢复] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[恢复] 无法加载学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Continue) {
             if (isSuccess && hasDeliveryContentInfo) {
@@ -537,7 +536,7 @@ public class ScormActivity extends AppCompatActivity {
                     triggerNavigationEvent(NavigationEventType.Continue);
                 } else {
                     UIHelper.dismissLoadingDialog();
-                    Toast.makeText(this, "[向后] 已到达最后一个学习活动", Toast.LENGTH_LONG).show();
+                    UIHelper.toast(this, "[向后] 禁止向后导航/需先完成当前学习内容/已无学习内容");
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Previous) {
@@ -552,7 +551,7 @@ public class ScormActivity extends AppCompatActivity {
                     triggerNavigationEvent(NavigationEventType.Previous);
                 } else {
                     UIHelper.dismissLoadingDialog();
-                    Toast.makeText(this, "[向前] 已到达第一个活动", Toast.LENGTH_LONG).show();
+                    UIHelper.toast(this, "[向前] 禁止向前导航/需先完成当前学习内容/已无学习内容");
                 }
             }
         } else if (response.getNavigationEventType() == NavigationEventType.Choose) {
@@ -564,7 +563,7 @@ public class ScormActivity extends AppCompatActivity {
             } else {
                 currentLevel1Item = currentLevel1ItemBeforeChoose;
                 currentLevel1ItemBeforeChoose = null;
-                Toast.makeText(this, "[跳转] 无法加载学习内容", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "[跳转] 禁止跳转/需先完成当前学习内容");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.SuspendAll) {
             UIHelper.dismissLoadingDialog();
@@ -573,7 +572,7 @@ public class ScormActivity extends AppCompatActivity {
                 setState(true, true);
                 refreshView();
             } else {
-                Toast.makeText(this, "无法暂停", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "无法暂停");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.UnqualifiedExit) {
             UIHelper.dismissLoadingDialog();
@@ -582,7 +581,7 @@ public class ScormActivity extends AppCompatActivity {
                 setState(false, false);
                 refreshView();
             } else {
-                Toast.makeText(this, "停止失败", Toast.LENGTH_LONG).show();
+                UIHelper.toast(this, "无法停止");
             }
         } else if (response.getNavigationEventType() == NavigationEventType.ExitAll) {
             if (shouldFinish) {
@@ -603,7 +602,12 @@ public class ScormActivity extends AppCompatActivity {
         }
         if (requestCode == REQUEST_CODE_CHOOSE_ITEM) {
             if (courseCatalogItemInfo == null) {
-                Toast.makeText(this, "未选择任何活动", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "未选择任何活动");
+                return;
+            }
+            if (currentDeliveryContentInfo != null && currentDeliveryContentInfo.getItemId() != null
+                    && currentDeliveryContentInfo.getItemId().equals(courseCatalogItemInfo.getItemId())) {
+                UIHelper.toast(this, "选择了当前的活动，不进行跳转");
                 return;
             }
             currentLevel1ItemBeforeChoose = currentLevel1Item;

@@ -15,12 +15,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.IUtils;
 import com.corkili.learningclient.common.IntentParam;
 import com.corkili.learningclient.common.ProtoUtils;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamInfo;
 import com.corkili.learningclient.generate.protobuf.Info.ExamQuestionInfo;
@@ -116,11 +116,11 @@ public class ExamEditActivity extends AppCompatActivity
 
         topBar.addRightImageButton(R.drawable.ic_save_24dp, R.id.topbar_right_save).setOnClickListener(v -> {
             if (StringUtils.isBlank(startTimeEditor.getText().toString())) {
-                Toast.makeText(ExamEditActivity.this, "请设置开始时间", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "请设置开始时间");
                 return;
             }
             if (StringUtils.isBlank(endTimeEditor.getText().toString())) {
-                Toast.makeText(ExamEditActivity.this, "请设置结束时间", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "请设置结束时间");
                 return;
             }
             String examName = examNameEditor.getText().toString().trim();
@@ -269,7 +269,6 @@ public class ExamEditActivity extends AppCompatActivity
 
     private void handleFindAllQuestionMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
         if (serviceResult.isSuccess()) {
             allQuestionInfo.clear();
             for (QuestionInfo questionInfo : serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList()) {
@@ -287,13 +286,14 @@ public class ExamEditActivity extends AppCompatActivity
                 }
                 recyclerViewAdapter.notifyDataSetChanged();
             }
-
+        } else {
+            UIHelper.toast(this, serviceResult, raw -> "加载试题信息失败");
         }
     }
 
     private void handleCreateExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "创建考试成功" : "创建考试失败");
         if (serviceResult.isSuccess()) {
             ExamInfo examInfo = serviceResult.extra(ExamCreateResponse.class).getExamInfo();
             Intent intent = new Intent();
@@ -305,7 +305,7 @@ public class ExamEditActivity extends AppCompatActivity
 
     private void handleUpdateExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "更新考试成功" : "更新考试失败");
         if (serviceResult.isSuccess()) {
             ExamInfo examInfo = serviceResult.extra(ExamUpdateResponse.class).getExamInfo();
             Intent intent = new Intent();
@@ -317,7 +317,7 @@ public class ExamEditActivity extends AppCompatActivity
 
     private void handleDeleteExamMsg(Message msg) {
         ServiceResult serviceResult = (ServiceResult) msg.obj;
-        Toast.makeText(this, serviceResult.msg(), Toast.LENGTH_SHORT).show();
+        UIHelper.toast(this, serviceResult, raw -> serviceResult.isSuccess() ? "删除考试成功" : "删除考试失败");
         if (serviceResult.isSuccess()) {
             Intent intent = new Intent();
             intent.putExtra(IntentParam.EXAM_INFO, examInfo);
@@ -380,11 +380,11 @@ public class ExamEditActivity extends AppCompatActivity
             }
             questionScoreMap.put(questionInfo.getQuestionId(), score);
             if (formatError && !lessScore) {
-                Toast.makeText(ExamEditActivity.this, "输入的分数必须大于或等于0", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "输入的分数必须大于或等于0");
             } else if (lessScore && !formatError) {
-                Toast.makeText(ExamEditActivity.this, "填空题（多空）设置的分数过少", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "填空题（多空）设置的分数过少");
             } else if (lessScore && formatError) {
-                Toast.makeText(ExamEditActivity.this, "填空题（多空）设置的分数过少，且输入的分数必须大于或等于0", Toast.LENGTH_SHORT).show();
+                UIHelper.toast(this, "填空题（多空）设置的分数过少，且输入的分数必须大于或等于0");
             }
             int index = -1;
             for (int i = 0; i < questionInfos.size(); i++) {
@@ -420,7 +420,7 @@ public class ExamEditActivity extends AppCompatActivity
             QuestionInfo questionInfo = (QuestionInfo) data.getSerializableExtra(IntentParam.QUESTION_INFO);
             for (QuestionInfo info : questionInfos) {
                 if (info.getQuestionId() == questionInfo.getQuestionId()) {
-                    Toast.makeText(this, "不能选择相同的试题", Toast.LENGTH_SHORT).show();
+                    UIHelper.toast(this, "不能选择相同的试题");
                     return;
                 }
             }

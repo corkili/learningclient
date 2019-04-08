@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.corkili.learningclient.R;
 import com.corkili.learningclient.common.CourseCatalogItemBean;
 import com.corkili.learningclient.common.IntentParam;
+import com.corkili.learningclient.common.UIHelper;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
@@ -43,7 +43,7 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
         courseCatalogInfo = (CourseCatalogInfo) getIntent().getSerializableExtra(IntentParam.COURSE_CATALOG_INFO);
 
         if (courseCatalogInfo == null) {
-            Toast.makeText(this, "没有可选择的学习内容", Toast.LENGTH_LONG).show();
+            UIHelper.toast(this, "没有可选择的学习内容");
             setResult(RESULT_CANCELED);
             finish();
             return;
@@ -65,7 +65,9 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
             mAdapter.setOnTreeNodeClickListener(this);
             catalogListView.setAdapter(mAdapter);
         } catch (Exception e) {
-            Toast.makeText(this, "加载好像遇到点问题哦~", Toast.LENGTH_LONG).show();
+            UIHelper.toast(this, "没有可选择的学习内容");
+            setResult(RESULT_CANCELED);
+            finish();
         }
 
     }
