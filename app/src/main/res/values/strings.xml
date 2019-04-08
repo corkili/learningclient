@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">学习百分百</string>
+    <string name="the_app_name">1%学习</string>
     <string name="title_activity_teacher_main">TeacherMainActivity</string>
     <string name="title_activity_student_main">StudentMainActivity</string>
     <string name="title_home">Home</string>
