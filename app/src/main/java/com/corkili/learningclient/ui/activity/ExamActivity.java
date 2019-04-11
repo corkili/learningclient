@@ -195,11 +195,15 @@ public class ExamActivity extends AppCompatActivity {
             });
             builder.build().show();
         } else {
-            if (examInfo != null) {
-                enterExamDetailActivity(examInfo);
+            if (examSimpleInfo.getStartTime() <= System.currentTimeMillis()) {
+                if (examInfo != null) {
+                    enterExamDetailActivity(examInfo);
+                } else {
+                    startDetailActivity = true;
+                    ExamService.getInstance().getExam(handler, examSimpleInfo.getExamId());
+                }
             } else {
-                startDetailActivity = true;
-                ExamService.getInstance().getExam(handler, examSimpleInfo.getExamId());
+                UIHelper.toast(this, "考试尚未开始");
             }
         }
     }

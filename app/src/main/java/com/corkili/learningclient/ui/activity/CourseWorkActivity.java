@@ -195,11 +195,15 @@ public class CourseWorkActivity extends AppCompatActivity {
             });
             builder.build().show();
         } else {
-            if (courseWorkInfo != null) {
-                enterCourseWorkDetailActivity(courseWorkInfo);
+            if (courseWorkSimpleInfo.getOpen()) {
+                if (courseWorkInfo != null) {
+                    enterCourseWorkDetailActivity(courseWorkInfo);
+                } else {
+                    startDetailActivity = true;
+                    CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+                }
             } else {
-                startDetailActivity = true;
-                CourseWorkService.getInstance().getCourseWork(handler, courseWorkSimpleInfo.getCourseWorkId());
+                UIHelper.toast(this, "作业未开放提交");
             }
         }
     }
@@ -221,15 +225,7 @@ public class CourseWorkActivity extends AppCompatActivity {
         if (serviceResult.isSuccess()) {
             courseWorkSimpleInfos.clear();
             courseWorkInfoCache.clear();
-            if (userInfo.getUserType() == UserType.Teacher) {
-                courseWorkSimpleInfos.addAll(serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList());
-            } else {
-                for (CourseWorkSimpleInfo courseWorkSimpleInfo : serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList()) {
-                    if (courseWorkSimpleInfo.getOpen()) {
-                        courseWorkSimpleInfos.add(courseWorkSimpleInfo);
-                    }
-                }
-            }
+            courseWorkSimpleInfos.addAll(serviceResult.extra(CourseWorkFindAllResponse.class).getCourseWorkSimpleInfoList());
             refreshListView();
         } else {
             UIHelper.toast(this, serviceResult, raw -> "加载作业信息失败");

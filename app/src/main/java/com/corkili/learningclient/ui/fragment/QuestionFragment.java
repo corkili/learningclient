@@ -153,12 +153,12 @@ public class QuestionFragment extends Fragment implements QuestionRecyclerViewAd
             questionInfos.clear();
             questionInfos.addAll(serviceResult.extra(QuestionFindAllResponse.class).getQuestionInfoList());
             recyclerViewAdapter.notifyDataSetChanged();
+        } else {
+            UIHelper.toast(getActivity(), serviceResult, raw -> "加载试题信息失败");
         }
         if (shouldFinishRefresh) {
             shouldFinishRefresh = false;
             swipeRefreshLayout.finishRefresh();
-        } else {
-            UIHelper.toast(getActivity(), serviceResult, raw -> "加载试题信息失败");
         }
         updateTipView();
     }
