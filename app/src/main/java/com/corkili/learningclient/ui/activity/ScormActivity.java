@@ -237,11 +237,15 @@ public class ScormActivity extends AppCompatActivity {
             String url = HttpUtils.getLaunchContentObjectUrl(courseInfo.getCoursewareId(), currentDeliveryContentInfo.getItemId());
             for (WebView webView : openWebViewList) {
                 webView.setVisibility(View.GONE);
+                scormViewLayout.removeView(webView);
                 webView.destroy();
             }
             openWebViewList.clear();
             scormView.loadUrl(url);
         } else {
+            for (WebView webView : openWebViewList) {
+                webView.setVisibility(View.GONE);
+            }
             scormView.setVisibility(View.GONE);
             tipView.setVisibility(View.VISIBLE);
         }
@@ -423,6 +427,7 @@ public class ScormActivity extends AppCompatActivity {
             initWebView(newWebView);
             scormView.setVisibility(View.GONE);
             scormViewLayout.addView(newWebView);
+            openWebViewList.add(newWebView);
             WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
             transport.setWebView(newWebView);
             resultMsg.sendToTarget();
