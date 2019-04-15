@@ -91,7 +91,7 @@ public class ExamEditActivity extends AppCompatActivity
 
         topBar = findViewById(R.id.topbar);
 
-        topBar.setTitle(isCreate ? "布置作业" : "修改作业");
+        topBar.setTitle(isCreate ? "创建考试" : "编辑考试");
         topBar.addLeftBackImageButton().setOnClickListener(v -> {
             setResult(RESULT_CANCELED);
             finish();
