@@ -77,7 +77,8 @@ public class ScormActivity extends AppCompatActivity {
     private boolean isSuspend;
 
     private boolean shouldFinish;
-    
+    private boolean startChooseActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,9 +116,8 @@ public class ScormActivity extends AppCompatActivity {
         initWebView(scormView);
 
         chooseButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ScormActivity.this, CourseCatalogActivity.class);
-            intent.putExtra(IntentParam.COURSE_CATALOG_INFO, courseCatalogInfo);
-            startActivityForResult(intent, REQUEST_CODE_CHOOSE_ITEM);
+            startChooseActivity = true;
+            loadCourseCatalog();
         });
 
         previousButton.setOnClickListener(v -> {
@@ -167,6 +167,8 @@ public class ScormActivity extends AppCompatActivity {
 
         UIHelper.showLoadingDialog(ScormActivity.this);
 
+        setState(false, false);
+        startChooseActivity = false;
         loadCourseCatalog();
     }
 
@@ -404,7 +406,7 @@ public class ScormActivity extends AppCompatActivity {
         @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
             QMUIDialog.CustomDialogBuilder builder = new CustomDialogBuilder(ScormActivity.this);
-            builder.setTitle("发表帖子");
+            builder.setTitle("来自网页的消息");
             builder.setLayout(R.layout.dialog_message_and_editor);
             builder.addAction("取消", (dialog, index) -> {
                 result.cancel();
@@ -487,12 +489,17 @@ public class ScormActivity extends AppCompatActivity {
             Collections.sort(level1ItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
             if (level1ItemInfoList.isEmpty()) {
                 UIHelper.toast(this, "无内容可以学习");
-                finish();
+                finishActivity();
                 return;
             }
-            setState(false, false);
             refreshView();
             UIHelper.dismissLoadingDialog();
+            if (startChooseActivity) {
+                startChooseActivity = false;
+                Intent intent = new Intent(ScormActivity.this, CourseCatalogActivity.class);
+                intent.putExtra(IntentParam.COURSE_CATALOG_INFO, courseCatalogInfo);
+                startActivityForResult(intent, REQUEST_CODE_CHOOSE_ITEM);
+            }
         } else {
             UIHelper.toast(this, serviceResult, raw -> "无内容可以学习");
             UIHelper.dismissLoadingDialog();
@@ -592,8 +599,11 @@ public class ScormActivity extends AppCompatActivity {
             if (shouldFinish) {
                 shouldFinish = false;
                 finish();
+                return;
             }
         }
+        startChooseActivity = false;
+        loadCourseCatalog();
     }
 
     @Override
