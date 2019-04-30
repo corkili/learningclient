@@ -189,7 +189,7 @@ public class TeacherCourseManageActivity extends AppCompatActivity {
         scormItem.setOnClickListener(v -> {
             QMUIBottomSheet.BottomListSheetBuilder builder = new QMUIBottomSheet
                     .BottomListSheetBuilder(TeacherCourseManageActivity.this);
-            builder.addItem(courseInfo.getHasCourseware() ? "上传课件" : "更新课件");
+            builder.addItem(courseInfo.getHasCourseware() ? "更新课件" : "上传课件");
             if (courseInfo.getHasCourseware()) {
                 builder.addItem("预览课件");
             }
