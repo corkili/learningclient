@@ -14,6 +14,8 @@ import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfo;
 import com.corkili.learningclient.generate.protobuf.Info.CourseCatalogItemInfoList;
 import com.corkili.learningclient.ui.adapter.CourseCatalogTreeListViewAdapter;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.zhy.tree.bean.Node;
 import com.zhy.tree.bean.TreeListViewAdapter;
 
@@ -61,7 +63,8 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
         initData();
 
         try {
-            mAdapter = new CourseCatalogTreeListViewAdapter(catalogListView, this, mDatas, courseCatalogInfo.getMaxLevel());
+            mAdapter = new CourseCatalogTreeListViewAdapter(catalogListView, this, mDatas,
+                    courseCatalogInfo.getMaxLevel(), dataMap);
             mAdapter.setOnTreeNodeClickListener(this);
             catalogListView.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -91,14 +94,16 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
 
     private void initData(CourseCatalogItemInfo courseCatalogItemInfo, AtomicInteger idCounter, int parentId) {
         CourseCatalogItemBean bean = new CourseCatalogItemBean(idCounter.incrementAndGet(), parentId, courseCatalogItemInfo.getItemTitle());
-        mDatas.add(bean);
-        dataMap.put(bean.getId(), courseCatalogItemInfo);
-        List<CourseCatalogItemInfo> courseCatalogItemInfoList = new ArrayList<>(courseCatalogItemInfo
-                .getNextLevelItems().getCourseCatalogItemInfoList());
-        Collections.sort(courseCatalogItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
-        for (int i = 0; i < courseCatalogItemInfoList.size(); i++) {
-            CourseCatalogItemInfo childCourseCatalogItemInfo = courseCatalogItemInfoList.get(i);
-            initData(childCourseCatalogItemInfo, idCounter, bean.getId());
+        if (courseCatalogItemInfo.getVisible()) {
+            mDatas.add(bean);
+            dataMap.put(bean.getId(), courseCatalogItemInfo);
+            List<CourseCatalogItemInfo> courseCatalogItemInfoList = new ArrayList<>(courseCatalogItemInfo
+                    .getNextLevelItems().getCourseCatalogItemInfoList());
+            Collections.sort(courseCatalogItemInfoList, (o1, o2) -> o1.getIndex() - o2.getIndex());
+            for (int i = 0; i < courseCatalogItemInfoList.size(); i++) {
+                CourseCatalogItemInfo childCourseCatalogItemInfo = courseCatalogItemInfoList.get(i);
+                initData(childCourseCatalogItemInfo, idCounter, bean.getId());
+            }
         }
     }
 
@@ -106,12 +111,53 @@ public class CourseCatalogActivity extends AppCompatActivity implements TreeList
     @Override
     public void onClick(Node node, int position) {
         CourseCatalogItemInfo courseCatalogItemInfo = dataMap.get(node.getId());
-        if (courseCatalogItemInfo != null && courseCatalogItemInfo.getSelectable()) {
-            Intent intent = new Intent();
-            intent.putExtra(IntentParam.COURSE_CATALOG_ITEM_INFO, courseCatalogItemInfo);
-            setResult(RESULT_OK, intent);
-            finish();
+        if (courseCatalogItemInfo == null) {
+            return;
         }
+        if (node.isLeaf()) {
+            StringBuilder sb = new StringBuilder();
+            String completionStatus = courseCatalogItemInfo.getCompletionStatus();
+            boolean hasCT = courseCatalogItemInfo.getHasCompletionThreshold();
+            double ct = courseCatalogItemInfo.getCompletionThreshold();
+            double pm = courseCatalogItemInfo.getProgressMeasure();
+            StringBuilder progress = new StringBuilder();
+            if (hasCT) {
+                progress.append("学习进度-");
+                progress.append(pm * 100).append("%");
+                progress.append("（达到 ").append(ct * 100).append("%即为完成学习）");
+            }
+            if ("completed".equals(completionStatus)) {
+                sb.append("已完成学习");
+                if (hasCT) {
+                    sb.append("，").append(progress.toString());
+                }
+            } else if ("incomplete".equals(completionStatus)){
+                sb.append("未完成学习");
+                if (hasCT) {
+                    sb.append("，").append(progress.toString());
+                }
+            } else {
+                sb.append("未开始学习");
+            }
+            QMUIDialog.MessageDialogBuilder builder = new QMUIDialog.MessageDialogBuilder(this)
+                    .setTitle(courseCatalogItemInfo.getItemTitle())
+                    .setMessage(sb.toString())
+                    .setCanceledOnTouchOutside(true)
+                    .setCancelable(true);
+            if (courseCatalogItemInfo.getSelectable()) {
+                builder.addAction(0, "去学习", QMUIDialogAction.ACTION_PROP_NEGATIVE, (dialog, index) -> {
+                    if (courseCatalogItemInfo.getSelectable()) {
+                        Intent intent = new Intent();
+                        intent.putExtra(IntentParam.COURSE_CATALOG_ITEM_INFO, courseCatalogItemInfo);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                    dialog.dismiss();
+                });
+            }
+            builder.show();
+        }
+
     }
 
     @Override

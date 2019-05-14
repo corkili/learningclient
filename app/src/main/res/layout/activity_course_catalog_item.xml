@@ -11,7 +11,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:src="@drawable/ic_list_no_expand_24dp"
+        app:srcCompat="@drawable/ic_list_no_expand_24dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
@@ -23,9 +23,22 @@
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="@style/QDTextAppearanceListItem"
-        android:text="catalog_item_title"
+        android:text="title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="@id/icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/catalog_item_state"/>
+
+    <ImageView
+        android:id="@+id/catalog_item_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        app:srcCompat="@drawable/ic_circle_24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/catalog_item_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
